@@ -70,8 +70,9 @@
   </section>
 
   <script>
+    // Nota: Mueve esta clave a un archivo de configuración seguro o variable de entorno
     const supabaseUrl = "https://vurddrbkwuafszrddgxe.supabase.co";
-    const supabaseKey = "sb_publishable_5bselDNif0wV61df7eZhgQ_E7gRM_zb";
+    const supabaseKey = "sb_publishable_5bselDNif0wV61df7eZhgQ_E7gRM_zb"; // Reemplaza con tu clave real de forma segura
     const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     const params = new URLSearchParams(window.location.search);
@@ -87,6 +88,7 @@
       }).showToast();
     }
 
+    // Formatear fecha exacta sin conversión de zona horaria (DD/MM/YYYY)
     function formatearFecha(fechaStr) {
       if (!fechaStr) return '--';
       const soloFecha = fechaStr.split('T')[0];
@@ -107,6 +109,7 @@
       loading.classList.remove('hidden');
 
       try {
+        // Cargar información de la factura (incluye descuento)
         const { data: facturaData, error: facturaError } = await supabaseClient
           .from('facturas')
           .select('id, fecha, subtotal, descuento, total')
@@ -115,9 +118,11 @@
 
         if (facturaError) throw facturaError;
 
+        // Mostrar info de la factura
         document.getElementById('facturaNum').textContent = facturaData.id;
         document.getElementById('facturaFecha').textContent = formatearFecha(facturaData.fecha);
 
+        // Cargar detalles de la factura
         const { data, error } = await supabaseClient
           .from('detalle_factura')
           .select('cantidad,precio,subtotal,articulos(nombre)')
@@ -149,14 +154,17 @@
           });
         }
 
+        // Mostrar subtotal
         document.getElementById('subtotalFactura').textContent = parseFloat(facturaData.subtotal || subtotalCalculado).toFixed(2);
 
+        // Mostrar descuento si existe
         const descuento = parseFloat(facturaData.descuento) || 0;
         if (descuento > 0) {
           document.getElementById('descuentoRow').classList.remove('hidden');
           document.getElementById('descuentoFactura').textContent = descuento.toFixed(2);
         }
 
+        // Mostrar total
         document.getElementById('totalFactura').textContent = parseFloat(facturaData.total).toFixed(2);
 
       } catch (error) {
@@ -166,6 +174,7 @@
       }
     }
 
+    // Cargar detalle al inicio
     window.onload = cargarDetalle;
   </script>
 
