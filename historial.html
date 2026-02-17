@@ -9,74 +9,86 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    /* Estilos adicionales para mejor responsive */
+    @media (max-width: 640px) {
+      .nav-btn {
+        font-size: 0.75rem;
+        padding: 0.5rem 0.75rem;
+      }
+      .factura-item {
+        font-size: 0.8rem;
+      }
+    }
+  </style>
 </head>
-<body class="bg-yellow-50 font-sans">
+<body class="bg-yellow-50 font-sans min-h-screen">
 
   <!-- Banner -->
-  <div class="relative w-full h-36 md:h-48 lg:h-56">
+  <div class="relative w-full h-28 sm:h-36 md:h-48 lg:h-56">
     <img src="LOGO LA PARADA DEL MAIZ.png" alt="Logo de La Parada del Maíz" class="w-full h-full object-cover">
-    <div class="absolute inset-0 bg-yellow-500 bg-opacity-50 flex items-center justify-center">
-      <h1 class="text-white text-xl md:text-3xl lg:text-4xl font-bold text-center drop-shadow-lg">
+    <div class="absolute inset-0 bg-yellow-500 bg-opacity-50 flex items-center justify-center px-2">
+      <h1 class="text-white text-lg sm:text-xl md:text-3xl lg:text-4xl font-bold text-center drop-shadow-lg">
         La Parada del Maíz y El Majarete de Leidy
       </h1>
     </div>
   </div>
 
-  <!-- Navegación -->
-  <nav class="flex justify-center mt-4 space-x-4" role="navigation" aria-label="Navegación principal">
-    <a href="index.html" class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-yellow-600">Volver a Artículos</a>
-    <a href="facturacion.html" class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-yellow-600">Ir a Facturación</a>
-    <button onclick="mostrarModalImprimir()" class="bg-green-400 hover:bg-green-500 text-white px-4 py-2 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-green-600">Imprimir Ventas del Día</button>
+  <!-- Navegación - Mejorada para móviles -->
+  <nav class="flex flex-wrap justify-center gap-2 sm:gap-3 mt-4 px-2" role="navigation" aria-label="Navegación principal">
+    <a href="index.html" class="nav-btn bg-yellow-400 hover:bg-yellow-500 text-white px-3 sm:px-4 py-2 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-yellow-600 text-sm sm:text-base text-center">Volver a Artículos</a>
+    <a href="facturacion.html" class="nav-btn bg-yellow-400 hover:bg-yellow-500 text-white px-3 sm:px-4 py-2 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-yellow-600 text-sm sm:text-base text-center">Ir a Facturación</a>
+    <button onclick="mostrarModalImprimir()" class="nav-btn bg-green-400 hover:bg-green-500 text-white px-3 sm:px-4 py-2 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-green-600 text-sm sm:text-base">Imprimir Ventas</button>
   </nav>
 
   <!-- Historial de Facturas -->
-  <section class="max-w-4xl mx-auto mt-8 bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow" role="region" aria-labelledby="historial-facturas">
-    <h2 id="historial-facturas" class="text-2xl font-semibold mb-4 text-gray-700 text-center">Historial de Facturas</h2>
+  <section class="max-w-4xl mx-auto mt-6 sm:mt-8 bg-white p-4 sm:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow mx-2 sm:mx-4 lg:mx-auto" role="region" aria-labelledby="historial-facturas">
+    <h2 id="historial-facturas" class="text-xl sm:text-2xl font-semibold mb-4 text-gray-700 text-center">Historial de Facturas</h2>
 
-    <!-- Selección de rango de fechas -->
-    <div class="flex flex-col md:flex-row gap-4 justify-center mb-4 w-full">
-      <div class="w-full md:w-auto">
-        <label for="fechaDesde" class="block font-medium mb-1 text-sm md:text-base">Desde:</label>
-        <input type="date" id="fechaDesde" class="border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-yellow-400" aria-label="Fecha desde">
+    <!-- Selección de rango de fechas - Mejorado para móviles -->
+    <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-4 w-full">
+      <div class="w-full sm:w-auto">
+        <label for="fechaDesde" class="block font-medium mb-1 text-sm">Desde:</label>
+        <input type="date" id="fechaDesde" class="border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-yellow-400 text-sm sm:text-base" aria-label="Fecha desde">
       </div>
-      <div class="w-full md:w-auto">
-        <label for="fechaHasta" class="block font-medium mb-1 text-sm md:text-base">Hasta:</label>
-        <input type="date" id="fechaHasta" class="border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-yellow-400" aria-label="Fecha hasta">
+      <div class="w-full sm:w-auto">
+        <label for="fechaHasta" class="block font-medium mb-1 text-sm">Hasta:</label>
+        <input type="date" id="fechaHasta" class="border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-yellow-400 text-sm sm:text-base" aria-label="Fecha hasta">
       </div>
-      <button onclick="cargarFacturasPorRango()" class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded shadow transition self-end focus:outline-none focus:ring-2 focus:ring-yellow-600 w-full md:w-auto">Buscar</button>
+      <button onclick="cargarFacturasPorRango()" class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded shadow transition sm:self-end focus:outline-none focus:ring-2 focus:ring-yellow-600 w-full sm:w-auto text-sm sm:text-base font-medium">Buscar</button>
     </div>
 
-    <ul id="historialFacturas" class="space-y-2 w-full overflow-x-auto" role="list" aria-label="Lista de facturas"></ul>
-    <div id="noData" class="text-center text-gray-500 mt-4 hidden text-sm md:text-base">No hay facturas en el rango seleccionado.</div>
+    <ul id="historialFacturas" class="space-y-2 w-full" role="list" aria-label="Lista de facturas"></ul>
+    <div id="noData" class="text-center text-gray-500 mt-4 hidden text-sm">No hay facturas en el rango seleccionado.</div>
   </section>
 
   <!-- Modal de contraseña para eliminar -->
-  <div id="modalPassword" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-sm mx-4">
-      <h3 id="modalTitle" class="text-lg font-semibold mb-2 text-sm md:text-base">Ingrese contraseña para eliminar</h3>
-      <input type="password" id="inputPassword" class="border border-gray-300 p-2 rounded w-full mb-4 focus:outline-none focus:ring-2 focus:ring-red-400" aria-label="Contraseña">
+  <div id="modalPassword" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-sm">
+      <h3 id="modalTitle" class="text-base sm:text-lg font-semibold mb-2">Ingrese contraseña para eliminar</h3>
+      <input type="password" id="inputPassword" class="border border-gray-300 p-2 rounded w-full mb-4 focus:outline-none focus:ring-2 focus:ring-red-400 text-sm sm:text-base" aria-label="Contraseña">
       <div class="flex justify-end gap-2">
-        <button onclick="cerrarModal()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-gray-600 text-sm md:text-base">Cancelar</button>
-        <button onclick="confirmarEliminar()" class="bg-red-400 hover:bg-red-500 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-600 text-sm md:text-base">Eliminar</button>
+        <button onclick="cerrarModal()" class="bg-gray-400 hover:bg-gray-500 text-white px-3 sm:px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-gray-600 text-sm sm:text-base">Cancelar</button>
+        <button onclick="confirmarEliminar()" class="bg-red-400 hover:bg-red-500 text-white px-3 sm:px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-600 text-sm sm:text-base">Eliminar</button>
       </div>
     </div>
   </div>
 
   <!-- Modal para imprimir ventas -->
-  <div id="modalImprimir" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="imprimirTitle">
-    <div class="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-sm mx-4">
-      <h3 id="imprimirTitle" class="text-lg font-semibold mb-2 text-sm md:text-base">Imprimir Ventas</h3>
+  <div id="modalImprimir" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="imprimirTitle">
+    <div class="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-sm">
+      <h3 id="imprimirTitle" class="text-base sm:text-lg font-semibold mb-2">Imprimir Ventas</h3>
       <div class="mb-4">
-        <label for="printDesde" class="block font-medium mb-1 text-sm md:text-base">Desde:</label>
-        <input type="date" id="printDesde" class="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-400" aria-label="Fecha desde para impresión">
+        <label for="printDesde" class="block font-medium mb-1 text-sm">Desde:</label>
+        <input type="date" id="printDesde" class="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-400 text-sm sm:text-base" aria-label="Fecha desde para impresión">
       </div>
       <div class="mb-4">
-        <label for="printHasta" class="block font-medium mb-1 text-sm md:text-base">Hasta:</label>
-        <input type="date" id="printHasta" class="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-400" aria-label="Fecha hasta para impresión">
+        <label for="printHasta" class="block font-medium mb-1 text-sm">Hasta:</label>
+        <input type="date" id="printHasta" class="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-400 text-sm sm:text-base" aria-label="Fecha hasta para impresión">
       </div>
       <div class="flex justify-end gap-2">
-        <button onclick="cerrarModalImprimir()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-gray-600 text-sm md:text-base">Cancelar</button>
-        <button onclick="imprimirVentas()" class="bg-green-400 hover:bg-green-500 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-600 text-sm md:text-base">Imprimir</button>
+        <button onclick="cerrarModalImprimir()" class="bg-gray-400 hover:bg-gray-500 text-white px-3 sm:px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-gray-600 text-sm sm:text-base">Cancelar</button>
+        <button onclick="imprimirVentas()" class="bg-green-400 hover:bg-green-500 text-white px-3 sm:px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-600 text-sm sm:text-base">Imprimir</button>
       </div>
     </div>
   </div>
@@ -99,17 +111,46 @@
       }).showToast();
     }
 
+    // Función para extraer solo la parte de fecha (YYYY-MM-DD) de un timestamp
+    function extraerFecha(fechaCompleta) {
+      if (!fechaCompleta) return '';
+      // Si viene como ISO string o timestamp, extraemos solo la fecha
+      const fecha = new Date(fechaCompleta);
+      const year = fecha.getFullYear();
+      const month = String(fecha.getMonth() + 1).padStart(2, '0');
+      const day = String(fecha.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    // Función para formatear fecha para mostrar (DD/MM/YYYY) - usa la fecha exacta guardada
+    // La fecha viene guardada como YYYY-MM-DDT12:00:00 desde facturación
+    function formatearFechaParaMostrar(fechaStr) {
+      if (!fechaStr) return '';
+      // Extraer directamente YYYY-MM-DD del string sin ninguna conversión de zona horaria
+      const soloFecha = fechaStr.split('T')[0]; // Obtiene "YYYY-MM-DD"
+      const partes = soloFecha.split('-');
+      if (partes.length === 3) {
+        // Formato DD/MM/YYYY
+        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+      }
+      return fechaStr;
+    }
+
     // Cargar facturas completas (por defecto hoy)
     async function cargarFacturas() {
       try {
+        // Obtener fecha de hoy en formato YYYY-MM-DD
         const hoy = new Date();
-        const desde = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()).toISOString();
-        const hasta = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 23, 59, 59).toISOString();
+        const year = hoy.getFullYear();
+        const month = String(hoy.getMonth() + 1).padStart(2, '0');
+        const day = String(hoy.getDate()).padStart(2, '0');
+        const fechaHoy = `${year}-${month}-${day}`;
 
+        // Buscar facturas cuya fecha comience con la fecha de hoy
         const { data, error } = await supabaseClient.from('facturas')
           .select('*')
-          .gte('fecha', desde)
-          .lte('fecha', hasta)
+          .gte('fecha', fechaHoy + 'T00:00:00')
+          .lte('fecha', fechaHoy + 'T23:59:59')
           .order('id', { ascending: false });
 
         if (error) throw error;
@@ -131,22 +172,26 @@
       noData.classList.add('hidden');
       data.forEach(factura => {
         const li = document.createElement('li');
-        li.className = "flex flex-col md:flex-row justify-between items-start md:items-center bg-yellow-100 p-3 rounded-lg shadow w-full";
-        // Mostrar fecha en zona horaria de RD para consistencia
-        const fechaFormateada = new Date(factura.fecha).toLocaleDateString('es-DO', { timeZone: 'America/Santo_Domingo', day: '2-digit', month: '2-digit', year: 'numeric' });
+        li.className = "factura-item flex flex-col sm:flex-row justify-between items-start sm:items-center bg-yellow-100 p-3 rounded-lg shadow w-full gap-2";
+        // Usar la fecha exacta que viene de la base de datos
+        const fechaFormateada = formatearFechaParaMostrar(factura.fecha);
         li.innerHTML = `
-          <span class="text-sm md:text-base mb-2 md:mb-0">Factura #${factura.id} | Fecha: ${fechaFormateada} | Total: RD$${parseFloat(factura.total).toFixed(2)}</span>
-          <div class="flex space-x-2 w-full md:w-auto justify-end">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 w-full sm:w-auto">
+            <span class="font-semibold text-yellow-700">Factura #${factura.id}</span>
+            <span class="text-gray-600 text-sm">| Fecha: ${fechaFormateada}</span>
+            <span class="text-gray-800 font-medium">| Total: RD$${parseFloat(factura.total).toFixed(2)}</span>
+          </div>
+          <div class="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0">
             <button onclick="window.location.href='detalle_factura.html?id=${factura.id}'"
-                    class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-yellow-600 text-sm md:text-base" aria-label="Ver detalle de factura ${factura.id}">Ver Detalle</button>
+                    class="flex-1 sm:flex-none bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1.5 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-yellow-600 text-sm" aria-label="Ver detalle de factura ${factura.id}">Ver Detalle</button>
             <button onclick="eliminarFactura(${factura.id})"
-                    class="bg-red-400 hover:bg-red-500 text-white px-3 py-1 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-red-600 text-sm md:text-base" aria-label="Eliminar factura ${factura.id}">Eliminar</button>
+                    class="flex-1 sm:flex-none bg-red-400 hover:bg-red-500 text-white px-3 py-1.5 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-red-600 text-sm" aria-label="Eliminar factura ${factura.id}">Eliminar</button>
           </div>`;
         lista.appendChild(li);
       });
     }
 
-    // Buscar por rango de fechas
+    // Buscar por rango de fechas - CORREGIDO para usar fecha exacta
     async function cargarFacturasPorRango() {
       const fechaDesde = document.getElementById('fechaDesde').value;
       const fechaHasta = document.getElementById('fechaHasta').value;
@@ -156,18 +201,17 @@
         return;
       }
 
-      const desde = new Date(fechaDesde + 'T00:00:00');
-      const hasta = new Date(fechaHasta + 'T23:59:59');
-      if (desde > hasta) {
+      if (fechaDesde > fechaHasta) {
         mostrarNotificacion("La fecha 'desde' debe ser anterior a 'hasta'.", 'warning');
         return;
       }
 
       try {
+        // Usar las fechas directamente sin conversión de zona horaria
         const { data, error } = await supabaseClient.from('facturas')
           .select('*')
-          .gte('fecha', desde.toISOString())
-          .lte('fecha', hasta.toISOString())
+          .gte('fecha', fechaDesde + 'T00:00:00')
+          .lte('fecha', fechaHasta + 'T23:59:59')
           .order('id', { ascending: false });
 
         if (error) throw error;
@@ -229,7 +273,7 @@
       document.getElementById('modalImprimir').classList.add('hidden');
     }
 
-    // Imprimir ventas
+    // Imprimir ventas - CORREGIDO para usar fecha exacta
     async function imprimirVentas() {
       const fechaDesde = document.getElementById('printDesde').value;
       const fechaHasta = document.getElementById('printHasta').value;
@@ -239,18 +283,17 @@
         return;
       }
 
-      const desde = new Date(fechaDesde + 'T00:00:00');
-      const hasta = new Date(fechaHasta + 'T23:59:59');
-      if (desde > hasta) {
+      if (fechaDesde > fechaHasta) {
         mostrarNotificacion("La fecha 'desde' debe ser anterior a 'hasta'.", 'warning');
         return;
       }
 
       try {
+        // Usar las fechas directamente sin conversión de zona horaria
         const { data: facturas, error } = await supabaseClient.from('facturas')
           .select('*')
-          .gte('fecha', desde.toISOString())
-          .lte('fecha', hasta.toISOString())
+          .gte('fecha', fechaDesde + 'T00:00:00')
+          .lte('fecha', fechaHasta + 'T23:59:59')
           .order('id', { ascending: true });
 
         if (error) throw error;
@@ -284,8 +327,9 @@
         let totalPeriodo = 0;
 
         for (const factura of facturas) {
+          const fechaFactura = formatearFechaParaMostrar(factura.fecha);
           doc.setFontSize(12);
-          doc.text(`Factura #${factura.id} | Total: RD$${parseFloat(factura.total).toFixed(2)}`, 10, y);
+          doc.text(`Factura #${factura.id} | Fecha: ${fechaFactura} | Total: RD$${parseFloat(factura.total).toFixed(2)}`, 10, y);
           totalPeriodo += parseFloat(factura.total);
           y += 6;
 
