@@ -8,37 +8,70 @@
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    @media (max-width: 640px) {
+      .nav-btn {
+        font-size: 0.75rem;
+        padding: 0.5rem 0.75rem;
+      }
+    }
+  </style>
 </head>
-<body class="bg-yellow-50 font-sans">
+<body class="bg-yellow-50 font-sans min-h-screen">
 
   <!-- Banner -->
-  <div class="relative w-full h-36 md:h-48 lg:h-56">
+  <div class="relative w-full h-28 sm:h-36 md:h-48 lg:h-56">
     <img src="LOGO LA PARADA DEL MAIZ.png" alt="Logo de La Parada del Maíz" class="w-full h-full object-cover">
-    <div class="absolute inset-0 bg-yellow-500 bg-opacity-50 flex items-center justify-center">
-      <h1 class="text-white text-xl md:text-3xl lg:text-4xl font-bold text-center drop-shadow-lg">
+    <div class="absolute inset-0 bg-yellow-500 bg-opacity-50 flex items-center justify-center px-2">
+      <h1 class="text-white text-lg sm:text-xl md:text-3xl lg:text-4xl font-bold text-center drop-shadow-lg">
         La Parada del Maíz y El Majarete de Leidy
       </h1>
     </div>
   </div>
 
   <!-- Navegación -->
-  <nav class="flex justify-center mt-4 space-x-4" role="navigation" aria-label="Navegación principal">
-    <a href="historial.html" class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-yellow-600">Volver al Historial</a>
+  <nav class="flex flex-wrap justify-center gap-2 sm:gap-3 mt-4 px-2" role="navigation" aria-label="Navegación principal">
+    <a href="historial.html" class="nav-btn bg-yellow-400 hover:bg-yellow-500 text-white px-3 sm:px-4 py-2 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-yellow-600 text-sm sm:text-base text-center">Volver al Historial</a>
   </nav>
 
   <!-- Detalle Factura -->
-  <section class="max-w-4xl mx-auto mt-8 bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow" role="region" aria-labelledby="detalle-factura">
-    <h2 id="detalle-factura" class="text-2xl font-semibold mb-4 text-gray-700 text-center">Detalle de Factura</h2>
+  <section class="max-w-4xl mx-auto mt-6 sm:mt-8 bg-white p-4 sm:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow mx-2 sm:mx-4 lg:mx-auto" role="region" aria-labelledby="detalle-factura">
+    <h2 id="detalle-factura" class="text-xl sm:text-2xl font-semibold mb-2 text-gray-700 text-center">Detalle de Factura</h2>
+
+    <!-- Info de la factura -->
+    <div id="infoFactura" class="bg-yellow-50 p-3 rounded-lg mb-4 text-center">
+      <p class="text-sm sm:text-base text-gray-600">
+        <span class="font-semibold">Factura #<span id="facturaNum">--</span></span> |
+        <span>Fecha: <span id="facturaFecha">--</span></span>
+      </p>
+    </div>
+
     <ul id="detalleFactura" class="space-y-2" role="list" aria-label="Lista de detalles de la factura"></ul>
-    <div id="noData" class="text-center text-gray-500 mt-4 hidden">No se encontraron detalles para esta factura.</div>
-    <h3 class="text-xl font-semibold mt-4 text-gray-700 text-center">Total: RD$ <span id="totalFactura">0.00</span></h3>
-    <div id="loading" class="hidden mt-2 text-yellow-600">Cargando...</div>
+    <div id="noData" class="text-center text-gray-500 mt-4 hidden text-sm">No se encontraron detalles para esta factura.</div>
+
+    <!-- Resumen de totales con descuento -->
+    <div class="mt-6 bg-gray-50 p-4 rounded-lg">
+      <div class="flex justify-between items-center mb-2">
+        <span class="text-gray-600 text-sm sm:text-base">Subtotal:</span>
+        <span class="font-medium text-sm sm:text-base">RD$ <span id="subtotalFactura">0.00</span></span>
+      </div>
+      <div id="descuentoRow" class="flex justify-between items-center mb-2 hidden">
+        <span class="text-red-600 text-sm sm:text-base">Descuento:</span>
+        <span class="font-medium text-red-600 text-sm sm:text-base">- RD$ <span id="descuentoFactura">0.00</span></span>
+      </div>
+      <hr class="my-2 border-gray-300">
+      <div class="flex justify-between items-center">
+        <span class="text-gray-800 font-semibold text-base sm:text-lg">Total:</span>
+        <span class="font-bold text-green-600 text-lg sm:text-xl">RD$ <span id="totalFactura">0.00</span></span>
+      </div>
+    </div>
+
+    <div id="loading" class="hidden mt-4 text-yellow-600 text-center text-sm">Cargando...</div>
   </section>
 
   <script>
-    // Nota: Mueve esta clave a un archivo de configuración seguro o variable de entorno
     const supabaseUrl = "https://vurddrbkwuafszrddgxe.supabase.co";
-    const supabaseKey = "sb_publishable_5bselDNif0wV61df7eZhgQ_E7gRM_zb"; // Reemplaza con tu clave real de forma segura
+    const supabaseKey = "sb_publishable_5bselDNif0wV61df7eZhgQ_E7gRM_zb";
     const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     const params = new URLSearchParams(window.location.search);
@@ -54,6 +87,16 @@
       }).showToast();
     }
 
+    function formatearFecha(fechaStr) {
+      if (!fechaStr) return '--';
+      const soloFecha = fechaStr.split('T')[0];
+      const partes = soloFecha.split('-');
+      if (partes.length === 3) {
+        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+      }
+      return fechaStr;
+    }
+
     async function cargarDetalle() {
       if (!facturaId) {
         mostrarNotificacion("ID de factura no válido.", 'error');
@@ -64,6 +107,17 @@
       loading.classList.remove('hidden');
 
       try {
+        const { data: facturaData, error: facturaError } = await supabaseClient
+          .from('facturas')
+          .select('id, fecha, subtotal, descuento, total')
+          .eq('id', facturaId)
+          .single();
+
+        if (facturaError) throw facturaError;
+
+        document.getElementById('facturaNum').textContent = facturaData.id;
+        document.getElementById('facturaFecha').textContent = formatearFecha(facturaData.fecha);
+
         const { data, error } = await supabaseClient
           .from('detalle_factura')
           .select('cantidad,precio,subtotal,articulos(nombre)')
@@ -74,23 +128,37 @@
         const lista = document.getElementById('detalleFactura');
         const noData = document.getElementById('noData');
         lista.innerHTML = "";
-        let total = 0;
+        let subtotalCalculado = 0;
 
         if (data.length === 0) {
           noData.classList.remove('hidden');
-          return;
+        } else {
+          noData.classList.add('hidden');
+          data.forEach(item => {
+            const li = document.createElement('li');
+            li.className = "flex flex-col sm:flex-row justify-between bg-yellow-100 p-3 rounded-lg shadow gap-1";
+            li.innerHTML = `
+              <span class="font-semibold text-yellow-800 text-sm sm:text-base">${item.articulos.nombre}</span>
+              <span class="text-gray-600 text-sm sm:text-base">
+                Cant: ${item.cantidad} | Precio: RD$${parseFloat(item.precio).toFixed(2)} |
+                <span class="font-medium">Subtotal: RD$${parseFloat(item.subtotal).toFixed(2)}</span>
+              </span>
+            `;
+            lista.appendChild(li);
+            subtotalCalculado += parseFloat(item.subtotal);
+          });
         }
 
-        noData.classList.add('hidden');
-        data.forEach(item => {
-          const li = document.createElement('li');
-          li.className = "flex justify-between bg-yellow-100 p-2 rounded-lg shadow";
-          li.innerHTML = `<span><strong>${item.articulos.nombre}</strong> | Cant: ${item.cantidad} | Precio: RD$${parseFloat(item.precio).toFixed(2)} | Subtotal: RD$${parseFloat(item.subtotal).toFixed(2)}</span>`;
-          lista.appendChild(li);
-          total += parseFloat(item.subtotal);
-        });
+        document.getElementById('subtotalFactura').textContent = parseFloat(facturaData.subtotal || subtotalCalculado).toFixed(2);
 
-        document.getElementById('totalFactura').textContent = total.toFixed(2);
+        const descuento = parseFloat(facturaData.descuento) || 0;
+        if (descuento > 0) {
+          document.getElementById('descuentoRow').classList.remove('hidden');
+          document.getElementById('descuentoFactura').textContent = descuento.toFixed(2);
+        }
+
+        document.getElementById('totalFactura').textContent = parseFloat(facturaData.total).toFixed(2);
+
       } catch (error) {
         mostrarNotificacion("Error al cargar detalle: " + error.message, 'error');
       } finally {
@@ -98,7 +166,6 @@
       }
     }
 
-    // Cargar detalle al inicio
     window.onload = cargarDetalle;
   </script>
 
