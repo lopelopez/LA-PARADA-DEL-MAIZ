@@ -201,17 +201,17 @@
         const descuento = parseFloat(document.getElementById('descuento').value) || 0;
         const total = subtotal - descuento;
 
-        // Manejo de fecha: Guardar como fecha local de RD (sin hora para evitar UTC issues)
+        // Manejo de fecha: Forzar zona horaria de RD para consistencia
         const fechaInput = document.getElementById('fechaFactura').value;
         let fechaFactura = new Date();
         if (fechaInput) {
-          fechaFactura = new Date(fechaInput + 'T00:00:00'); // Asegurar formato correcto
+          fechaFactura = new Date(fechaInput + 'T12:00:00'); // Usar mediodía para evitar cambios de día por zona
           if (isNaN(fechaFactura.getTime())) {
             throw new Error("Fecha inválida.");
           }
         }
-        // Convertir a zona horaria de RD y guardar como ISO (Supabase lo maneja como UTC)
-        const fechaIso = fechaFactura.toISOString();
+        // Convertir a zona RD y guardar como ISO
+        const fechaIso = new Date(fechaFactura.toLocaleString('en-US', { timeZone: 'America/Santo_Domingo' })).toISOString();
 
         const { data: facturaData, error: facturaError } = await supabaseClient
           .from('facturas')
@@ -237,7 +237,7 @@
         itemsFactura = [];
         actualizarVistaFactura();
         document.getElementById('descuento').value = "0";
-        const hoy = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+        const hoy = new Date().toISOString().split('T')[0];
         document.getElementById('fechaFactura').value = hoy;
       } catch (error) {
         mostrarNotificacion("Error al guardar factura: " + error.message, 'error');
@@ -257,3 +257,4 @@
 
 </body>
 </html>
+ 
