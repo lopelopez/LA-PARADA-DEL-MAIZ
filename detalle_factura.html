@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalle de Factura - La Parada del Maíz</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-yellow-50 font-sans">
+
+  <!-- Banner -->
+  <div class="relative w-full h-36 md:h-48 lg:h-56">
+    <img src="LOGO LA PARADA DEL MAIZ.png" alt="Logo de La Parada del Maíz" class="w-full h-full object-cover">
+    <div class="absolute inset-0 bg-yellow-500 bg-opacity-50 flex items-center justify-center">
+      <h1 class="text-white text-xl md:text-3xl lg:text-4xl font-bold text-center drop-shadow-lg">
+        La Parada del Maíz y El Majarete de Leidy
+      </h1>
+    </div>
+  </div>
+
+  <!-- Navegación -->
+  <nav class="flex justify-center mt-4 space-x-4" role="navigation" aria-label="Navegación principal">
+    <a href="historial.html" class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-yellow-600">Volver al Historial</a>
+  </nav>
+
+  <!-- Detalle Factura -->
+  <section class="max-w-4xl mx-auto mt-8 bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow" role="region" aria-labelledby="detalle-factura">
+    <h2 id="detalle-factura" class="text-2xl font-semibold mb-4 text-gray-700 text-center">Detalle de Factura</h2>
+    <ul id="detalleFactura" class="space-y-2" role="list" aria-label="Lista de detalles de la factura"></ul>
+    <div id="noData" class="text-center text-gray-500 mt-4 hidden">No se encontraron detalles para esta factura.</div>
+    <h3 class="text-xl font-semibold mt-4 text-gray-700 text-center">Total: RD$ <span id="totalFactura">0.00</span></h3>
+    <div id="loading" class="hidden mt-2 text-yellow-600">Cargando...</div>
+  </section>
+
+  <script>
+    // Nota: Mueve esta clave a un archivo de configuración seguro o variable de entorno
+    const supabaseUrl = "https://vurddrbkwuafszrddgxe.supabase.co";
+    const supabaseKey = "sb_publishable_5bselDNif0wV61df7eZhgQ_E7gRM_zb"; // Reemplaza con tu clave real de forma segura
+    const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    const params = new URLSearchParams(window.location.search);
+    const facturaId = params.get("id");
+
+    function mostrarNotificacion(mensaje, tipo = 'success') {
+      Toastify({
+        text: mensaje,
+        duration: 3000,
+        gravity: "top",
+        position: "right",
+        backgroundColor: tipo === 'error' ? "#dc3545" : tipo === 'warning' ? "#ffc107" : "#28a745",
+      }).showToast();
+    }
+
+    async function cargarDetalle() {
+      if (!facturaId) {
+        mostrarNotificacion("ID de factura no válido.", 'error');
+        return;
+      }
+
+      const loading = document.getElementById('loading');
+      loading.classList.remove('hidden');
+
+      try {
+        const { data, error } = await supabaseClient
+          .from('detalle_factura')
+          .select('cantidad,precio,subtotal,articulos(nombre)')
+          .eq('factura_id', facturaId);
+
+        if (error) throw error;
+
+        const lista = document.getElementById('detalleFactura');
+        const noData = document.getElementById('noData');
+        lista.innerHTML = "";
+        let total = 0;
+
+        if (data.length === 0) {
+          noData.classList.remove('hidden');
+          return;
+        }
+
+        noData.classList.add('hidden');
+        data.forEach(item => {
+          const li = document.createElement('li');
+          li.className = "flex justify-between bg-yellow-100 p-2 rounded-lg shadow";
+          li.innerHTML = `<span><strong>${item.articulos.nombre}</strong> | Cant: ${item.cantidad} | Precio: RD$${parseFloat(item.precio).toFixed(2)} | Subtotal: RD$${parseFloat(item.subtotal).toFixed(2)}</span>`;
+          lista.appendChild(li);
+          total += parseFloat(item.subtotal);
+        });
+
+        document.getElementById('totalFactura').textContent = total.toFixed(2);
+      } catch (error) {
+        mostrarNotificacion("Error al cargar detalle: " + error.message, 'error');
+      } finally {
+        loading.classList.add('hidden');
+      }
+    }
+
+    // Cargar detalle al inicio
+    window.onload = cargarDetalle;
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Historial de Facturas - La Parada del Maíz</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body class="bg-yellow-50 font-sans">
+
+  <!-- Banner -->
+  <div class="relative w-full h-36 md:h-48 lg:h-56">
+    <img src="LOGO LA PARADA DEL MAIZ.png" alt="Logo de La Parada del Maíz" class="w-full h-full object-cover">
+    <div class="absolute inset-0 bg-yellow-500 bg-opacity-50 flex items-center justify-center">
+      <h1 class="text-white text-xl md:text-3xl lg:text-4xl font-bold text-center drop-shadow-lg">
+        La Parada del Maíz y El Majarete de Leidy
+      </h1>
+    </div>
+  </div>
+
+  <!-- Navegación -->
+  <nav class="flex justify-center mt-4 space-x-4" role="navigation" aria-label="Navegación principal">
+    <a href="index.html" class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-yellow-600">Volver a Artículos</a>
+    <a href="facturacion.html" class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-yellow-600">Ir a Facturación</a>
+    <button onclick="mostrarModalImprimir()" class="bg-green-400 hover:bg-green-500 text-white px-4 py-2 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-green-600">Imprimir Ventas del Día</button>
+  </nav>
+
+  <!-- Historial de Facturas -->
+  <section class="max-w-4xl mx-auto mt-8 bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow" role="region" aria-labelledby="historial-facturas">
+    <h2 id="historial-facturas" class="text-2xl font-semibold mb-4 text-gray-700 text-center">Historial de Facturas</h2>
+
+    <!-- Selección de rango de fechas -->
+    <div class="flex gap-4 justify-center mb-4">
+      <div>
+        <label for="fechaDesde" class="block font-medium mb-1">Desde:</label>
+        <input type="date" id="fechaDesde" class="border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" aria-label="Fecha desde">
+      </div>
+      <div>
+        <label for="fechaHasta" class="block font-medium mb-1">Hasta:</label>
+        <input type="date" id="fechaHasta" class="border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" aria-label="Fecha hasta">
+      </div>
+      <button onclick="cargarFacturasPorRango()" class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded shadow transition self-end focus:outline-none focus:ring-2 focus:ring-yellow-600">Buscar</button>
+    </div>
+
+    <ul id="historialFacturas" class="space-y-2" role="list" aria-label="Lista de facturas"></ul>
+    <div id="noData" class="text-center text-gray-500 mt-4 hidden">No hay facturas en el rango seleccionado.</div>
+  </section>
+
+  <!-- Modal de contraseña para eliminar -->
+  <div id="modalPassword" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-80 mx-4">
+      <h3 id="modalTitle" class="text-lg font-semibold mb-2">Ingrese contraseña para eliminar</h3>
+      <input type="password" id="inputPassword" class="border border-gray-300 p-2 rounded w-full mb-4 focus:outline-none focus:ring-2 focus:ring-red-400" aria-label="Contraseña">
+      <div class="flex justify-end gap-2">
+        <button onclick="cerrarModal()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-gray-600">Cancelar</button>
+        <button onclick="confirmarEliminar()" class="bg-red-400 hover:bg-red-500 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-600">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para imprimir ventas -->
+  <div id="modalImprimir" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="imprimirTitle">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-80 mx-4">
+      <h3 id="imprimirTitle" class="text-lg font-semibold mb-2">Imprimir Ventas</h3>
+      <div class="mb-4">
+        <label for="printDesde" class="block font-medium mb-1">Desde:</label>
+        <input type="date" id="printDesde" class="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-400" aria-label="Fecha desde para impresión">
+      </div>
+      <div class="mb-4">
+        <label for="printHasta" class="block font-medium mb-1">Hasta:</label>
+        <input type="date" id="printHasta" class="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-400" aria-label="Fecha hasta para impresión">
+      </div>
+      <div class="flex justify-end gap-2">
+        <button onclick="cerrarModalImprimir()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-gray-600">Cancelar</button>
+        <button onclick="imprimirVentas()" class="bg-green-400 hover:bg-green-500 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-600">Imprimir</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Nota: Mueve esta clave a un archivo de configuración seguro o variable de entorno
+    const supabaseUrl = "https://vurddrbkwuafszrddgxe.supabase.co";
+    const supabaseKey = "sb_publishable_5bselDNif0wV61df7eZhgQ_E7gRM_zb"; // Reemplaza con tu clave real de forma segura
+    const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    let facturaAEliminar = null;
+
+    function mostrarNotificacion(mensaje, tipo = 'success') {
+      Toastify({
+        text: mensaje,
+        duration: 3000,
+        gravity: "top",
+        position: "right",
+        backgroundColor: tipo === 'error' ? "#dc3545" : tipo === 'warning' ? "#ffc107" : "#28a745",
+      }).showToast();
+    }
+
+    // Cargar facturas completas (por defecto hoy)
+    async function cargarFacturas() {
+      try {
+        const hoy = new Date();
+        const desde = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()).toISOString();
+        const hasta = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 23, 59, 59).toISOString();
+
+        const { data, error } = await supabaseClient.from('facturas')
+          .select('*')
+          .gte('fecha', desde)
+          .lte('fecha', hasta)
+          .order('id', { ascending: false });
+
+        if (error) throw error;
+        mostrarFacturas(data);
+      } catch (error) {
+        mostrarNotificacion("Error al cargar facturas: " + error.message, 'error');
+      }
+    }
+
+    // Mostrar facturas en el listado
+    function mostrarFacturas(data) {
+      const lista = document.getElementById('historialFacturas');
+      const noData = document.getElementById('noData');
+      lista.innerHTML = "";
+      if (data.length === 0) {
+        noData.classList.remove('hidden');
+        return;
+      }
+      noData.classList.add('hidden');
+      data.forEach(factura => {
+        const li = document.createElement('li');
+        li.className = "flex justify-between items-center bg-yellow-100 p-3 rounded-lg shadow";
+        // Mostrar fecha en zona horaria de RD para consistencia
+        const fechaFormateada = new Date(factura.fecha).toLocaleDateString('es-DO', { timeZone: 'America/Santo_Domingo' });
+        li.innerHTML = `
+          <span>Factura #${factura.id} | Fecha: ${fechaFormateada} | Total: RD$${parseFloat(factura.total).toFixed(2)}</span>
+          <div class="space-x-2">
+            <button onclick="window.location.href='detalle_factura.html?id=${factura.id}'"
+                    class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-yellow-600" aria-label="Ver detalle de factura ${factura.id}">Ver Detalle</button>
+            <button onclick="eliminarFactura(${factura.id})"
+                    class="bg-red-400 hover:bg-red-500 text-white px-3 py-1 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-red-600" aria-label="Eliminar factura ${factura.id}">Eliminar</button>
+          </div>`;
+        lista.appendChild(li);
+      });
+    }
+
+    // Buscar por rango de fechas
+    async function cargarFacturasPorRango() {
+      const fechaDesde = document.getElementById('fechaDesde').value;
+      const fechaHasta = document.getElementById('fechaHasta').value;
+
+      if (!fechaDesde || !fechaHasta) {
+        mostrarNotificacion("Debe seleccionar ambas fechas.", 'warning');
+        return;
+      }
+
+      const desde = new Date(fechaDesde + 'T00:00:00');
+      const hasta = new Date(fechaHasta + 'T23:59:59');
+      if (desde > hasta) {
+        mostrarNotificacion("La fecha 'desde' debe ser anterior a 'hasta'.", 'warning');
+        return;
+      }
+
+      try {
+        const { data, error } = await supabaseClient.from('facturas')
+          .select('*')
+          .gte('fecha', desde.toISOString())
+          .lte('fecha', hasta.toISOString())
+          .order('id', { ascending: false });
+
+        if (error) throw error;
+        mostrarFacturas(data);
+      } catch (error) {
+        mostrarNotificacion("Error al buscar facturas: " + error.message, 'error');
+      }
+    }
+
+    // Eliminar con contraseña
+    function eliminarFactura(id) {
+      facturaAEliminar = id;
+      document.getElementById('modalPassword').classList.remove('hidden');
+    }
+
+    function cerrarModal() {
+      facturaAEliminar = null;
+      document.getElementById('inputPassword').value = "";
+      document.getElementById('modalPassword').classList.add('hidden');
+    }
+
+    async function confirmarEliminar() {
+      const ingreso = document.getElementById('inputPassword').value;
+      if (!ingreso) {
+        mostrarNotificacion("Debe ingresar la contraseña.", 'warning');
+        return;
+      }
+
+      // Nota: Reemplaza con autenticación real (ej. Supabase Auth)
+      const password = "6511";
+      if (ingreso !== password) {
+        mostrarNotificacion("Contraseña incorrecta.", 'error');
+        return;
+      }
+
+      try {
+        // Eliminar detalles primero
+        const { error: detalleError } = await supabaseClient.from('detalle_factura').delete().eq('factura_id', facturaAEliminar);
+        if (detalleError) throw detalleError;
+
+        // Eliminar factura
+        const { error: facturaError } = await supabaseClient.from('facturas').delete().eq('id', facturaAEliminar);
+        if (facturaError) throw facturaError;
+
+        mostrarNotificacion("Factura eliminada correctamente.");
+        cerrarModal();
+        cargarFacturas();
+      } catch (error) {
+        mostrarNotificacion("Error al eliminar factura: " + error.message, 'error');
+      }
+    }
+
+    // Modal para imprimir
+    function mostrarModalImprimir() {
+      document.getElementById('modalImprimir').classList.remove('hidden');
+    }
+
+    function cerrarModalImprimir() {
+      document.getElementById('modalImprimir').classList.add('hidden');
+    }
+
+    // Imprimir ventas
+    async function imprimirVentas() {
+      const fechaDesde = document.getElementById('printDesde').value;
+      const fechaHasta = document.getElementById('printHasta').value;
+
+      if (!fechaDesde || !fechaHasta) {
+        mostrarNotificacion("Debe seleccionar ambas fechas.", 'warning');
+        return;
+      }
+
+      const desde = new Date(fechaDesde + 'T00:00:00');
+      const hasta = new Date(fechaHasta + 'T23:59:59');
+      if (desde > hasta) {
+        mostrarNotificacion("La fecha 'desde' debe ser anterior a 'hasta'.", 'warning');
+        return;
+      }
+
+      try {
+        const { data: facturas, error } = await supabaseClient.from('facturas')
+          .select('*')
+          .gte('fecha', desde.toISOString())
+          .lte('fecha', hasta.toISOString())
+          .order('id', { ascending: true });
+
+        if (error) throw error;
+        if (!facturas || facturas.length === 0) {
+          mostrarNotificacion("No hay ventas en ese rango.", 'warning');
+          return;
+        }
+
+        const facturaIds = facturas.map(f => f.id);
+        const { data: detalles, error: detalleError } = await supabaseClient
+          .from('detalle_factura')
+          .select('factura_id,cantidad,precio,subtotal,articulos(nombre)')
+          .in('factura_id', facturaIds);
+
+        if (detalleError) throw detalleError;
+
+        const detallesPorFactura = {};
+        detalles.forEach(d => {
+          if (!detallesPorFactura[d.factura_id]) detallesPorFactura[d.factura_id] = [];
+          detallesPorFactura[d.factura_id].push(d);
+        });
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.setFontSize(16);
+        doc.text("La Parada del Maíz y El Majarete de Leidy", 105, 15, { align: "center" });
+        doc.setFontSize(12);
+        doc.text(`Ventas del Período: ${fechaDesde} a ${fechaHasta}`, 105, 25, { align: "center" });
+
+        let y = 35;
+        let totalPeriodo = 0;
+
+        for (const factura of facturas) {
+          doc.setFontSize(12);
+          doc.text(`Factura #${factura.id} | Total: RD$${parseFloat(factura.total).toFixed(2)}`, 10, y);
+          totalPeriodo += parseFloat(factura.total);
+          y += 6;
+
+          const items = detallesPorFactura[factura.id] || [];
+          items.forEach(item => {
+            doc.text(`- ${item.articulos.nombre} | Cant: ${item.cantidad} | Precio: RD$${item.precio} | Subtotal: RD$${item.subtotal}`, 15, y);
+            y += 6;
+          });
+          y += 4;
+          if (y > 270) {
+            doc.addPage();
+            y = 20;
+          }
+        }
+
+        doc.setFontSize(14);
+        doc.text(`Total Ventas del Período: RD$${totalPeriodo.toFixed(2)}`, 105, y + 10, { align: "center" });
+        doc.save(`Ventas_${fechaDesde}_a_${fechaHasta}.pdf`);
+        cerrarModalImprimir();
+        mostrarNotificacion("PDF generado correctamente.");
+      } catch (error) {
+        mostrarNotificacion("Error al generar PDF: " + error.message, 'error');
+      }
+    }
+
+    // Cargar facturas al inicio
+    window.onload = cargarFacturas;
+  </script>
+
+</body>
+</html>

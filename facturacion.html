@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Facturación - La Parada del Maíz</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-yellow-50 font-sans">
+
+  <!-- Banner -->
+  <div class="relative w-full h-36 md:h-48 lg:h-56">
+    <img src="LOGO LA PARADA DEL MAIZ.png" alt="Logo de La Parada del Maíz" class="w-full h-full object-cover">
+    <div class="absolute inset-0 bg-yellow-500 bg-opacity-50 flex items-center justify-center">
+      <h1 class="text-white text-xl md:text-3xl lg:text-4xl font-bold text-center drop-shadow-lg">
+        La Parada del Maíz y El Majarete de Leidy
+      </h1>
+    </div>
+  </div>
+
+  <!-- Navegación -->
+  <nav class="flex justify-center mt-4 space-x-4" role="navigation" aria-label="Navegación principal">
+    <a href="index.html" class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-yellow-600">Volver a Artículos</a>
+    <a href="historial.html" class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-yellow-600">Ver Historial</a>
+  </nav>
+
+  <!-- Crear Factura -->
+  <section class="max-w-4xl mx-auto mt-8 bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow" role="region" aria-labelledby="crear-factura">
+    <h2 id="crear-factura" class="text-2xl font-semibold mb-4 text-gray-700">Crear Factura</h2>
+
+    <div class="flex flex-col md:flex-row gap-4 mb-4">
+      <select id="articuloSelect" class="border border-gray-300 p-2 rounded-lg w-full md:w-1/2 focus:outline-none focus:ring-2 focus:ring-yellow-400" aria-label="Seleccionar artículo">
+        <option value="">Selecciona un artículo</option>
+      </select>
+      <input type="number" id="cantidad" placeholder="Cantidad" min="1" max="1000"
+             class="border border-gray-300 p-2 rounded-lg w-full md:w-1/2 focus:outline-none focus:ring-2 focus:ring-yellow-400" aria-label="Cantidad">
+    </div>
+
+    <!-- Seleccionar fecha de la factura -->
+    <div class="mb-4">
+      <label for="fechaFactura" class="block mb-1 font-medium text-gray-700">Fecha de Factura:</label>
+      <input type="date" id="fechaFactura" class="border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" aria-label="Fecha de la factura">
+    </div>
+
+    <button onclick="agregarItem()" class="bg-yellow-400 hover:bg-yellow-500 text-white px-6 py-2 rounded-lg shadow-md transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-yellow-600">
+      Agregar
+    </button>
+
+    <h3 class="mt-6 text-xl font-semibold text-gray-700">Detalle de Factura</h3>
+    <ul id="detalleLista" class="space-y-2" role="list" aria-label="Lista de detalles de factura"></ul>
+
+    <div class="mt-4 flex items-center gap-4">
+      <label for="descuento" class="font-medium text-gray-700">Descuento (RD$):</label>
+      <input type="number" id="descuento" value="0" min="0" step="0.01" oninput="actualizarVistaFactura()"
+             class="border border-gray-300 p-2 rounded-lg w-32 focus:outline-none focus:ring-2 focus:ring-yellow-400" aria-label="Descuento">
+    </div>
+
+    <h3 class="mt-4 text-xl font-semibold text-gray-700">Total: RD$ <span id="totalFactura">0.00</span></h3>
+
+    <button onclick="mostrarModalGuardar()" id="guardarBtn"
+            class="mt-4 bg-green-400 hover:bg-green-500 text-white px-6 py-2 rounded-lg shadow-md transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-600">
+      Guardar Factura
+    </button>
+    <div id="loading" class="hidden mt-2 text-green-600">Guardando...</div>
+  </section>
+
+  <!-- Modal de confirmación para guardar -->
+  <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full mx-4">
+      <h3 id="confirmTitle" class="text-lg font-semibold mb-4">Confirmar Guardado</h3>
+      <p>¿Estás seguro de que deseas guardar esta factura? Esta acción no se puede deshacer.</p>
+      <div class="flex justify-end mt-4 space-x-2">
+        <button onclick="cerrarModal()" class="px-4 py-2 bg-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-600">Cancelar</button>
+        <button id="confirmSave" onclick="confirmarGuardar()" class="px-4 py-2 bg-green-500 text-white rounded focus:outline-none focus:ring-2 focus:ring-green-600">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Nota: Mueve esta clave a un archivo de configuración seguro o variable de entorno
+    const supabaseUrl = "https://vurddrbkwuafszrddgxe.supabase.co";
+    const supabaseKey = "sb_publishable_5bselDNif0wV61df7eZhgQ_E7gRM_zb"; // Reemplaza con tu clave real de forma segura
+    const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    let itemsFactura = [];
+
+    function mostrarNotificacion(mensaje, tipo = 'success') {
+      Toastify({
+        text: mensaje,
+        duration: 3000,
+        gravity: "top",
+        position: "right",
+        backgroundColor: tipo === 'error' ? "#dc3545" : tipo === 'warning' ? "#ffc107" : "#28a745",
+      }).showToast();
+    }
+
+    // Cargar artículos
+    async function cargarArticulos() {
+      try {
+        const { data, error } = await supabaseClient.from('articulos').select('*');
+        if (error) throw error;
+        const select = document.getElementById('articuloSelect');
+        select.innerHTML = '<option value="">Selecciona un artículo</option>';
+        data.forEach(articulo => {
+          const option = document.createElement('option');
+          option.value = articulo.id;
+          option.textContent = `${articulo.nombre} - RD$${parseFloat(articulo.precio).toFixed(2)}`;
+          option.dataset.precio = articulo.precio;
+          select.appendChild(option);
+        });
+      } catch (error) {
+        mostrarNotificacion("Error al cargar artículos: " + error.message, 'error');
+      }
+    }
+
+    // Agregar item a factura
+    function agregarItem() {
+      const select = document.getElementById('articuloSelect');
+      const cantidad = parseInt(document.getElementById('cantidad').value);
+      if (!select.value) {
+        mostrarNotificacion("Selecciona un artículo.", 'warning');
+        return;
+      }
+      if (!cantidad || cantidad <= 0 || cantidad > 1000) {
+        mostrarNotificacion("Ingrese una cantidad válida (1-1000).", 'warning');
+        return;
+      }
+
+      const articuloId = select.value;
+      const nombre = select.options[select.selectedIndex].text.split(' - ')[0]; // Extraer solo el nombre
+      const precio = parseFloat(select.options[select.selectedIndex].dataset.precio);
+      const subtotal = precio * cantidad;
+
+      // Verificar si ya existe el artículo en la factura
+      const existe = itemsFactura.find(item => item.articulo_id == articuloId);
+      if (existe) {
+        mostrarNotificacion("El artículo ya está en la factura. Edita la cantidad si es necesario.", 'warning');
+        return;
+      }
+
+      itemsFactura.push({ articulo_id: articuloId, nombre, cantidad, precio, subtotal });
+      actualizarVistaFactura();
+      document.getElementById('cantidad').value = "";
+      select.value = "";
+    }
+
+    // Actualizar lista y total
+    function actualizarVistaFactura() {
+      const lista = document.getElementById('detalleLista');
+      lista.innerHTML = "";
+      let subtotalGeneral = 0;
+      itemsFactura.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.className = "bg-yellow-100 p-2 rounded-lg shadow flex justify-between";
+        li.innerHTML = `
+          <span>${item.nombre} | Cant: ${item.cantidad} | Subtotal: RD$${item.subtotal.toFixed(2)}</span>
+          <button onclick="eliminarItem(${index})" class="bg-red-400 hover:bg-red-500 text-white px-2 py-1 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-red-600" aria-label="Eliminar ${item.nombre}">X</button>
+        `;
+        lista.appendChild(li);
+        subtotalGeneral += item.subtotal;
+      });
+      const descuento = parseFloat(document.getElementById('descuento').value) || 0;
+      if (descuento > subtotalGeneral) {
+        mostrarNotificacion("El descuento no puede ser mayor que el subtotal.", 'warning');
+        document.getElementById('descuento').value = subtotalGeneral.toFixed(2);
+        return actualizarVistaFactura();
+      }
+      document.getElementById('totalFactura').textContent = (subtotalGeneral - descuento).toFixed(2);
+    }
+
+    function eliminarItem(index) {
+      itemsFactura.splice(index, 1);
+      actualizarVistaFactura();
+    }
+
+    function mostrarModalGuardar() {
+      if (itemsFactura.length === 0) {
+        mostrarNotificacion("Agrega al menos un artículo antes de guardar.", 'warning');
+        return;
+      }
+      document.getElementById('confirmModal').classList.remove('hidden');
+    }
+
+    function cerrarModal() {
+      document.getElementById('confirmModal').classList.add('hidden');
+    }
+
+    // Guardar factura
+    async function confirmarGuardar() {
+      cerrarModal();
+      const loading = document.getElementById('loading');
+      loading.classList.remove('hidden');
+      document.getElementById('guardarBtn').disabled = true;
+
+      try {
+        let subtotal = 0;
+        itemsFactura.forEach(item => subtotal += item.subtotal);
+        const descuento = parseFloat(document.getElementById('descuento').value) || 0;
+        const total = subtotal - descuento;
+
+        // Manejo de fecha: Guardar como fecha local de RD (sin hora para evitar UTC issues)
+        const fechaInput = document.getElementById('fechaFactura').value;
+        let fechaFactura = new Date();
+        if (fechaInput) {
+          fechaFactura = new Date(fechaInput + 'T00:00:00'); // Asegurar formato correcto
+          if (isNaN(fechaFactura.getTime())) {
+            throw new Error("Fecha inválida.");
+          }
+        }
+        // Convertir a zona horaria de RD y guardar como ISO (Supabase lo maneja como UTC)
+        const fechaIso = fechaFactura.toISOString();
+
+        const { data: facturaData, error: facturaError } = await supabaseClient
+          .from('facturas')
+          .insert([{ fecha: fechaIso, subtotal, descuento, total }])
+          .select();
+
+        if (facturaError) throw facturaError;
+
+        const facturaId = facturaData[0].id;
+        const detalles = itemsFactura.map(item => ({
+          factura_id: facturaId,
+          articulo_id: item.articulo_id,
+          cantidad: item.cantidad,
+          precio: item.precio,
+          subtotal: item.subtotal
+        }));
+
+        const { error: detalleError } = await supabaseClient.from('detalle_factura').insert(detalles);
+        if (detalleError) throw detalleError;
+
+        mostrarNotificacion("Factura guardada correctamente.");
+        // Resetear todo
+        itemsFactura = [];
+        actualizarVistaFactura();
+        document.getElementById('descuento').value = "0";
+        const hoy = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+        document.getElementById('fechaFactura').value = hoy;
+      } catch (error) {
+        mostrarNotificacion("Error al guardar factura: " + error.message, 'error');
+      } finally {
+        loading.classList.add('hidden');
+        document.getElementById('guardarBtn').disabled = false;
+      }
+    }
+
+    // Inicializar
+    window.onload = () => {
+      cargarArticulos();
+      const hoy = new Date().toISOString().split('T')[0];
+      document.getElementById('fechaFactura').value = hoy;
+    };
+  </script>
+
+</body>
+</html>
