@@ -74,6 +74,18 @@
     </div>
   </div>
 
+  <!-- Modal de contraseña para imprimir -->
+  <div id="modalPasswordImprimir" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="modalTitleImprimir">
+    <div class="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-sm">
+      <h3 id="modalTitleImprimir" class="text-base sm:text-lg font-semibold mb-2">Ingrese contraseña para imprimir</h3>
+      <input type="password" id="inputPasswordImprimir" class="border border-gray-300 p-2 rounded w-full mb-4 focus:outline-none focus:ring-2 focus:ring-green-400 text-sm sm:text-base" aria-label="Contraseña para imprimir">
+      <div class="flex justify-end gap-2">
+        <button onclick="cerrarModalImprimir()" class="bg-gray-400 hover:bg-gray-500 text-white px-3 sm:px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-gray-600 text-sm sm:text-base">Cancelar</button>
+        <button onclick="confirmarPasswordImprimir()" class="bg-green-400 hover:bg-green-500 text-white px-3 sm:px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-600 text-sm sm:text-base">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal para imprimir ventas -->
   <div id="modalImprimir" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="imprimirTitle">
     <div class="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-sm">
@@ -256,7 +268,7 @@
         const { error: facturaError } = await supabaseClient.from('facturas').delete().eq('id', facturaAEliminar);
         if (facturaError) throw facturaError;
 
-        mostrarNotificacion("Factura eliminada correctamente.");
+               mostrarNotificacion("Factura eliminada correctamente.");
         cerrarModal();
         cargarFacturas();
       } catch (error) {
@@ -264,16 +276,38 @@
       }
     }
 
-    // Modal para imprimir
+    // Modal para imprimir - Primero mostrar contraseña
     function mostrarModalImprimir() {
-      document.getElementById('modalImprimir').classList.remove('hidden');
+      document.getElementById('modalPasswordImprimir').classList.remove('hidden');
     }
 
     function cerrarModalImprimir() {
+      document.getElementById('modalPasswordImprimir').classList.add('hidden');
+      document.getElementById('inputPasswordImprimir').value = "";
       document.getElementById('modalImprimir').classList.add('hidden');
     }
 
-    // Imprimir ventas - CORREGIDO para usar fecha exacta
+    // Confirmar contraseña para imprimir
+    function confirmarPasswordImprimir() {
+      const ingreso = document.getElementById('inputPasswordImprimir').value;
+      if (!ingreso) {
+        mostrarNotificacion("Debe ingresar la contraseña.", 'warning');
+        return;
+      }
+
+      const password = "6511";
+      if (ingreso !== password) {
+        mostrarNotificacion("Contraseña incorrecta.", 'error');
+        return;
+      }
+
+      // Contraseña correcta, mostrar modal de fechas
+      document.getElementById('modalPasswordImprimir').classList.add('hidden');
+      document.getElementById('inputPasswordImprimir').value = "";
+      document.getElementById('modalImprimir').classList.remove('hidden');
+    }
+
+    // Imprimir ventas - CORREGIDO para usar fecha exacta y añadir total por artículos
     async function imprimirVentas() {
       const fechaDesde = document.getElementById('printDesde').value;
       const fechaHasta = document.getElementById('printHasta').value;
@@ -316,6 +350,20 @@
           detallesPorFactura[d.factura_id].push(d);
         });
 
+        // Calcular total por artículos
+        const totalPorArticulo = {};
+        let totalArticulosGeneral = 0;
+        detalles.forEach(detalle => {
+          const nombre = detalle.articulos.nombre;
+          const cantidad = detalle.cantidad;
+          if (totalPorArticulo[nombre]) {
+            totalPorArticulo[nombre] += cantidad;
+          } else {
+            totalPorArticulo[nombre] = cantidad;
+          }
+          totalArticulosGeneral += cantidad;
+        });
+
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         doc.setFontSize(16);
@@ -345,8 +393,23 @@
           }
         }
 
+        // Añadir sección de total por artículos
+        doc.setFontSize(14);
+        doc.text("Total por Artículos:", 10, y + 10);
+        y += 20;
+        Object.keys(totalPorArticulo).forEach(articulo => {
+          doc.setFontSize(12);
+          doc.text(`${articulo}: ${totalPorArticulo[articulo]} unidades`, 15, y);
+          y += 6;
+          if (y > 270) {
+            doc.addPage();
+            y = 20;
+          }
+        });
+
         doc.setFontSize(14);
         doc.text(`Total Ventas del Período: RD$${totalPeriodo.toFixed(2)}`, 105, y + 10, { align: "center" });
+        doc.text(`Total Artículos Vendidos: ${totalArticulosGeneral}`, 105, y + 20, { align: "center" });
         doc.save(`Ventas_${fechaDesde}_a_${fechaHasta}.pdf`);
         cerrarModalImprimir();
         mostrarNotificacion("PDF generado correctamente.");
