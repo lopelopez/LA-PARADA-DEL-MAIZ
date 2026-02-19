@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inicio de Sesión - La Parada del Maíz</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Poppins', sans-serif; }
+    .glass {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+    }
+    .input-field {
+      transition: all 0.3s ease;
+    }
+    .input-field:focus {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      transition: all 0.3s ease;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+    }
+    .btn-secondary {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      transition: all 0.3s ease;
+    }
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+    .banner-overlay {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.9) 0%, rgba(217, 119, 6, 0.8) 100%);
+    }
+  </style>
+</head>
+<body class="bg-yellow-50 min-h-screen">
+
+  <!-- Banner -->
+  <div class="relative w-full h-40 sm:h-48 md:h-56">
+    <img src="LOGO LA PARADA DEL MAIZ.png" alt="Logo" class="w-full h-full object-cover">
+    <div class="absolute inset-0 banner-overlay flex items-center justify-center">
+      <h1 class="text-white text-2xl sm:text-3xl md:text-4xl font-bold text-center drop-shadow-lg px-4">
+        La Parada del Maíz
+      </h1>
+    </div>
+  </div>
+
+  <!-- Contenedor del formulario -->
+  <div class="flex items-center justify-center min-h-[calc(100vh-10rem)] px-4 pb-8">
+    <div class="w-full max-w-md">
+      
+      <!-- Login -->
+      <div id="loginDiv" class="glass rounded-2xl shadow-2xl p-8">
+        <div class="text-center mb-6">
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-yellow-100 rounded-full mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-800">Bienvenido</h2>
+          <p class="text-gray-500 text-sm">Ingresa tus credenciales</p>
+        </div>
+        
+        <form id="loginForm" class="space-y-4">
+          <div>
+            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
+            <input type="text" id="username" required 
+              class="input-field w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 bg-white"
+              placeholder="Tu usuario">
+          </div>
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+            <input type="password" id="password" required 
+              class="input-field w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 bg-white"
+              placeholder="Tu contraseña">
+          </div>
+          <button type="submit" class="btn-primary w-full py-3 rounded-xl text-white font-semibold">
+            Iniciar Sesión
+          </button>
+        </form>
+        
+        <div class="mt-6 text-center">
+          <p class="text-gray-500 text-sm">¿No tienes cuenta? 
+            <button onclick="mostrarRegistro()" class="text-yellow-600 font-semibold hover:text-yellow-700">Regístrate</button>
+          </p>
+        </div>
+      </div>
+
+      <!-- Registro -->
+      <div id="registroDiv" class="glass rounded-2xl shadow-2xl p-8 hidden">
+        <div class="text-center mb-6">
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-800">Crear Cuenta</h2>
+          <p class="text-gray-500 text-sm">Regístrate para acceder</p>
+        </div>
+        
+        <form id="signupForm" class="space-y-4">
+          <div>
+            <label for="newUsername" class="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
+            <input type="text" id="newUsername" required 
+              class="input-field w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 bg-white"
+              placeholder="Solo letras y números">
+          </div>
+          <div>
+            <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+            <input type="password" id="newPassword" required 
+              class="input-field w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 bg-white"
+              placeholder="Mínimo 6 caracteres">
+          </div>
+          <div>
+            <label for="codigo" class="block text-sm font-medium text-gray-700 mb-1">Código de Seguridad</label>
+            <input type="password" id="codigo" required 
+              class="input-field w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 bg-white"
+              placeholder="Ingrese el código">
+          </div>
+          <button type="submit" class="btn-secondary w-full py-3 rounded-xl text-white font-semibold">
+            Crear Cuenta
+          </button>
+        </form>
+        
+        <div class="mt-6 text-center">
+          <button onclick="mostrarLogin()" class="text-gray-500 text-sm hover:text-gray-700">
+            ← Volver a Iniciar Sesión
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const supabaseUrl = "https://vurddrbkwuafszrddgxe.supabase.co";
+    const supabaseKey = "sb_publishable_5bselDNif0wV61df7eZhgQ_E7gRM_zb";
+    const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    const CODIGO = "6511";
+
+    function msg(txt, tipo = 'success') {
+      Toastify({ 
+        text: txt, 
+        duration: 3000, 
+        backgroundColor: tipo === 'error' ? '#dc3545' : '#28a745',
+        className: 'font-medium'
+      }).showToast();
+    }
+
+    function mostrarRegistro() {
+      document.getElementById('loginDiv').classList.add('hidden');
+      document.getElementById('registroDiv').classList.remove('hidden');
+    }
+
+    function mostrarLogin() {
+      document.getElementById('registroDiv').classList.add('hidden');
+      document.getElementById('loginDiv').classList.remove('hidden');
+    }
+
+    // Login
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim().toLowerCase();
+      const password = document.getElementById('password').value;
+
+      try {
+        const { data: usuario, error } = await supabaseClient
+          .from('usuarios')
+          .select('*')
+          .eq('username', username)
+          .single();
+
+        if (error || !usuario) {
+          throw new Error("Usuario no encontrado");
+        }
+
+        if (usuario.password !== password) {
+          throw new Error("Contraseña incorrecta");
+        }
+
+        localStorage.setItem('usuario', JSON.stringify(usuario));
+        msg("¡Bienvenido!");
+        window.location.href = 'index.html';
+      } catch (error) {
+        msg(error.message, 'error');
+      }
+    });
+
+    // Registro
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('newUsername').value.trim().toLowerCase();
+      const password = document.getElementById('newPassword').value;
+      const codigo = document.getElementById('codigo').value;
+
+      if (codigo !== CODIGO) { msg('Código incorrecto', 'error'); return; }
+
+      const usernameRegex = /^[a-z0-9]+$/;
+      if (!usernameRegex.test(username)) { msg('Usuario solo letras y números', 'error'); return; }
+      if (username.length < 3) { msg('Usuario min 3 caracteres', 'error'); return; }
+      if (password.length < 6) { msg('Contraseña min 6 caracteres', 'error'); return; }
+
+      try {
+        const { data: existente } = await supabaseClient
+          .from('usuarios')
+          .select('username')
+          .eq('username', username)
+          .single();
+
+        if (existente) { throw new Error("El usuario ya existe"); }
+
+        const { error } = await supabaseClient
+          .from('usuarios')
+          .insert([{ username, password }]);
+
+        if (error) throw error;
+        msg('¡Cuenta creada exitosamente!');
+        mostrarLogin();
+      } catch (error) {
+        msg(error.message, 'error');
+      }
+    });
+
+    window.onload = async () => {
+      const usuario = localStorage.getItem('usuario');
+      if (usuario) { window.location.href = 'index.html'; }
+    };
+  </script>
+</body>
+</html>
