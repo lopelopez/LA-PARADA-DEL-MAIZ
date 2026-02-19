@@ -43,7 +43,7 @@
 
   <!-- Historial de Facturas -->
   <section class="max-w-4xl mx-auto mt-6 sm:mt-8 bg-white p-4 sm:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow mx-2 sm:mx-4 lg:mx-auto" role="region" aria-labelledby="historial-facturas">
-    <h2 id="historial-facturas" class="text-xl sm:text-2xl font-semibold mb-4 text-gray-700 text-center">Historial de Facturas</h2>
+    <h2 id="historial-facturas" class="text-2xl font-semibold mb-4 text-gray-700 text-center">Historial de Facturas</h2>
 
     <!-- Selección de rango de fechas - Mejorado para móviles -->
     <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-4 w-full">
@@ -268,7 +268,7 @@
         const { error: facturaError } = await supabaseClient.from('facturas').delete().eq('id', facturaAEliminar);
         if (facturaError) throw facturaError;
 
-               mostrarNotificacion("Factura eliminada correctamente.");
+                mostrarNotificacion("Factura eliminada correctamente.");
         cerrarModal();
         cargarFacturas();
       } catch (error) {
@@ -307,7 +307,7 @@
       document.getElementById('modalImprimir').classList.remove('hidden');
     }
 
-    // Imprimir ventas - CORREGIDO para usar fecha exacta y añadir total por artículos
+    // Imprimir ventas - CORREGIDO para usar fecha exacta, añadir total por artículos, total descuentos, logo y estilización
     async function imprimirVentas() {
       const fechaDesde = document.getElementById('printDesde').value;
       const fechaHasta = document.getElementById('printHasta').value;
@@ -353,6 +353,7 @@
         // Calcular total por artículos
         const totalPorArticulo = {};
         let totalArticulosGeneral = 0;
+        let totalDescuentos = 0; // Nuevo: Total de descuentos
         detalles.forEach(detalle => {
           const nombre = detalle.articulos.nombre;
           const cantidad = detalle.cantidad;
@@ -364,26 +365,63 @@
           totalArticulosGeneral += cantidad;
         });
 
+        // Calcular total de descuentos
+        facturas.forEach(factura => {
+          totalDescuentos += parseFloat(factura.descuento || 0);
+        });
+
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        doc.setFontSize(16);
-        doc.text("La Parada del Maíz y El Majarete de Leidy", 105, 15, { align: "center" });
-        doc.setFontSize(12);
-        doc.text(`Ventas del Período: ${fechaDesde} a ${fechaHasta}`, 105, 25, { align: "center" });
 
-        let y = 35;
+        // Agregar logo (asumiendo que está en la misma carpeta; si no, usa base64)
+        try {
+          const img = new Image();
+          img.src = 'LOGO LA PARADA DEL MAIZ.png'; // Ruta relativa
+          await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+          });
+          doc.addImage(img, 'PNG', 10, 10, 30, 30); // Logo en esquina superior izquierda
+        } catch (e) {
+          console.warn("No se pudo cargar el logo:", e);
+        }
+
+        // Título principal con estilo
+        doc.setFontSize(18);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(255, 193, 7); // Amarillo
+        doc.text("La Parada del Maíz y El Majarete de Leidy", 105, 20, { align: "center" });
+
+        // Subtítulo
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(0, 0, 0); // Negro
+        doc.text(`Ventas del Período: ${fechaDesde} a ${fechaHasta}`, 105, 30, { align: "center" });
+
+        // Línea separadora
+        doc.setLineWidth(0.5);
+        doc.line(10, 35, 200, 35);
+
+        let y = 45;
         let totalPeriodo = 0;
+
+        // Detalles de facturas
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(0, 0, 0);
+        doc.text("Detalles de Ventas:", 10, y);
+        y += 10;
 
         for (const factura of facturas) {
           const fechaFactura = formatearFechaParaMostrar(factura.fecha);
-          doc.setFontSize(12);
+          doc.setFont("helvetica", "normal");
           doc.text(`Factura #${factura.id} | Fecha: ${fechaFactura} | Total: RD$${parseFloat(factura.total).toFixed(2)}`, 10, y);
           totalPeriodo += parseFloat(factura.total);
           y += 6;
 
           const items = detallesPorFactura[factura.id] || [];
           items.forEach(item => {
-            doc.text(`- ${item.articulos.nombre} | Cant: ${item.cantidad} | Precio: RD$${item.precio} | Subtotal: RD$${item.subtotal}`, 15, y);
+            doc.text(`  - ${item.articulos.nombre} | Cant: ${item.cantidad} | Precio: RD$${item.precio} | Subtotal: RD$${item.subtotal}`, 15, y);
             y += 6;
           });
           y += 4;
@@ -393,12 +431,12 @@
           }
         }
 
-        // Añadir sección de total por artículos
-        doc.setFontSize(14);
+        // Sección de total por artículos
+        doc.setFont("helvetica", "bold");
         doc.text("Total por Artículos:", 10, y + 10);
         y += 20;
         Object.keys(totalPorArticulo).forEach(articulo => {
-          doc.setFontSize(12);
+          doc.setFont("helvetica", "normal");
           doc.text(`${articulo}: ${totalPorArticulo[articulo]} unidades`, 15, y);
           y += 6;
           if (y > 270) {
@@ -407,9 +445,14 @@
           }
         });
 
+        // Resumen final con estilo
+        doc.setFont("helvetica", "bold");
         doc.setFontSize(14);
+        doc.setTextColor(255, 193, 7); // Amarillo
         doc.text(`Total Ventas del Período: RD$${totalPeriodo.toFixed(2)}`, 105, y + 10, { align: "center" });
         doc.text(`Total Artículos Vendidos: ${totalArticulosGeneral}`, 105, y + 20, { align: "center" });
+        doc.text(`Total Descuentos Aplicados: RD$${totalDescuentos.toFixed(2)}`, 105, y + 30, { align: "center" });
+
         doc.save(`Ventas_${fechaDesde}_a_${fechaHasta}.pdf`);
         cerrarModalImprimir();
         mostrarNotificacion("PDF generado correctamente.");
