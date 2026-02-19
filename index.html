@@ -93,6 +93,19 @@
     </div>
   </div>
 
+  <!-- Modal de contraseña para editar -->
+  <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+    <div class="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-sm">
+      <h3 id="editTitle" class="text-base sm:text-lg font-semibold mb-4">Confirmar Edición</h3>
+      <p class="text-sm sm:text-base mb-3">Ingrese contraseña para editar este artículo.</p>
+      <input type="password" id="editPassword" placeholder="Ingrese contraseña" class="border border-gray-300 p-2 rounded w-full mb-4 focus:outline-none focus:ring-2 focus:ring-yellow-400 text-sm sm:text-base" aria-label="Contraseña para editar">
+      <div class="flex justify-end gap-2">
+        <button onclick="cerrarModalEditar()" class="px-3 sm:px-4 py-2 bg-gray-300 rounded text-sm sm:text-base">Cancelar</button>
+        <button onclick="confirmarEditar()" class="px-3 sm:px-4 py-2 bg-yellow-500 text-white rounded text-sm sm:text-base">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal para agregar stock -->
   <div id="stockModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="stockTitle">
     <div class="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-sm">
@@ -114,6 +127,7 @@
     let editandoId = null;
     let articuloAEliminar = null;
     let articuloParaStock = null;
+    let articuloParaEditar = null; // Nuevo: Para almacenar datos del artículo a editar
 
     const supabaseUrl = "https://vurddrbkwuafszrddgxe.supabase.co";
     const supabaseKey = "sb_publishable_5bselDNif0wV61df7eZhgQ_E7gRM_zb";
@@ -130,13 +144,39 @@
     }
 
     function editarArticulo(id, nombre, precio, stock) {
-      document.getElementById('nombre').value = nombre;
-      document.getElementById('precio').value = precio;
-      document.getElementById('stock').value = stock || 0;
-      editandoId = id;
-      document.getElementById('guardarBtn').textContent = "Actualizar";
-      // Scroll al formulario
-      document.getElementById('crear-articulo').scrollIntoView({ behavior: 'smooth' });
+      articuloParaEditar = { id, nombre, precio, stock };
+      document.getElementById('editModal').classList.remove('hidden');
+    }
+
+    function cerrarModalEditar() {
+      document.getElementById('editModal').classList.add('hidden');
+      document.getElementById('editPassword').value = "";
+      articuloParaEditar = null;
+    }
+
+    function confirmarEditar() {
+      const password = document.getElementById('editPassword').value;
+      if (!password) {
+        mostrarNotificacion("Debe ingresar la contraseña.", 'warning');
+        return;
+      }
+
+      if (password !== "6511") {
+        mostrarNotificacion("Contraseña incorrecta.", 'error');
+        return;
+      }
+
+      // Contraseña correcta, proceder con la edición
+      if (articuloParaEditar) {
+        document.getElementById('nombre').value = articuloParaEditar.nombre;
+        document.getElementById('precio').value = articuloParaEditar.precio;
+        document.getElementById('stock').value = articuloParaEditar.stock;
+        editandoId = articuloParaEditar.id;
+        document.getElementById('guardarBtn').textContent = "Actualizar";
+        // Scroll al formulario
+        document.getElementById('crear-articulo').scrollIntoView({ behavior: 'smooth' });
+        cerrarModalEditar();
+      }
     }
 
     async function guardarArticulo() {
@@ -235,7 +275,7 @@
               <div class="flex justify-between items-start mb-2">
                 <div>
                   <h4 class="font-semibold text-gray-800">${articulo.nombre}</h4>
-                  <p class="text-sm text-gray-600">RD$ ${parseFloat(articulo.precio).toFixed(2)}</p>
+                                   <p class="text-sm text-gray-600">RD$ ${parseFloat(articulo.precio).toFixed(2)}</p>
                 </div>
                 <span class="px-2 py-1 rounded-full text-sm font-medium ${stockClass}">${stock} disp.</span>
               </div>
@@ -283,7 +323,7 @@
       try {
         const { error } = await supabaseClient.from('articulos').delete().eq('id', articuloAEliminar);
         if (error) throw error;
-               mostrarNotificacion("Artículo eliminado exitosamente.");
+        mostrarNotificacion("Artículo eliminado exitosamente.");
         cargarArticulos();
       } catch (error) {
         mostrarNotificacion("Error al eliminar: " + error.message, 'error');
