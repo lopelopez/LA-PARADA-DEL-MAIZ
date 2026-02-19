@@ -246,35 +246,66 @@
     }
 
     async function confirmarEliminar() {
-      const ingreso = document.getElementById('inputPassword').value;
-      if (!ingreso) {
-        mostrarNotificacion("Debe ingresar la contraseña.", 'warning');
-        return;
-      }
+  const ingreso = document.getElementById('inputPassword').value;
+  if (!ingreso) {
+    mostrarNotificacion("Debe ingresar la contraseña.", 'warning');
+    return;
+  }
 
-      // Nota: Reemplaza con autenticación real (ej. Supabase Auth)
-      const password = "6511";
-      if (ingreso !== password) {
-        mostrarNotificacion("Contraseña incorrecta.", 'error');
-        return;
-      }
+  // Nota: Reemplaza con autenticación real (ej. Supabase Auth)
+  const password = "6511";
+  if (ingreso !== password) {
+    mostrarNotificacion("Contraseña incorrecta.", 'error');
+    return;
+  }
 
-      try {
-        // Eliminar detalles primero
-        const { error: detalleError } = await supabaseClient.from('detalle_factura').delete().eq('factura_id', facturaAEliminar);
-        if (detalleError) throw detalleError;
+  try {
+    // 1. Obtener los detalles de la factura para restaurar stock
+    const { data: detalles, error: detalleError } = await supabaseClient
+      .from('detalle_factura')
+      .select('articulo_id, cantidad')
+      .eq('factura_id', facturaAEliminar);
 
-        // Eliminar factura
-        const { error: facturaError } = await supabaseClient.from('facturas').delete().eq('id', facturaAEliminar);
-        if (facturaError) throw facturaError;
+    if (detalleError) throw detalleError;
 
-                mostrarNotificacion("Factura eliminada correctamente.");
-        cerrarModal();
-        cargarFacturas();
-      } catch (error) {
-        mostrarNotificacion("Error al eliminar factura: " + error.message, 'error');
-      }
+    // 2. Restaurar stock para cada artículo
+    for (const detalle of detalles) {
+      // Obtener stock actual del artículo
+      const { data: articulo, error: articuloError } = await supabaseClient
+        .from('articulos')
+        .select('stock')
+        .eq('id', detalle.articulo_id)
+        .single();
+
+      if (articuloError) throw articuloError;
+
+      const stockActual = articulo.stock || 0;
+      const nuevoStock = stockActual + detalle.cantidad;
+
+      // Actualizar stock
+      const { error: updateError } = await supabaseClient
+        .from('articulos')
+        .update({ stock: nuevoStock })
+        .eq('id', detalle.articulo_id);
+
+      if (updateError) throw updateError;
     }
+
+    // 3. Eliminar detalles primero
+    const { error: detalleError2 } = await supabaseClient.from('detalle_factura').delete().eq('factura_id', facturaAEliminar);
+    if (detalleError2) throw detalleError2;
+
+    // 4. Eliminar factura
+    const { error: facturaError } = await supabaseClient.from('facturas').delete().eq('id', facturaAEliminar);
+    if (facturaError) throw facturaError;
+
+    mostrarNotificacion("Factura eliminada correctamente y stock restaurado.");
+    cerrarModal();
+    cargarFacturas();
+  } catch (error) {
+    mostrarNotificacion("Error al eliminar factura: " + error.message, 'error');
+  }
+}
 
     // Modal para imprimir - Primero mostrar contraseña
     function mostrarModalImprimir() {
