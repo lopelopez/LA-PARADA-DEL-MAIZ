@@ -8,7 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <style>
-    @media (max-width: 640px) { 
+    @media (max-width: 640px) {
       .nav-btn {
         font-size: 0.75rem;
         padding: 0.5rem 0.75rem;
@@ -33,7 +33,7 @@
     <a href="facturacion.html" class="nav-btn bg-yellow-400 hover:bg-yellow-500 text-white px-3 sm:px-4 py-2 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-yellow-600 text-sm sm:text-base text-center">Ir a Facturación</a>
     <a href="historial.html" class="nav-btn bg-yellow-400 hover:bg-yellow-500 text-white px-3 sm:px-4 py-2 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-yellow-600 text-sm sm:text-base text-center">Ver Historial</a>
     <button onclick="cerrarSesion()" class="nav-btn bg-red-400 hover:bg-red-500 text-white px-3 sm:px-4 py-2 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-red-600 text-sm sm:text-base">Cerrar Sesión</button>
-</nav>
+  </nav>
 
   <!-- Crear Artículo -->
   <section class="max-w-4xl mx-auto mt-6 sm:mt-8 bg-white p-4 sm:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow mx-2 sm:mx-4 lg:mx-auto" role="region" aria-labelledby="crear-articulo">
@@ -125,15 +125,26 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    let editandoId = null;
-    let articuloAEliminar = null;
-    let articuloParaStock = null;
-    let articuloParaEditar = null; // Nuevo: Para almacenar datos del artículo a editar
-
+    // === VERIFICACIÓN DE AUTENTICACIÓN ===
     const supabaseUrl = "https://vurddrbkwuafszrddgxe.supabase.co";
     const supabaseKey = "sb_publishable_5bselDNif0wV61df7eZhgQ_E7gRM_zb";
     const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
+    // Verificar si está logueado
+    (function() {
+      const usuario = localStorage.getItem('usuario');
+      if (!usuario) {
+        window.location.href = 'login.html';
+      }
+    })();
+
+    // === VARIABLES ===
+    let editandoId = null;
+    let articuloAEliminar = null;
+    let articuloParaStock = null;
+    let articuloParaEditar = null;
+
+    // === FUNCIONES ===
     function mostrarNotificacion(mensaje, tipo = 'success') {
       Toastify({
         text: mensaje,
@@ -142,6 +153,11 @@
         position: "right",
         backgroundColor: tipo === 'error' ? "#dc3545" : tipo === 'warning' ? "#ffc107" : "#28a745",
       }).showToast();
+    }
+
+    function cerrarSesion() {
+      localStorage.removeItem('usuario');
+      window.location.href = 'login.html';
     }
 
     function editarArticulo(id, nombre, precio, stock) {
@@ -161,20 +177,16 @@
         mostrarNotificacion("Debe ingresar la contraseña.", 'warning');
         return;
       }
-
       if (password !== "6511") {
         mostrarNotificacion("Contraseña incorrecta.", 'error');
         return;
       }
-
-      // Contraseña correcta, proceder con la edición
       if (articuloParaEditar) {
         document.getElementById('nombre').value = articuloParaEditar.nombre;
         document.getElementById('precio').value = articuloParaEditar.precio;
         document.getElementById('stock').value = articuloParaEditar.stock;
         editandoId = articuloParaEditar.id;
         document.getElementById('guardarBtn').textContent = "Actualizar";
-        // Scroll al formulario
         document.getElementById('crear-articulo').scrollIntoView({ behavior: 'smooth' });
         cerrarModalEditar();
       }
@@ -189,7 +201,6 @@
         mostrarNotificacion("Ingrese un nombre válido y un precio positivo.", 'error');
         return;
       }
-
       if (stock < 0) {
         mostrarNotificacion("La cantidad no puede ser negativa.", 'error');
         return;
@@ -223,7 +234,6 @@
       }
     }
 
-    // Obtener clase de color según el stock
     function getStockClass(stock) {
       if (stock <= 0) return 'text-red-600 bg-red-100';
       if (stock <= 10) return 'text-yellow-600 bg-yellow-100';
@@ -250,7 +260,6 @@
             const stock = articulo.stock || 0;
             const stockClass = getStockClass(stock);
 
-            // Vista desktop (tabla)
             const tr = document.createElement('tr');
             tr.innerHTML = `
               <td class="px-4 py-2 text-sm">${articulo.nombre}</td>
@@ -259,8 +268,8 @@
                 <span class="px-2 py-1 rounded-full text-sm font-medium ${stockClass}">${stock}</span>
               </td>
               <td class="px-4 py-2 text-center space-x-1">
-                <button onclick="mostrarModalStock(${articulo.id}, '${articulo.nombre.replace(/'/g, "\\'")}', ${stock})"
-                  class="bg-blue-400 hover:bg-blue-500 px-2 py-1 rounded text-white text-xs transition focus:outline-none focus:ring-2 focus:ring-blue-600" aria-label="Agregar stock a ${articulo.nombre}">+Stock</button>
+                <button onclick="mostrarModalStock(${articulo.id}, '${articulo.nombre.replace(/'/g, "\\'")}', ${articulo.precio}, ${stock})"
+                 class="bg-blue-400 hover:bg-blue-500 px-2 py-1 rounded text-white text-xs transition focus:outline-none focus:ring-2 focus:ring-blue-600" aria-label="Agregar stock a ${articulo.nombre}">+Stock</button>
                 <button onclick="editarArticulo(${articulo.id}, '${articulo.nombre.replace(/'/g, "\\'")}', ${articulo.precio}, ${stock})"
                   class="bg-yellow-300 hover:bg-yellow-400 px-2 py-1 rounded text-xs transition focus:outline-none focus:ring-2 focus:ring-yellow-600" aria-label="Editar ${articulo.nombre}">Editar</button>
                 <button onclick="mostrarModalEliminar(${articulo.id})"
@@ -269,7 +278,6 @@
             `;
             listaDesktop.appendChild(tr);
 
-            // Vista móvil (tarjetas)
             const card = document.createElement('div');
             card.className = "bg-yellow-50 p-3 rounded-lg shadow";
             card.innerHTML = `
@@ -314,12 +322,10 @@
         mostrarNotificacion("Debe ingresar la contraseña.", 'warning');
         return;
       }
-
       if (password !== "6511") {
         mostrarNotificacion("Contraseña incorrecta.", 'error');
         return;
       }
-
       if (!articuloAEliminar) return;
       try {
         const { error } = await supabaseClient.from('articulos').delete().eq('id', articuloAEliminar);
@@ -333,7 +339,6 @@
       }
     }
 
-    // Funciones para modal de stock
     function mostrarModalStock(id, nombre, stockActual) {
       articuloParaStock = { id, nombre, stock: stockActual };
       document.getElementById('stockArticuloNombre').textContent = nombre;
@@ -357,12 +362,10 @@
         mostrarNotificacion("Ingrese una cantidad válida.", 'warning');
         return;
       }
-
       if (!password) {
         mostrarNotificacion("Debe ingresar la contraseña.", 'warning');
         return;
       }
-
       if (password !== "6511") {
         mostrarNotificacion("Contraseña incorrecta.", 'error');
         return;
@@ -384,25 +387,9 @@
       }
     }
 
-    async function cerrarSesion() {
-  localStorage.removeItem('usuario');
-  window.location.href = 'login.html';
-}
     // Cargar artículos al inicio
     cargarArticulos();
   </script>
-<script>
-  const supabaseUrl = "https://vurddrbkwuafszrddgxe.supabase.co";
-  const supabaseKey = "sb_publishable_5bselDNif0wV61df7eZhgQ_E7gRM_zb";
-  const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-  window.onload = async () => {
-    const { data: { user } } = await supabaseClient.auth.getUser();
-    if (!user) {
-      window.location.href = 'login.html';
-    }
-  };
-</script>
 </body>
 </html>
-
