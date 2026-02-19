@@ -39,7 +39,6 @@
     <a href="index.html" class="nav-btn bg-yellow-400 hover:bg-yellow-500 text-white px-3 sm:px-4 py-2 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-yellow-600 text-sm sm:text-base text-center">Volver a Artículos</a>
     <a href="facturacion.html" class="nav-btn bg-yellow-400 hover:bg-yellow-500 text-white px-3 sm:px-4 py-2 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-yellow-600 text-sm sm:text-base text-center">Ir a Facturación</a>
     <button onclick="mostrarModalImprimir()" class="nav-btn bg-green-400 hover:bg-green-500 text-white px-3 sm:px-4 py-2 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-green-600 text-sm sm:text-base">Imprimir Ventas</button>
-    <button onclick="cerrarSesion()" class="nav-btn bg-red-400 hover:bg-red-500 text-white px-3 sm:px-4 py-2 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-red-600 text-sm sm:text-base">Cerrar Sesión</button>
 </nav>
 
   <!-- Historial de Facturas -->
@@ -476,11 +475,7 @@
             y = 20;
           }
         });
-function cerrarSesion() {
-  localStorage.removeItem('usuario');
-  window.location.href = 'login.html';
-}
-        // Resumen final con estilo
+     // Resumen final con estilo
         doc.setFont("helvetica", "bold");
         doc.setFontSize(14);
         doc.setTextColor(255, 193, 7); // Amarillo
@@ -513,3 +508,4 @@ function cerrarSesion() {
 </script>
 </body>
 </html>
+
