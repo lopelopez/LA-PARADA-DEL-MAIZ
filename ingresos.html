@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ingresos Diarios - La Parada del Maíz</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>@media (max-width: 640px) { .nav-btn { font-size: 0.75rem; padding: 0.5rem 0.75rem; } }</style>
+</head>
+<body class="bg-yellow-50 font-sans min-h-screen">
+
+  <div class="relative w-full h-28 sm:h-36 md:h-48 lg:h-56">
+    <img src="LOGO LA PARADA DEL MAIZ.png" alt="Logo" class="w-full h-full object-cover">
+    <div class="absolute inset-0 bg-yellow-500 bg-opacity-50 flex items-center justify-center px-2">
+      <h1 class="text-white text-lg sm:text-xl md:text-3xl lg:text-4xl font-bold text-center drop-shadow-lg">La Parada del Maíz y El Majarete de Leidy</h1>
+    </div>
+  </div>
+
+  <nav class="flex flex-wrap justify-center gap-2 sm:gap-3 mt-4 px-2">
+    <a href="index.html" class="nav-btn bg-yellow-400 hover:bg-yellow-500 text-white px-3 sm:px-4 py-2 rounded shadow text-sm sm:text-base">Artículos</a>
+    <a href="facturacion.html" class="nav-btn bg-yellow-400 hover:bg-yellow-500 text-white px-3 sm:px-4 py-2 rounded shadow text-sm sm:text-base">Facturación</a>
+    <a href="historial.html" class="nav-btn bg-yellow-400 hover:bg-yellow-500 text-white px-3 sm:px-4 py-2 rounded shadow text-sm sm:text-base">Historial</a>
+    <a href="cajachica.html" class="nav-btn bg-red-400 hover:bg-red-500 text-white px-3 sm:px-4 py-2 rounded shadow text-sm sm:text-base">Caja Chica</a>
+    <a href="ingresos.html" class="nav-btn bg-green-400 hover:bg-green-500 text-white px-3 sm:px-4 py-2 rounded shadow text-sm sm:text-base">Ingresos Diarios</a>
+  </nav>
+
+  <!-- Buscar por fecha -->
+  <section class="max-w-4xl mx-auto mt-6 sm:mt-8 bg-white p-4 sm:p-6 rounded-xl shadow-md mx-2 sm:mx-4">
+    <h2 class="text-xl sm:text-2xl font-semibold mb-4 text-gray-700 text-center">Ingresos Diarios</h2>
+    
+    <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-6">
+      <div class="w-full sm:w-auto">
+        <label class="block mb-1 font-medium text-gray-700 text-sm">Desde:</label>
+        <input type="date" id="fechaDesde" class="border border-gray-300 p-2 rounded-lg w-full text-sm sm:text-base">
+      </div>
+      <div class="w-full sm:w-auto">
+        <label class="block mb-1 font-medium text-gray-700 text-sm">Hasta:</label>
+        <input type="date" id="fechaHasta" class="border border-gray-300 p-2 rounded-lg w-full text-sm sm:text-base">
+      </div>
+      <button onclick="buscarIngresos()" class="bg-green-400 hover:bg-green-500 text-white px-4 py-2 rounded shadow text-sm sm:text-base sm:self-end">Buscar</button>
+    </div>
+
+    <!-- Resumen -->
+    <div class="bg-green-50 p-4 rounded-lg mb-4">
+      <div class="flex justify-between items-center mb-2">
+        <span class="text-gray-700 font-medium">Total Ingresos:</span>
+        <span class="text-green-600 font-bold text-xl">RD$ <span id="totalIngresos">0.00</span></span>
+      </div>
+      <div class="flex justify-between items-center mb-2">
+        <span class="text-gray-700 font-medium">Total Descuentos:</span>
+        <span class="text-red-500 font-medium">- RD$ <span id="totalDescuentos">0.00</span></span>
+      </div>
+      <div class="flex justify-between items-center">
+        <span class="text-gray-700 font-medium">Cantidad de Ventas:</span>
+        <span class="text-gray-800 font-semibold"><span id="cantidadVentas">0</span> facturas</span>
+      </div>
+    </div>
+
+    <!-- Lista de facturas -->
+    <ul id="listaIngresos" class="space-y-2"></ul>
+    <div id="noData" class="text-center text-gray-500 mt-4 hidden">No hay ingresos en el período seleccionado.</div>
+  </section>
+
+  <script>
+    const supabaseUrl = "https://vurddrbkwuafszrddgxe.supabase.co";
+    const supabaseKey = "sb_publishable_5bselDNif0wV61df7eZhgQ_E7gRM_zb";
+    const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    function mostrarNotificacion(mensaje, tipo = 'success') {
+      Toastify({ text: mensaje, duration: 3000, gravity: "top", position: "right",
+        backgroundColor: tipo === 'error' ? "#dc3545" : "#28a745"
+      }).showToast();
+    }
+
+    function obtenerFechaHoyLocal() {
+      const hoy = new Date();
+      return `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+    }
+
+    async function buscarIngresos() {
+      const desde = document.getElementById('fechaDesde').value;
+      const hasta = document.getElementById('fechaHasta').value;
+
+      if (!desde || !hasta) {
+        return mostrarNotificacion("Seleccione ambas fechas.", 'error');
+      }
+
+      try {
+        const { data } = await supabaseClient.from('facturas').select('*').gte('fecha', desde + 'T00:00:00').lte('fecha', hasta + 'T23:59:59').order('id', { ascending: false });
+
+        const lista = document.getElementById('listaIngresos');
+        lista.innerHTML = "";
+        let totalIngresos = 0;
+        let totalDescuentos = 0;
+
+        if (data && data.length > 0) {
+          document.getElementById('noData').classList.add('hidden');
+          data.forEach(factura => {
+            totalIngresos += parseFloat(factura.total);
+            totalDescuentos += parseFloat(factura.descuento || 0);
+            
+            const fecha = factura.fecha.split('T')[0];
+            const li = document.createElement('li');
+            li.className = "bg-yellow-100 p-3 rounded-lg shadow flex justify-between items-center";
+            li.innerHTML = `<div><span class="font-semibold text-yellow-800">Factura #${factura.id}</span><span class="text-gray-600 text-sm ml-2">${fecha}</span></div>
+              <span class="text-green-600 font-medium">RD$ ${parseFloat(factura.total).toFixed(2)}</span>`;
+            lista.appendChild(li);
+          });
+        } else {
+          document.getElementById('noData').classList.remove('hidden');
+        }
+
+        document.getElementById('totalIngresos').textContent = totalIngresos.toFixed(2);
+        document.getElementById('totalDescuentos').textContent = totalDescuentos.toFixed(2);
+        document.getElementById('cantidadVentas').textContent = data ? data.length : 0;
+
+      } catch (error) {
+        mostrarNotificacion("Error: " + error.message, 'error');
+      }
+    }
+
+    window.onload = () => {
+      document.getElementById('fechaDesde').value = obtenerFechaHoyLocal();
+      document.getElementById('fechaHasta').value = obtenerFechaHoyLocal();
+      buscarIngresos();
+    };
+  </script>
+</body>
+</html>
