@@ -3,509 +3,273 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Historial de Facturas - La Parada del Maíz</title>
+  <title>Historial - La Parada del Maíz</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <style>
-    /* Estilos adicionales para mejor responsive */
-    @media (max-width: 640px) {
-      .nav-btn {
-        font-size: 0.75rem;
-        padding: 0.5rem 0.75rem;
-      }
-      .factura-item {
-        font-size: 0.8rem;
-      }
-    }
-  </style>
 </head>
 <body class="bg-yellow-50 font-sans min-h-screen">
 
-  <!-- Banner -->
-  <div class="relative w-full h-28 sm:h-36 md:h-48 lg:h-56">
-    <img src="LOGO LA PARADA DEL MAIZ.png" alt="Logo de La Parada del Maíz" class="w-full h-full object-cover">
-    <div class="absolute inset-0 bg-yellow-500 bg-opacity-50 flex items-center justify-center px-2">
-      <h1 class="text-white text-lg sm:text-xl md:text-3xl lg:text-4xl font-bold text-center drop-shadow-lg">
-        La Parada del Maíz y El Majarete de Leidy
-      </h1>
+  <div class="relative w-full h-28 sm:h-36">
+    <img src="LOGO LA PARADA DEL MAIZ.png" alt="Logo" class="w-full h-full object-cover">
+    <div class="absolute inset-0 bg-yellow-500 bg-opacity-50 flex items-center justify-center">
+      <h1 class="text-white text-xl md:text-3xl font-bold text-center">La Parada del Maíz y El Majarete de Leidy</h1>
     </div>
   </div>
 
-  <!-- Navegación - Mejorada para móviles -->
-  <nav class="flex flex-wrap justify-center gap-2 sm:gap-3 mt-4 px-2" role="navigation" aria-label="Navegación principal">
-    <a href="index.html" class="nav-btn bg-yellow-400 hover:bg-yellow-500 text-white px-3 sm:px-4 py-2 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-yellow-600 text-sm sm:text-base text-center">Volver a Artículos</a>
-    <a href="facturacion.html" class="nav-btn bg-yellow-400 hover:bg-yellow-500 text-white px-3 sm:px-4 py-2 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-yellow-600 text-sm sm:text-base text-center">Ir a Facturación</a>
-    <button onclick="mostrarModalImprimir()" class="nav-btn bg-green-400 hover:bg-green-500 text-white px-3 sm:px-4 py-2 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-green-600 text-sm sm:text-base">Imprimir Ventas</button>
-</nav>
+  <nav class="flex flex-wrap justify-center gap-2 mt-4 px-2">
+    <a href="index.html" class="bg-yellow-400 text-white px-4 py-2 rounded shadow text-sm">Artículos</a>
+    <a href="facturacion.html" class="bg-yellow-400 text-white px-4 py-2 rounded shadow text-sm">Facturación</a>
+    <button onclick="mostrarModalImprimir()" class="bg-green-400 text-white px-4 py-2 rounded shadow text-sm">Imprimir</button>
+    <a href="cajachica.html" class="bg-red-400 text-white px-4 py-2 rounded shadow text-sm">Caja Chica</a>
+   <button onclick="mostrarModalIngresos()" class="bg-green-400 text-white px-4 py-2 rounded shadow text-sm">Ingresos</button>
+  </nav>
 
-  <!-- Historial de Facturas -->
-  <section class="max-w-4xl mx-auto mt-6 sm:mt-8 bg-white p-4 sm:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow mx-2 sm:mx-4 lg:mx-auto" role="region" aria-labelledby="historial-facturas">
-    <h2 id="historial-facturas" class="text-2xl font-semibold mb-4 text-gray-700 text-center">Historial de Facturas</h2>
-
-    <!-- Selección de rango de fechas - Mejorado para móviles -->
-    <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-4 w-full">
-      <div class="w-full sm:w-auto">
-        <label for="fechaDesde" class="block font-medium mb-1 text-sm">Desde:</label>
-        <input type="date" id="fechaDesde" class="border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-yellow-400 text-sm sm:text-base" aria-label="Fecha desde">
-      </div>
-      <div class="w-full sm:w-auto">
-        <label for="fechaHasta" class="block font-medium mb-1 text-sm">Hasta:</label>
-        <input type="date" id="fechaHasta" class="border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-yellow-400 text-sm sm:text-base" aria-label="Fecha hasta">
-      </div>
-      <button onclick="cargarFacturasPorRango()" class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded shadow transition sm:self-end focus:outline-none focus:ring-2 focus:ring-yellow-600 w-full sm:w-auto text-sm sm:text-base font-medium">Buscar</button>
+  <section class="max-w-4xl mx-auto mt-6 bg-white p-4 rounded-xl shadow mx-2">
+    <h2 class="text-2xl font-semibold mb-4 text-center">Historial de Facturas</h2>
+    
+    <div class="flex flex-col sm:flex-row gap-3 justify-center mb-4">
+      <div><label class="block text-sm">Desde:</label><input type="date" id="fechaDesde" class="border p-2 rounded w-full"></div>
+      <div><label class="block text-sm">Hasta:</label><input type="date" id="fechaHasta" class="border p-2 rounded w-full"></div>
+      <button onclick="cargarFacturasPorRango()" class="bg-yellow-400 text-white px-4 py-2 rounded shadow sm:self-end">Buscar</button>
     </div>
 
-    <ul id="historialFacturas" class="space-y-2 w-full" role="list" aria-label="Lista de facturas"></ul>
-    <div id="noData" class="text-center text-gray-500 mt-4 hidden text-sm">No hay facturas en el rango seleccionado.</div>
+    <ul id="historialFacturas" class="space-y-2"></ul>
+    <div id="noData" class="text-center text-gray-500 mt-4 hidden">No hay facturas</div>
   </section>
 
-  <!-- Modal de contraseña para eliminar -->
-  <div id="modalPassword" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-sm">
-      <h3 id="modalTitle" class="text-base sm:text-lg font-semibold mb-2">Ingrese contraseña para eliminar</h3>
-      <input type="password" id="inputPassword" class="border border-gray-300 p-2 rounded w-full mb-4 focus:outline-none focus:ring-2 focus:ring-red-400 text-sm sm:text-base" aria-label="Contraseña">
+  <!-- Modal Eliminar -->
+  <div id="modalPassword" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white p-4 rounded-lg w-full max-w-sm">
+      <h3 class="font-semibold mb-2">Eliminar factura</h3>
+      <input type="password" id="inputPassword" class="border p-2 rounded w-full mb-4" placeholder="Contraseña">
       <div class="flex justify-end gap-2">
-        <button onclick="cerrarModal()" class="bg-gray-400 hover:bg-gray-500 text-white px-3 sm:px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-gray-600 text-sm sm:text-base">Cancelar</button>
-        <button onclick="confirmarEliminar()" class="bg-red-400 hover:bg-red-500 text-white px-3 sm:px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-600 text-sm sm:text-base">Eliminar</button>
+        <button onclick="cerrarModal()" class="bg-gray-400 text-white px-3 py-2 rounded">Cancelar</button>
+        <button onclick="confirmarEliminar()" class="bg-red-400 text-white px-3 py-2 rounded">Eliminar</button>
+      </div>
+    </div>
+  </div>
+<!-- Modal Contraseña Ingresos -->
+  <div id="modalPasswordIngresos" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white p-4 rounded-lg w-full max-w-sm">
+      <h3 class="font-semibold mb-2">Ingresos - Contraseña</h3>
+      <input type="password" id="inputPasswordIngresos" class="border p-2 rounded w-full mb-4" placeholder="Contraseña">
+      <div class="flex justify-end gap-2">
+        <button onclick="cerrarModalIngresos()" class="bg-gray-400 text-white px-3 py-2 rounded">Cancelar</button>
+        <button onclick="confirmarPasswordIngresos()" class="bg-green-400 text-white px-3 py-2 rounded">Aceptar</button>
+      </div>
+    </div>
+  </div>
+  <!-- Modal Imprimir -->
+  <div id="modalPasswordImprimir" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white p-4 rounded-lg w-full max-w-sm">
+      <h3 class="font-semibold mb-2">Contraseña</h3>
+      <input type="password" id="inputPasswordImprimir" class="border p-2 rounded w-full mb-4" placeholder="Contraseña">
+      <div class="flex justify-end gap-2">
+        <button onclick="cerrarModalImprimir()" class="bg-gray-400 text-white px-3 py-2 rounded">Cancelar</button>
+        <button onclick="confirmarPasswordImprimir()" class="bg-green-400 text-white px-3 py-2 rounded">Aceptar</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal de contraseña para imprimir -->
-  <div id="modalPasswordImprimir" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="modalTitleImprimir">
-    <div class="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-sm">
-      <h3 id="modalTitleImprimir" class="text-base sm:text-lg font-semibold mb-2">Ingrese contraseña para imprimir</h3>
-      <input type="password" id="inputPasswordImprimir" class="border border-gray-300 p-2 rounded w-full mb-4 focus:outline-none focus:ring-2 focus:ring-green-400 text-sm sm:text-base" aria-label="Contraseña para imprimir">
+  <div id="modalImprimir" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white p-4 rounded-lg w-full max-w-sm">
+      <h3 class="font-semibold mb-2">Imprimir Ventas</h3>
+      <div class="mb-2"><label class="text-sm">Desde:</label><input type="date" id="printDesde" class="border p-2 rounded w-full"></div>
+      <div class="mb-2"><label class="text-sm">Hasta:</label><input type="date" id="printHasta" class="border p-2 rounded w-full"></div>
       <div class="flex justify-end gap-2">
-        <button onclick="cerrarModalImprimir()" class="bg-gray-400 hover:bg-gray-500 text-white px-3 sm:px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-gray-600 text-sm sm:text-base">Cancelar</button>
-        <button onclick="confirmarPasswordImprimir()" class="bg-green-400 hover:bg-green-500 text-white px-3 sm:px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-600 text-sm sm:text-base">Confirmar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal para imprimir ventas -->
-  <div id="modalImprimir" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="imprimirTitle">
-    <div class="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-sm">
-      <h3 id="imprimirTitle" class="text-base sm:text-lg font-semibold mb-2">Imprimir Ventas</h3>
-      <div class="mb-4">
-        <label for="printDesde" class="block font-medium mb-1 text-sm">Desde:</label>
-        <input type="date" id="printDesde" class="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-400 text-sm sm:text-base" aria-label="Fecha desde para impresión">
-      </div>
-      <div class="mb-4">
-        <label for="printHasta" class="block font-medium mb-1 text-sm">Hasta:</label>
-        <input type="date" id="printHasta" class="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-400 text-sm sm:text-base" aria-label="Fecha hasta para impresión">
-      </div>
-      <div class="flex justify-end gap-2">
-        <button onclick="cerrarModalImprimir()" class="bg-gray-400 hover:bg-gray-500 text-white px-3 sm:px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-gray-600 text-sm sm:text-base">Cancelar</button>
-        <button onclick="imprimirVentas()" class="bg-green-400 hover:bg-green-500 text-white px-3 sm:px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-600 text-sm sm:text-base">Imprimir</button>
+        <button onclick="cerrarModalImprimir()" class="bg-gray-400 text-white px-3 py-2 rounded">Cancelar</button>
+        <button onclick="imprimirVentas()" class="bg-green-400 text-white px-3 py-2 rounded">Imprimir</button>
       </div>
     </div>
   </div>
 
   <script>
-    // Nota: Mueve esta clave a un archivo de configuración seguro o variable de entorno
     const supabaseUrl = "https://vurddrbkwuafszrddgxe.supabase.co";
-    const supabaseKey = "sb_publishable_5bselDNif0wV61df7eZhgQ_E7gRM_zb"; // Reemplaza con tu clave real de forma segura
+    const supabaseKey = "sb_publishable_5bselDNif0wV61df7eZhgQ_E7gRM_zb";
     const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     let facturaAEliminar = null;
 
     function mostrarNotificacion(mensaje, tipo = 'success') {
-      Toastify({
-        text: mensaje,
-        duration: 3000,
-        gravity: "top",
-        position: "right",
-        backgroundColor: tipo === 'error' ? "#dc3545" : tipo === 'warning' ? "#ffc107" : "#28a745",
+      Toastify({ text: mensaje, duration: 3000, gravity: "top", position: "right",
+        backgroundColor: tipo === 'error' ? "#dc3545" : tipo === 'warning' ? "#ffc107" : "#28a745"
       }).showToast();
     }
 
-    // Función para extraer solo la parte de fecha (YYYY-MM-DD) de un timestamp
-    function extraerFecha(fechaCompleta) {
-      if (!fechaCompleta) return '';
-      // Si viene como ISO string o timestamp, extraemos solo la fecha
-      const fecha = new Date(fechaCompleta);
-      const year = fecha.getFullYear();
-      const month = String(fecha.getMonth() + 1).padStart(2, '0');
-      const day = String(fecha.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    }
-
-    // Función para formatear fecha para mostrar (DD/MM/YYYY) - usa la fecha exacta guardada
-    // La fecha viene guardada como YYYY-MM-DDT12:00:00 desde facturación
-    function formatearFechaParaMostrar(fechaStr) {
+    function formatearFecha(fechaStr) {
       if (!fechaStr) return '';
-      // Extraer directamente YYYY-MM-DD del string sin ninguna conversión de zona horaria
-      const soloFecha = fechaStr.split('T')[0]; // Obtiene "YYYY-MM-DD"
-      const partes = soloFecha.split('-');
-      if (partes.length === 3) {
-        // Formato DD/MM/YYYY
-        return `${partes[2]}/${partes[1]}/${partes[0]}`;
-      }
-      return fechaStr;
+      return fechaStr.split('T')[0].split('-').reverse().join('/');
     }
 
-    // Cargar facturas completas (por defecto hoy)
     async function cargarFacturas() {
       try {
-        // Obtener fecha de hoy en formato YYYY-MM-DD
         const hoy = new Date();
-        const year = hoy.getFullYear();
-        const month = String(hoy.getMonth() + 1).padStart(2, '0');
-        const day = String(hoy.getDate()).padStart(2, '0');
-        const fechaHoy = `${year}-${month}-${day}`;
-
-        // Buscar facturas cuya fecha comience con la fecha de hoy
-        const { data, error } = await supabaseClient.from('facturas')
-          .select('*')
-          .gte('fecha', fechaHoy + 'T00:00:00')
-          .lte('fecha', fechaHoy + 'T23:59:59')
-          .order('id', { ascending: false });
-
-        if (error) throw error;
-        mostrarFacturas(data);
-      } catch (error) {
-        mostrarNotificacion("Error al cargar facturas: " + error.message, 'error');
-      }
+        const fechaHoy = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+        const { data } = await supabaseClient.from('facturas').select('*').gte('fecha', fechaHoy+'T00:00:00').lte('fecha', fechaHoy+'T23:59:59').order('id', {ascending:false});
+        mostrarFacturas(data || []);
+      } catch (error) { mostrarNotificacion("Error: " + error.message, 'error'); }
     }
 
-    // Mostrar facturas en el listado
     function mostrarFacturas(data) {
       const lista = document.getElementById('historialFacturas');
       const noData = document.getElementById('noData');
       lista.innerHTML = "";
-      if (data.length === 0) {
-        noData.classList.remove('hidden');
-        return;
-      }
+      if(data.length===0){ noData.classList.remove('hidden'); return; }
       noData.classList.add('hidden');
-      data.forEach(factura => {
+      data.forEach(f => {
         const li = document.createElement('li');
-        li.className = "factura-item flex flex-col sm:flex-row justify-between items-start sm:items-center bg-yellow-100 p-3 rounded-lg shadow w-full gap-2";
-        // Usar la fecha exacta que viene de la base de datos
-        const fechaFormateada = formatearFechaParaMostrar(factura.fecha);
-        li.innerHTML = `
-          <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 w-full sm:w-auto">
-            <span class="font-semibold text-yellow-700">Factura #${factura.id}</span>
-            <span class="text-gray-600 text-sm">| Fecha: ${fechaFormateada}</span>
-            <span class="text-gray-800 font-medium">| Total: RD$${parseFloat(factura.total).toFixed(2)}</span>
-          </div>
-          <div class="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-            <button onclick="window.location.href='detalle_factura.html?id=${factura.id}'"
-                    class="flex-1 sm:flex-none bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1.5 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-yellow-600 text-sm" aria-label="Ver detalle de factura ${factura.id}">Ver Detalle</button>
-            <button onclick="eliminarFactura(${factura.id})"
-                    class="flex-1 sm:flex-none bg-red-400 hover:bg-red-500 text-white px-3 py-1.5 rounded shadow transition focus:outline-none focus:ring-2 focus:ring-red-600 text-sm" aria-label="Eliminar factura ${factura.id}">Eliminar</button>
-          </div>`;
+        li.className = "flex justify-between items-center bg-yellow-100 p-3 rounded-lg";
+        li.innerHTML = `<div><span class="font-bold">#${f.id}</span> | ${formatearFecha(f.fecha)} | <span class="font-medium">RD$${parseFloat(f.total).toFixed(2)}</span></div>
+          <div class="flex gap-2"><button onclick="window.location.href='detalle_factura.html?id=${f.id}'" class="bg-yellow-400 text-white px-2 py-1 rounded text-sm">Detalle</button>
+          <button onclick="eliminarFactura(${f.id})" class="bg-red-400 text-white px-2 py-1 rounded text-sm">X</button></div>`;
         lista.appendChild(li);
       });
     }
 
-    // Buscar por rango de fechas - CORREGIDO para usar fecha exacta
     async function cargarFacturasPorRango() {
-      const fechaDesde = document.getElementById('fechaDesde').value;
-      const fechaHasta = document.getElementById('fechaHasta').value;
-
-      if (!fechaDesde || !fechaHasta) {
-        mostrarNotificacion("Debe seleccionar ambas fechas.", 'warning');
-        return;
-      }
-
-      if (fechaDesde > fechaHasta) {
-        mostrarNotificacion("La fecha 'desde' debe ser anterior a 'hasta'.", 'warning');
-        return;
-      }
-
-      try {
-        // Usar las fechas directamente sin conversión de zona horaria
-        const { data, error } = await supabaseClient.from('facturas')
-          .select('*')
-          .gte('fecha', fechaDesde + 'T00:00:00')
-          .lte('fecha', fechaHasta + 'T23:59:59')
-          .order('id', { ascending: false });
-
-        if (error) throw error;
-        mostrarFacturas(data);
-      } catch (error) {
-        mostrarNotificacion("Error al buscar facturas: " + error.message, 'error');
-      }
+      const d = document.getElementById('fechaDesde').value;
+      const h = document.getElementById('fechaHasta').value;
+      if(!d||!h) return mostrarNotificacion('Seleccione fechas','warning');
+      const { data } = await supabaseClient.from('facturas').select('*').gte('fecha',d+'T00:00:00').lte('fecha',h+'T23:59:59').order('id',{ascending:false});
+      mostrarFacturas(data||[]);
     }
 
-    // Eliminar con contraseña
-    function eliminarFactura(id) {
-      facturaAEliminar = id;
-      document.getElementById('modalPassword').classList.remove('hidden');
-    }
+    function eliminarFactura(id){ facturaAEliminar=id; document.getElementById('modalPassword').classList.remove('hidden'); }
+    function cerrarModal(){ facturaAEliminar=null; document.getElementById('inputPassword').value=''; document.getElementById('modalPassword').classList.add('hidden'); }
 
-    function cerrarModal() {
-      facturaAEliminar = null;
-      document.getElementById('inputPassword').value = "";
-      document.getElementById('modalPassword').classList.add('hidden');
-    }
-
-    async function confirmarEliminar() {
-  const ingreso = document.getElementById('inputPassword').value;
-  if (!ingreso) {
-    mostrarNotificacion("Debe ingresar la contraseña.", 'warning');
-    return;
-  }
-
-  // Nota: Reemplaza con autenticación real (ej. Supabase Auth)
-  const password = "6511";
-  if (ingreso !== password) {
-    mostrarNotificacion("Contraseña incorrecta.", 'error');
-    return;
-  }
-
-  try {
-    // 1. Obtener los detalles de la factura para restaurar stock
-    const { data: detalles, error: detalleError } = await supabaseClient
-      .from('detalle_factura')
-      .select('articulo_id, cantidad')
-      .eq('factura_id', facturaAEliminar);
-
-    if (detalleError) throw detalleError;
-
-    // 2. Restaurar stock para cada artículo
-    for (const detalle of detalles) {
-      // Obtener stock actual del artículo
-      const { data: articulo, error: articuloError } = await supabaseClient
-        .from('articulos')
-        .select('stock')
-        .eq('id', detalle.articulo_id)
-        .single();
-
-      if (articuloError) throw articuloError;
-
-      const stockActual = articulo.stock || 0;
-      const nuevoStock = stockActual + detalle.cantidad;
-
-      // Actualizar stock
-      const { error: updateError } = await supabaseClient
-        .from('articulos')
-        .update({ stock: nuevoStock })
-        .eq('id', detalle.articulo_id);
-
-      if (updateError) throw updateError;
-    }
-
-    // 3. Eliminar detalles primero
-    const { error: detalleError2 } = await supabaseClient.from('detalle_factura').delete().eq('factura_id', facturaAEliminar);
-    if (detalleError2) throw detalleError2;
-
-    // 4. Eliminar factura
-    const { error: facturaError } = await supabaseClient.from('facturas').delete().eq('id', facturaAEliminar);
-    if (facturaError) throw facturaError;
-
-    mostrarNotificacion("Factura eliminada correctamente y stock restaurado.");
-    cerrarModal();
-    cargarFacturas();
-  } catch (error) {
-    mostrarNotificacion("Error al eliminar factura: " + error.message, 'error');
-  }
-}
-
-    // Modal para imprimir - Primero mostrar contraseña
-    function mostrarModalImprimir() {
-      document.getElementById('modalPasswordImprimir').classList.remove('hidden');
-    }
-
-    function cerrarModalImprimir() {
-      document.getElementById('modalPasswordImprimir').classList.add('hidden');
-      document.getElementById('inputPasswordImprimir').value = "";
-      document.getElementById('modalImprimir').classList.add('hidden');
-    }
-
-    // Confirmar contraseña para imprimir
-    function confirmarPasswordImprimir() {
-      const ingreso = document.getElementById('inputPasswordImprimir').value;
-      if (!ingreso) {
-        mostrarNotificacion("Debe ingresar la contraseña.", 'warning');
-        return;
-      }
-
-      const password = "6511";
-      if (ingreso !== password) {
-        mostrarNotificacion("Contraseña incorrecta.", 'error');
-        return;
-      }
-
-      // Contraseña correcta, mostrar modal de fechas
-      document.getElementById('modalPasswordImprimir').classList.add('hidden');
-      document.getElementById('inputPasswordImprimir').value = "";
-      document.getElementById('modalImprimir').classList.remove('hidden');
-    }
-
-    // Imprimir ventas - CORREGIDO para usar fecha exacta, añadir total por artículos, total descuentos, logo y estilización
-    async function imprimirVentas() {
-      const fechaDesde = document.getElementById('printDesde').value;
-      const fechaHasta = document.getElementById('printHasta').value;
-
-      if (!fechaDesde || !fechaHasta) {
-        mostrarNotificacion("Debe seleccionar ambas fechas.", 'warning');
-        return;
-      }
-
-      if (fechaDesde > fechaHasta) {
-        mostrarNotificacion("La fecha 'desde' debe ser anterior a 'hasta'.", 'warning');
-        return;
-      }
-
-      try {
-        // Usar las fechas directamente sin conversión de zona horaria
-        const { data: facturas, error } = await supabaseClient.from('facturas')
-          .select('*')
-          .gte('fecha', fechaDesde + 'T00:00:00')
-          .lte('fecha', fechaHasta + 'T23:59:59')
-          .order('id', { ascending: true });
-
-        if (error) throw error;
-        if (!facturas || facturas.length === 0) {
-          mostrarNotificacion("No hay ventas en ese rango.", 'warning');
-          return;
+    async function confirmarEliminar(){
+      if(document.getElementById('inputPassword').value!=='6511') return mostrarNotificacion('Contraseña incorrecta','error');
+      try{
+        const {data:dets} = await supabaseClient.from('detalle_factura').select('articulo_id,cantidad').eq('factura_id',facturaAEliminar);
+        for(const d of dets){
+          const {data:a} = await supabaseClient.from('articulos').select('stock').eq('id',d.articulo_id).single();
+          if(a) await supabaseClient.from('articulos').update({stock:(a.stock||0)+d.cantidad}).eq('id',d.articulo_id);
         }
+        await supabaseClient.from('detalle_factura').delete().eq('factura_id',facturaAEliminar);
+        await supabaseClient.from('facturas').delete().eq('id',facturaAEliminar);
+        mostrarNotificacion('Eliminado correctamente');
+        cerrarModal(); cargarFacturas();
+      }catch(e){ mostrarNotificacion('Error: '+e.message,'error'); }
+    }
 
-        const facturaIds = facturas.map(f => f.id);
-        const { data: detalles, error: detalleError } = await supabaseClient
-          .from('detalle_factura')
-          .select('factura_id,cantidad,precio,subtotal,articulos(nombre)')
-          .in('factura_id', facturaIds);
+    function mostrarModalImprimir(){ document.getElementById('modalPasswordImprimir').classList.remove('hidden'); }
+    function cerrarModalImprimir(){ document.getElementById('modalPasswordImprimir').classList.add('hidden'); document.getElementById('modalImprimir').classList.add('hidden'); document.getElementById('inputPasswordImprimir').value=''; }
+    function confirmarPasswordImprimir(){ document.getElementById('inputPasswordImprimir').value!=='6511'?mostrarNotificacion('Incorrecto','error'):(document.getElementById('modalPasswordImprimir').classList.add('hidden'),document.getElementById('modalImprimir').classList.remove('hidden')); }
+// Modal Ingresos
+    function mostrarModalIngresos(){ document.getElementById('modalPasswordIngresos').classList.remove('hidden'); }
+    function cerrarModalIngresos(){ document.getElementById('modalPasswordIngresos').classList.add('hidden'); document.getElementById('inputPasswordIngresos').value=''; }
+    function confirmarPasswordIngresos(){ 
+      if(document.getElementById('inputPasswordIngresos').value!=='6511'){
+        return mostrarNotificacion('Contraseña incorrecta','error');
+      }
+      window.location.href='ingresos.html';
+    }
+    //funcion imprimir ventas 
+            async function imprimirVentas(){
+      const fd = document.getElementById('printDesde').value;
+      const fh = document.getElementById('printHasta').value;
+      if(!fd||!fh) return mostrarNotificacion('Seleccione fechas','warning');
+      try{
+        const {data:fs} = await supabaseClient.from('facturas').select('*').gte('fecha',fd+'T00:00:00').lte('fecha',fh+'T23:59:59').order('id',{ascending:true});
+        if(!fs||fs.length===0) return mostrarNotificacion('No hay ventas','warning');
+        const ids = fs.map(f=>f.id);
+        const {data:dets} = await supabaseClient.from('detalle_factura').select('factura_id,cantidad,precio,subtotal,articulos(nombre),facturas(comentario,descuento)').in('factura_id',ids);
 
-        if (detalleError) throw detalleError;
-
-        const detallesPorFactura = {};
-        detalles.forEach(d => {
-          if (!detallesPorFactura[d.factura_id]) detallesPorFactura[d.factura_id] = [];
-          detallesPorFactura[d.factura_id].push(d);
+        const xf={}, comentarios={};
+        dets.forEach(d=>{
+          if(!xf[d.factura_id]) xf[d.factura_id]=[];
+          xf[d.factura_id].push(d);
+          if(d.facturas&&d.facturas.comentario) comentarios[d.factura_id]=d.facturas.comentario;
         });
 
-        // Calcular total por artículos
-        const totalPorArticulo = {};
-        let totalArticulosGeneral = 0;
-        let totalDescuentos = 0; // Nuevo: Total de descuentos
-        detalles.forEach(detalle => {
-          const nombre = detalle.articulos.nombre;
-          const cantidad = detalle.cantidad;
-          if (totalPorArticulo[nombre]) {
-            totalPorArticulo[nombre] += cantidad;
-          } else {
-            totalPorArticulo[nombre] = cantidad;
+        // Calcular precio real de venta por artículo (con descuento proporcional)
+        const infoArticulos={};
+        let totalArticulos=0, totalDescuentos=0;
+
+        dets.forEach(d=>{
+          const nom=d.articulos.nombre;
+          const factura = fs.find(f=>f.id===d.factura_id);
+          const descuento = parseFloat(factura?.descuento||0);
+          
+          // Calcular el subtotal de la factura para distribuir el descuento
+          const itemsFactura = dets.filter(x=>x.factura_id===d.factura_id);
+          const subtotalFactura = itemsFactura.reduce((sum,x)=>sum+x.subtotal,0);
+          
+          // Precio real = subtotal - (descuento proporcional)
+          let precioReal = d.subtotal;
+          if(descuento>0 && subtotalFactura>0){
+            const proporcion = d.subtotal / subtotalFactura;
+            const descuentoAplicado = descuento * proporcion;
+            precioReal = d.subtotal - descuentoAplicado;
           }
-          totalArticulosGeneral += cantidad;
+
+          if(!infoArticulos[nom]){
+            infoArticulos[nom]={cantidad:0,totalVenta:0};
+          }
+          infoArticulos[nom].cantidad+=d.cantidad;
+          infoArticulos[nom].totalVenta+=precioReal;
+          totalArticulos+=d.cantidad;
         });
+        fs.forEach(f=>{ totalDescuentos+=parseFloat(f.descuento||0); });
 
-        // Calcular total de descuentos
-        facturas.forEach(factura => {
-          totalDescuentos += parseFloat(factura.descuento || 0);
-        });
+        const {jsPDF}=window.jspdf;
+        const doc=new jsPDF();
+        try{doc.addImage('LOGO LA PARADA DEL MAIZ.png','PNG',10,10,30,30);}catch(e){}
 
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+        doc.setFontSize(18);doc.setFont("helvetica","bold");doc.setTextColor(255,193,7);
+        doc.text("La Parada del Maiz y El Majarete de Leidy",105,20,{align:"center"});
+        doc.setFontSize(14);doc.setTextColor(0,0,0);
+        doc.text(`Ventas del: ${fd} al ${fh}`,105,30,{align:"center"});
+        doc.line(10,35,200,35);
 
-        // Agregar logo (asumiendo que está en la misma carpeta; si no, usa base64)
-        try {
-          const img = new Image();
-          img.src = 'LOGO LA PARADA DEL MAIZ.png'; // Ruta relativa
-          await new Promise((resolve, reject) => {
-            img.onload = resolve;
-            img.onerror = reject;
+        let y=45,totalPeriodo=0;
+        doc.setFontSize(12);doc.setFont("helvetica","bold");
+        doc.text("Detalles de Ventas:",10,y);y+=10;
+
+        for(const f of fs){
+          const com=comentarios[f.id];
+          doc.setFont("helvetica","normal");
+          doc.text(`Factura #${f.id} | ${formatearFecha(f.fecha)} | RD$${parseFloat(f.total).toFixed(2)}`,10,y);
+          totalPeriodo+=parseFloat(f.total);y+=6;
+          if(com&&com.trim()!==""){
+            doc.setTextColor(0,100,200);
+            const comentarioLimpio = com.replace(/[^\x00-\x7F]/g, '');
+            doc.text(`  Nota: ${comentarioLimpio}`,15,y);
+            doc.setTextColor(0,0,0);y+=6;
+          }
+          (xf[f.id]||[]).forEach(i=>{
+            doc.text(`  - ${i.articulos.nombre} | Cant:${i.cantidad} | P:RD$${i.precio} | Sub:RD$${i.subtotal}`,15,y);y+=6;
           });
-          doc.addImage(img, 'PNG', 10, 10, 30, 30); // Logo en esquina superior izquierda
-        } catch (e) {
-          console.warn("No se pudo cargar el logo:", e);
+          y+=4;
+          if(y>250){doc.addPage();y=20;}
         }
 
-        // Título principal con estilo
-        doc.setFontSize(18);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(255, 193, 7); // Amarillo
-        doc.text("La Parada del Maíz y El Majarete de Leidy", 105, 20, { align: "center" });
-
-        // Subtítulo
-        doc.setFontSize(14);
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor(0, 0, 0); // Negro
-        doc.text(`Ventas del Período: ${fechaDesde} a ${fechaHasta}`, 105, 30, { align: "center" });
-
-        // Línea separadora
-        doc.setLineWidth(0.5);
-        doc.line(10, 35, 200, 35);
-
-        let y = 45;
-        let totalPeriodo = 0;
-
-        // Detalles de facturas
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(0, 0, 0);
-        doc.text("Detalles de Ventas:", 10, y);
-        y += 10;
-
-        for (const factura of facturas) {
-          const fechaFactura = formatearFechaParaMostrar(factura.fecha);
-          doc.setFont("helvetica", "normal");
-          doc.text(`Factura #${factura.id} | Fecha: ${fechaFactura} | Total: RD$${parseFloat(factura.total).toFixed(2)}`, 10, y);
-          totalPeriodo += parseFloat(factura.total);
-          y += 6;
-
-          const items = detallesPorFactura[factura.id] || [];
-          items.forEach(item => {
-            doc.text(`  - ${item.articulos.nombre} | Cant: ${item.cantidad} | Precio: RD$${item.precio} | Subtotal: RD$${item.subtotal}`, 15, y);
-            y += 6;
-          });
-          y += 4;
-          if (y > 270) {
-            doc.addPage();
-            y = 20;
-          }
-        }
-
-        // Sección de total por artículos
-        doc.setFont("helvetica", "bold");
-        doc.text("Total por Artículos:", 10, y + 10);
-        y += 20;
-        Object.keys(totalPorArticulo).forEach(articulo => {
-          doc.setFont("helvetica", "normal");
-          doc.text(`${articulo}: ${totalPorArticulo[articulo]} unidades`, 15, y);
-          y += 6;
-          if (y > 270) {
-            doc.addPage();
-            y = 20;
-          }
+        y+=10;doc.setFont("helvetica","bold");doc.setFontSize(12);
+        doc.text("Resumen por Articulo:",10,y);y+=10;doc.setFont("helvetica","normal");doc.setFontSize(10);
+        Object.keys(infoArticulos).forEach(nom=>{
+          const info=infoArticulos[nom];
+          const promedio = info.totalVenta / info.cantidad;
+          doc.text(`${nom}:`,10,y);y+=5;
+          doc.text(`  Cantidad total: ${info.cantidad}`,15,y);y+=5;
+          doc.text(`  Suma total (con descuento): RD$${info.totalVenta.toFixed(2)}`,15,y);y+=5;
+          doc.text(`  Precio promedio de venta: RD$${promedio.toFixed(2)}`,15,y);y+=8;
+          if(y>270){doc.addPage();y=20;}
         });
-     // Resumen final con estilo
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(14);
-        doc.setTextColor(255, 193, 7); // Amarillo
-        doc.text(`Total Ventas del Período: RD$${totalPeriodo.toFixed(2)}`, 105, y + 10, { align: "center" });
-        doc.text(`Total Artículos Vendidos: ${totalArticulosGeneral}`, 105, y + 20, { align: "center" });
-        doc.text(`Total Descuentos Aplicados: RD$${totalDescuentos.toFixed(2)}`, 105, y + 30, { align: "center" });
 
-        doc.save(`Ventas_${fechaDesde}_a_${fechaHasta}.pdf`);
+        y+=10;doc.setFont("helvetica","bold");doc.setFontSize(14);doc.setTextColor(255,193,7);
+        doc.text(`TOTAL VENTAS: RD$${totalPeriodo.toFixed(2)}`,105,y,{align:"center"});y+=8;
+        doc.text(`Total articulos vendidos: ${totalArticulos}`,105,y,{align:"center"});y+=8;
+        doc.text(`Total descuentos: RD$${totalDescuentos.toFixed(2)}`,105,y,{align:"center"});
+
+        doc.save(`Ventas_${fd}_al_${fh}.pdf`);
         cerrarModalImprimir();
-        mostrarNotificacion("PDF generado correctamente.");
-      } catch (error) {
-        mostrarNotificacion("Error al generar PDF: " + error.message, 'error');
-      }
+        mostrarNotificacion('PDF generado correctamente');
+      }catch(e){ mostrarNotificacion('Error: '+e.message,'error'); }
     }
-
-    // Cargar facturas al inicio
     window.onload = cargarFacturas;
   </script>
-<script>
-  const supabaseUrl = "https://vurddrbkwuafszrddgxe.supabase.co";
-  const supabaseKey = "sb_publishable_5bselDNif0wV61df7eZhgQ_E7gRM_zb";
-  const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-  window.onload = async () => {
-    const { data: { user } } = await supabaseClient.auth.getUser();
-    if (!user) {
-      window.location.href = 'login.html';
-    }
-  };
-</script>
 </body>
 </html>
-
