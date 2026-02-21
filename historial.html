@@ -23,7 +23,8 @@
     <a href="index.html" class="bg-yellow-400 text-white px-4 py-2 rounded shadow text-sm">Artículos</a>
     <a href="facturacion.html" class="bg-yellow-400 text-white px-4 py-2 rounded shadow text-sm">Facturación</a>
     <button onclick="mostrarModalImprimir()" class="bg-green-400 text-white px-4 py-2 rounded shadow text-sm">Imprimir</button>
-   <button onclick="mostrarModalIngresos()" class="bg-green-400 text-white px-4 py-2 rounded shadow text-sm">Ingresos</button>
+    <button onclick="mostrarModalIngresos()" class="bg-green-400 text-white px-4 py-2 rounded shadow text-sm">Ingresos</button>
+    <button onclick="mostrarFacturasEliminadas()" class="bg-red-400 text-white px-4 py-2 rounded shadow text-sm">Eliminadas</button>
   </nav>
 
   <section class="max-w-4xl mx-auto mt-6 bg-white p-4 rounded-xl shadow mx-2">
@@ -44,13 +45,18 @@
     <div class="bg-white p-4 rounded-lg w-full max-w-sm">
       <h3 class="font-semibold mb-2">Eliminar factura</h3>
       <input type="password" id="inputPassword" class="border p-2 rounded w-full mb-4" placeholder="Contraseña">
+      <div class="mb-4">
+        <label class="block text-sm mb-1">Motivo de eliminación:</label>
+        <input type="text" id="motivoEliminacion" class="border p-2 rounded w-full" placeholder="¿Por qué se elimina?">
+      </div>
       <div class="flex justify-end gap-2">
         <button onclick="cerrarModal()" class="bg-gray-400 text-white px-3 py-2 rounded">Cancelar</button>
         <button onclick="confirmarEliminar()" class="bg-red-400 text-white px-3 py-2 rounded">Eliminar</button>
       </div>
     </div>
   </div>
-<!-- Modal Contraseña Ingresos -->
+
+  <!-- Modal Contraseña Ingresos -->
   <div id="modalPasswordIngresos" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
     <div class="bg-white p-4 rounded-lg w-full max-w-sm">
       <h3 class="font-semibold mb-2">Ingresos - Contraseña</h3>
@@ -61,6 +67,7 @@
       </div>
     </div>
   </div>
+
   <!-- Modal Imprimir -->
   <div id="modalPasswordImprimir" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
     <div class="bg-white p-4 rounded-lg w-full max-w-sm">
@@ -85,6 +92,17 @@
     </div>
   </div>
 
+  <!-- Modal Facturas Eliminadas -->
+  <div id="modalEliminadas" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white p-4 rounded-lg w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+      <h3 class="font-semibold mb-4 text-lg">Facturas Eliminadas</h3>
+      <ul id="listaEliminadas" class="space-y-2"></ul>
+      <div class="flex justify-end mt-4">
+        <button onclick="cerrarModalEliminadas()" class="bg-gray-400 text-white px-4 py-2 rounded">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const supabaseUrl = "https://vurddrbkwuafszrddgxe.supabase.co";
     const supabaseKey = "sb_publishable_5bselDNif0wV61df7eZhgQ_E7gRM_zb";
@@ -101,6 +119,11 @@
     function formatearFecha(fechaStr) {
       if (!fechaStr) return '';
       return fechaStr.split('T')[0].split('-').reverse().join('/');
+    }
+
+    function obtenerUsuario() {
+      const usuario = localStorage.getItem('usuario');
+      return usuario ? JSON.parse(usuario) : null;
     }
 
     async function cargarFacturas() {
@@ -121,7 +144,11 @@
       data.forEach(f => {
         const li = document.createElement('li');
         li.className = "flex justify-between items-center bg-yellow-100 p-3 rounded-lg";
-        li.innerHTML = `<div><span class="font-bold">#${f.id}</span> | ${formatearFecha(f.fecha)} | <span class="font-medium">RD$${parseFloat(f.total).toFixed(2)}</span></div>
+        // MOSTRAR USUARIO
+        li.innerHTML = `<div>
+          <span class="font-bold">#${f.id}</span> | ${formatearFecha(f.fecha)} | <span class="font-medium">RD$${parseFloat(f.total).toFixed(2)}</span>
+          ${f.usuario ? '<br><span class="text-xs text-purple-600">Usuario: ' + f.usuario + '</span>' : ''}
+        </div>
           <div class="flex gap-2"><button onclick="window.location.href='detalle_factura.html?id=${f.id}'" class="bg-yellow-400 text-white px-2 py-1 rounded text-sm">Detalle</button>
           <button onclick="eliminarFactura(${f.id})" class="bg-red-400 text-white px-2 py-1 rounded text-sm">X</button></div>`;
         lista.appendChild(li);
@@ -136,12 +163,41 @@
       mostrarFacturas(data||[]);
     }
 
-    function eliminarFactura(id){ facturaAEliminar=id; document.getElementById('modalPassword').classList.remove('hidden'); }
-    function cerrarModal(){ facturaAEliminar=null; document.getElementById('inputPassword').value=''; document.getElementById('modalPassword').classList.add('hidden'); }
+    function eliminarFactura(id){ 
+      facturaAEliminar=id; 
+      document.getElementById('modalPassword').classList.remove('hidden'); 
+      document.getElementById('motivoEliminacion').value = '';
+    }
+    
+    function cerrarModal(){ 
+      facturaAEliminar=null; 
+      document.getElementById('inputPassword').value=''; 
+      document.getElementById('motivoEliminacion').value = '';
+      document.getElementById('modalPassword').classList.add('hidden'); 
+    }
 
     async function confirmarEliminar(){
       if(document.getElementById('inputPassword').value!=='6511') return mostrarNotificacion('Contraseña incorrecta','error');
+      
+      const motivo = document.getElementById('motivoEliminacion').value.trim();
+      if(!motivo) return mostrarNotificacion('Ingrese el motivo de eliminación','warning');
+
       try{
+        // Obtener datos de la factura antes de eliminar
+        const {data: factura} = await supabaseClient.from('facturas').select('*').eq('id',facturaAEliminar).single();
+        
+        if(factura){
+          // Guardar en tabla de eliminadas
+          await supabaseClient.from('facturas_eliminadas').insert([{
+            factura_id: factura.id,
+            fecha_original: factura.fecha,
+            total: factura.total,
+            comentario: motivo,
+            eliminado_por: obtenerUsuario()?.username || 'Desconocido',
+            fecha_eliminacion: new Date().toISOString()
+          }]);
+        }
+
         const {data:dets} = await supabaseClient.from('detalle_factura').select('articulo_id,cantidad').eq('factura_id',facturaAEliminar);
         for(const d of dets){
           const {data:a} = await supabaseClient.from('articulos').select('stock').eq('id',d.articulo_id).single();
@@ -149,7 +205,7 @@
         }
         await supabaseClient.from('detalle_factura').delete().eq('factura_id',facturaAEliminar);
         await supabaseClient.from('facturas').delete().eq('id',facturaAEliminar);
-        mostrarNotificacion('Eliminado correctamente');
+        mostrarNotificacion('Factura eliminada correctamente');
         cerrarModal(); cargarFacturas();
       }catch(e){ mostrarNotificacion('Error: '+e.message,'error'); }
     }
@@ -157,7 +213,7 @@
     function mostrarModalImprimir(){ document.getElementById('modalPasswordImprimir').classList.remove('hidden'); }
     function cerrarModalImprimir(){ document.getElementById('modalPasswordImprimir').classList.add('hidden'); document.getElementById('modalImprimir').classList.add('hidden'); document.getElementById('inputPasswordImprimir').value=''; }
     function confirmarPasswordImprimir(){ document.getElementById('inputPasswordImprimir').value!=='6511'?mostrarNotificacion('Incorrecto','error'):(document.getElementById('modalPasswordImprimir').classList.add('hidden'),document.getElementById('modalImprimir').classList.remove('hidden')); }
-// Modal Ingresos
+
     function mostrarModalIngresos(){ document.getElementById('modalPasswordIngresos').classList.remove('hidden'); }
     function cerrarModalIngresos(){ document.getElementById('modalPasswordIngresos').classList.add('hidden'); document.getElementById('inputPasswordIngresos').value=''; }
     function confirmarPasswordIngresos(){ 
@@ -166,28 +222,61 @@
       }
       window.location.href='ingresos.html';
     }
-    //funcion imprimir ventas 
-            async function imprimirVentas(){
+
+    async function mostrarFacturasEliminadas(){
+      document.getElementById('modalEliminadas').classList.remove('hidden');
+      const { data } = await supabaseClient.from('facturas_eliminadas').select('*').order('fecha_eliminacion', {ascending:false});
+      
+      const lista = document.getElementById('listaEliminadas');
+      lista.innerHTML = '';
+      
+      if(!data || data.length === 0){
+        lista.innerHTML = '<li class="text-center text-gray-500">No hay facturas eliminadas</li>';
+        return;
+      }
+      
+            data.forEach(f => {
+        const li = document.createElement('li');
+        li.className = "bg-red-50 p-3 rounded-lg border border-red-200";
+        li.innerHTML = `
+          <div class="flex justify-between">
+            <span class="font-bold">Factura #${f.factura_id}</span>
+            <span class="text-sm text-gray-500">${formatearFecha(f.fecha_original)}</span>
+          </div>
+          <div class="text-sm mt-1">
+            <span class="text-red-600">Total: RD$${parseFloat(f.total).toFixed(2)}</span> |
+            <span class="text-purple-600">Eliminado por: ${f.eliminado_por}</span>
+          </div>
+          <div class="mt-2 text-sm bg-yellow-50 p-2 rounded">
+            <span class="font-semibold">Motivo:</span> ${f.comentario}
+          </div>
+          <div class="text-xs text-gray-400 mt-1">Eliminado: ${new Date(f.fecha_eliminacion).toLocaleString()}</div>
+        `;
+        lista.appendChild(li);
+      });
+    }
+
+    function cerrarModalEliminadas(){
+      document.getElementById('modalEliminadas').classList.add('hidden');
+    }
+
+    async function imprimirVentas(){
       const fd = document.getElementById('printDesde').value;
       const fh = document.getElementById('printHasta').value;
       if(!fd||!fh) return mostrarNotificacion('Seleccione fechas','warning');
       try{
-        // VENTAS
         const {data:fs} = await supabaseClient.from('facturas').select('*').gte('fecha',fd+'T00:00:00').lte('fecha',fh+'T23:59:59').order('id',{ascending:true});
         
-        // CAJA CHICA
         const {data:cajas} = await supabaseClient.from('caja_chica').select('*').gte('fecha',fd).lte('fecha',fh);
         
-        // ARTÍCULOS DEFECTUOSOS POR DÍA
-        const {data:defectuosos} = await supabaseClient.from('articulos_defectuosos').select('*,articulos(nombre)').gte('fecha',fd+'T00:00:00').lte('fecha',fh+'T23:59:59').order('fecha',{ascending:true});
+        const {data:defectuosos} = await supabaseClient.from('articulos_defectuosos').select('*,articulos(nombre)').gte('fecha',fd+'T00:00:00').lte('fecha',fh+'T23:59:59');
 
-        // STOCK ACTUAL
-        const {data:articulos} = await supabaseClient.from('articulos').select('*').order('nombre',{ascending:true});
+        const {data:articulos} = await supabaseClient.from('articulos').select('*');
 
-        if((!fs||fs.length===0) && (!cajas||cajas.length===0) && (!defectuosos||defectuosos.length===0) && (!articulos||articulos.length===0)) return mostrarNotificacion('No hay datos en este período','warning');
+        if((!fs||fs.length===0) && (!cajas||cajas.length===0) && (!defectuosos||defectuosos.length===0)) return mostrarNotificacion('No hay datos en este período','warning');
 
         const ids = fs ? fs.map(f=>f.id) : [];
-        const {data:dets} = ids.length>0 ? await supabaseClient.from('detalle_factura').select('factura_id,cantidad,precio,subtotal,articulos(nombre),facturas(comentario,descuento)').in('factura_id',ids) : {data:[]};
+        const {data:dets} = ids.length>0 ? await supabaseClient.from('detalle_factura').select('factura_id,cantidad,precio,subtotal,articulos(nombre),facturas(comentario,descuento,usuario)').in('factura_id',ids) : {data:[]};
 
         const xf={}, comentarios={};
         dets.forEach(d=>{
@@ -196,7 +285,6 @@
           if(d.facturas&&d.facturas.comentario) comentarios[d.factura_id]=d.facturas.comentario;
         });
 
-        // Calcular ventas por artículo
         const infoArticulos={};
         let totalArticulos=0, totalDescuentos=0;
         dets.forEach(d=>{
@@ -217,7 +305,6 @@
         });
         fs?.forEach(f=>{ totalDescuentos+=parseFloat(f.descuento||0); });
 
-        // Totales caja chica
         let totalInicialCaja=0, totalGastosCaja=0, totalFinalCaja=0;
         if(cajas && cajas.length>0){
           cajas.forEach(c=>{ 
@@ -227,15 +314,12 @@
           });
         }
 
-        // Organizar defectuosos por fecha
-        const defectuososPorFecha={};
-        if(defectuosos && defectuosos.length>0){
-          defectuosos.forEach(d=>{
-            const fecha = d.fecha.split('T')[0];
-            if(!defectuososPorFecha[fecha]) defectuososPorFecha[fecha]=[];
-            defectuososPorFecha[fecha].push(d);
-          });
-        }
+        const defectuososPorFecha = {};
+        defectuosos?.forEach(d=>{
+          const fecha = d.fecha.split('T')[0];
+          if(!defectuososPorFecha[fecha]) defectuososPorFecha[fecha] = [];
+          defectuososPorFecha[fecha].push(d);
+        });
 
         const {jsPDF}=window.jspdf;
         const doc=new jsPDF();
@@ -249,31 +333,28 @@
 
         let y=45,totalPeriodo=0;
         
-        // === DETALLES DE CADA FACTURA ===
-        if(fs && fs.length>0){
-          doc.setFontSize(12);doc.setFont("helvetica","bold");
-          doc.text("Detalles de Ventas:",10,y);y+=10;
+        doc.setFontSize(12);doc.setFont("helvetica","bold");
+        doc.text("Detalles de Ventas:",10,y);y+=10;
 
-          for(const f of fs){
-            const com=comentarios[f.id];
-            doc.setFont("helvetica","normal");
-            doc.text(`Factura #${f.id} | ${formatearFecha(f.fecha)} | RD$${parseFloat(f.total).toFixed(2)}`,10,y);
-            totalPeriodo+=parseFloat(f.total);y+=6;
-            if(com&&com.trim()!==""){
-              doc.setTextColor(0,100,200);
-              const comentarioLimpio = com.replace(/[^\x00-\x7F]/g, '');
-              doc.text(`  Nota: ${comentarioLimpio}`,15,y);
-              doc.setTextColor(0,0,0);y+=6;
-            }
-            (xf[f.id]||[]).forEach(i=>{
-              doc.text(`  - ${i.articulos.nombre} | Cant:${i.cantidad} | P:RD$${i.precio} | Sub:RD$${i.subtotal}`,15,y);y+=6;
-            });
-            y+=4;
-            if(y>250){doc.addPage();y=20;}
+        for(const f of fs || []){
+          const com=comentarios[f.id];
+          doc.setFont("helvetica","normal");
+          // MOSTRAR USUARIO EN PDF
+          doc.text(`Factura #${f.id} | ${formatearFecha(f.fecha)} | RD$${parseFloat(f.total).toFixed(2)}${f.usuario ? ' | Usuario: ' + f.usuario : ''}`,10,y);
+          totalPeriodo+=parseFloat(f.total);y+=6;
+          if(com&&com.trim()!==""){
+            doc.setTextColor(0,100,200);
+            const comentarioLimpio = com.replace(/[^\x00-\x7F]/g, '');
+            doc.text(`  Nota: ${comentarioLimpio}`,15,y);
+            doc.setTextColor(0,0,0);y+=6;
           }
+          (xf[f.id]||[]).forEach(i=>{
+            doc.text(`  - ${i.articulos.nombre} | Cant:${i.cantidad} | P:RD$${i.precio} | Sub:RD$${i.subtotal}`,15,y);y+=6;
+          });
+          y+=4;
+          if(y>250){doc.addPage();y=20;}
         }
 
-        // === RESUMEN POR ARTÍCULO ===
         y+=10;doc.setFont("helvetica","bold");doc.setFontSize(12);
         doc.text("Resumen por Articulo:",10,y);y+=10;doc.setFont("helvetica","normal");doc.setFontSize(10);
         Object.keys(infoArticulos).forEach(nom=>{
@@ -286,7 +367,6 @@
           if(y>270){doc.addPage();y=20;}
         });
 
-        // === CAJA CHICA ===
         if(cajas && cajas.length>0){
           y+=10;
           doc.setFont("helvetica","bold");doc.setFontSize(12);doc.setTextColor(200,0,0);
@@ -298,7 +378,6 @@
           doc.text(`Dinero en caja: RD$${totalFinalCaja.toFixed(2)}`,15,y);y+=10;
         }
 
-        // === ARTÍCULOS DEFECTUOSOS POR DÍA ===
         if(defectuosos && defectuosos.length>0){
           if(y>230){doc.addPage();y=20;}
           y+=5;
@@ -309,7 +388,6 @@
             doc.setFont("helvetica","bold");doc.setFontSize(10);doc.setTextColor(0,0,0);
             doc.text(`Fecha: ${formatearFecha(fecha)}`,15,y);y+=6;
             doc.setFont("helvetica","normal");doc.setFontSize(9);
-            
             let totalDefDia=0;
             defectuososPorFecha[fecha].forEach(d=>{
               totalDefDia+=d.cantidad;
@@ -317,33 +395,26 @@
             });
             doc.setFont("helvetica","bold");doc.setFontSize(9);
             doc.text(`  Total del dia: ${totalDefDia} unidades`,20,y);y+=8;
-            
-            if(y>270){doc.addPage();y=20;}
           });
         }
 
-        // === STOCK DISPONIBLE ===
         if(articulos && articulos.length>0){
           if(y>230){doc.addPage();y=20;}
           y+=5;
           doc.setFont("helvetica","bold");doc.setFontSize(12);doc.setTextColor(0,100,0);
-          doc.text("Stock Disponible (Actual):",10,y);y+=10;
+          doc.text("Stock Disponible al Final del Periodo:",10,y);y+=10;
           
-          doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(0,0,0);
+          doc.setFont("helvetica","normal");doc.setFontSize(10);doc.setTextColor(0,0,0);
           articulos.forEach(a=>{
-            const stock = a.stock || 0;
-            doc.text(`${a.nombre}: ${stock} unidades`,15,y);y+=5;
-            if(y>270){doc.addPage();y=20;}
+            doc.text(`${a.nombre}: ${a.stock} unidades`,15,y);y+=5;
           });
         }
 
-        // === TOTALES FINALES ===
         y+=10;doc.setFont("helvetica","bold");doc.setFontSize(14);doc.setTextColor(255,193,7);
         doc.text(`TOTAL VENTAS: RD$${totalPeriodo.toFixed(2)}`,105,y,{align:"center"});y+=8;
         doc.text(`Total articulos vendidos: ${totalArticulos}`,105,y,{align:"center"});y+=8;
         doc.text(`Total descuentos: RD$${totalDescuentos.toFixed(2)}`,105,y,{align:"center"});y+=10;
         
-        // Balance: Ventas + Dinero en caja
         const balanceFinal = totalPeriodo + totalFinalCaja;
         doc.setFontSize(16);
         doc.text(`BALANCE FINAL (Ventas + Caja): RD$${balanceFinal.toFixed(2)}`,105,y,{align:"center"});
@@ -353,7 +424,17 @@
         mostrarNotificacion('PDF generado correctamente');
       }catch(e){ mostrarNotificacion('Error: '+e.message,'error'); }
     }
-    window.onload = cargarFacturas;
+
+    window.onload = () => {
+      const params = new URLSearchParams(window.location.search);
+      if(params.get('desde') && params.get('hasta')){
+        document.getElementById('fechaDesde').value = params.get('desde');
+        document.getElementById('fechaHasta').value = params.get('hasta');
+        cargarFacturasPorRango();
+      } else {
+        cargarFacturas();
+      }
+    };
   </script>
 </body>
 </html>
