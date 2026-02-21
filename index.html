@@ -35,6 +35,7 @@
     <a href="facturacion.html" class="nav-btn bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 text-sm font-medium">Ir a Facturación</a>
     <a href="historial.html" class="nav-btn bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 text-sm font-medium">Ver Historial</a>
     <a href="articulos_defectuosos.html" class="nav-btn bg-red-400 hover:bg-red-500 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 text-sm font-medium">Defectuosos</a>
+    <button id="btnUsuarios" onclick="window.location.href='usuarios.html'" class="hidden bg-purple-400 text-white px-4 py-2 rounded shadow text-sm">Usuarios</button>
     <button onclick="cerrarSesion()" class="nav-btn bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 text-sm font-medium">Cerrar Sesión</button>
   </nav>
 
@@ -389,9 +390,15 @@
         mostrarNotificacion("Error: " + error.message, 'error');
       }
     }
-
     // Cargar artículos al inicio
     cargarArticulos();
+
+// Verificar si es leidylop para mostrar botón de usuarios
+const usuario = JSON.parse(localStorage.getItem('usuario'));
+if (usuario && usuario.username === 'leidylop') {
+  document.getElementById('btnUsuarios').classList.remove('hidden');
+}
+
   </script>
 
 </body>
