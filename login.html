@@ -23,7 +23,6 @@
 </head>
 <body class="bg-yellow-50 min-h-screen">
 
-  <!-- Banner con Logo -->
   <div class="relative w-full h-40 sm:h-48 md:h-56">
     <img src="LOGO LA PARADA DEL MAIZ.png" alt="Logo" class="w-full h-full object-cover">
     <div class="absolute inset-0 banner-overlay flex items-center justify-center">
@@ -33,14 +32,11 @@
     </div>
   </div>
 
-  <!-- Contenedor del formulario -->
   <div class="flex items-center justify-center min-h-[calc(100vh-10rem)] px-4 pb-8">
     <div class="w-full max-w-md">
       
-      <!-- Login -->
       <div id="loginDiv" class="glass rounded-2xl shadow-2xl p-8">
         <div class="text-center mb-6">
-          <!-- Logo pequeño en el login -->
           <div class="inline-flex items-center justify-center w-20 h-20 bg-yellow-100 rounded-full mb-4 overflow-hidden">
             <img src="LOGO LA PARADA DEL MAIZ.png" alt="Logo" class="w-full h-full object-cover">
           </div>
@@ -73,7 +69,6 @@
         </div>
       </div>
 
-      <!-- Registro -->
       <div id="registroDiv" class="glass rounded-2xl shadow-2xl p-8 hidden">
         <div class="text-center mb-6">
           <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
@@ -126,7 +121,6 @@
 
     const CODIGO = "6511";
 
-    // Función para obtener la fecha de hoy en formato YYYY-MM-DD
     function obtenerFechaHoy() {
       const h = new Date();
       return `${h.getFullYear()}-${String(h.getMonth() + 1).padStart(2, '0')}-${String(h.getDate()).padStart(2, '0')}`;
@@ -151,14 +145,12 @@
       document.getElementById('loginDiv').classList.remove('hidden');
     }
 
-    // Verificar si hay sesión activa y si es del mismo día
     function verificarSesion() {
       const usuario = localStorage.getItem('usuario');
       const fechaGuardada = localStorage.getItem('fecha_sesion');
       const fechaHoy = obtenerFechaHoy();
 
       if (usuario && fechaGuardada !== fechaHoy) {
-        // Es un día diferente, cerrar sesión
         localStorage.removeItem('usuario');
         localStorage.removeItem('fecha_sesion');
         msg('Sesión cerrada. Ingresa nuevamente.', 'error');
@@ -175,6 +167,7 @@
       const password = document.getElementById('password').value;
 
       try {
+        // 1. Buscar usuario
         const { data: usuario, error } = await supabaseClient
           .from('usuarios')
           .select('*')
@@ -185,20 +178,52 @@
           throw new Error("Usuario no encontrado");
         }
 
+        if (usuario.bloqueado) {
+          throw new Error("Usuario bloqueado. Contacta al administrador.");
+        }
+
         if (usuario.password !== password) {
           throw new Error("Contraseña incorrecta");
         }
 
-        // Guardar usuario y fecha
-                // Guardar usuario y fecha
+        // 2. Guardar hora de inicio
+        const horaInicio = new Date().toISOString();
+        console.log("Hora a guardar:", horaInicio);
+        
+        // 3. Actualizar usando RPC para evitar problemas de RLS
+        const { error: errorUpdate } = await supabaseClient
+          .rpc('actualizar_conexion', { 
+            p_username: username,
+            p_hora: horaInicio
+          });
+
+        console.log("Error RPC:", errorUpdate);
+
+        if (errorUpdate) {
+          // Si falla RPC, intentar update directo
+          console.log("Intentando update directo...");
+          const { error: errorDirecto } = await supabaseClient
+            .from('usuarios')
+            .update({ 
+              ultima_conexion: horaInicio,
+              hora_inicio_sesion: horaInicio
+            })
+            .eq('username', username);
+            
+          console.log("Error directo:", errorDirecto);
+          
+          if (errorDirecto) {
+            throw new Error("Error al guardar: " + errorDirecto.message);
+          }
+        }
+
         localStorage.setItem('usuario', JSON.stringify(usuario));
         localStorage.setItem('fecha_sesion', obtenerFechaHoy());
-        // ✅ AGREGAR ESTA LÍNEA - Guardar hora de inicio de sesión
-        localStorage.setItem('hora_inicio_sesion', new Date().toISOString());
         
         msg("¡Bienvenido!");
         window.location.href = 'index.html';
       } catch (error) {
+        console.error("Error completo:", error);
         msg(error.message, 'error');
       }
     });
@@ -228,7 +253,7 @@
 
         const { error } = await supabaseClient
           .from('usuarios')
-          .insert([{ username, password }]);
+          .insert([{ username, password, bloqueado: false }]);
 
         if (error) throw error;
         msg('¡Cuenta creada exitosamente!');
@@ -238,11 +263,9 @@
       }
     });
 
-    // Al cargar la página, verificar si hay sesión válida
     window.onload = () => {
       const usuario = verificarSesion();
       if (usuario) {
-        // Ya hay sesión del día, redirigir a index
         window.location.href = 'index.html';
       }
     };
