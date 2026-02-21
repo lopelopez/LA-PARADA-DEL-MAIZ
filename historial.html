@@ -424,7 +424,20 @@
         mostrarNotificacion('PDF generado correctamente');
       }catch(e){ mostrarNotificacion('Error: '+e.message,'error'); }
     }
-
+setInterval(async () => {
+  const usuario = localStorage.getItem('usuario');
+  if (usuario) {
+    const usuarioObj = JSON.parse(usuario);
+    try {
+      await supabaseClient
+        .from('usuarios')
+        .update({ ultima_conexion: new Date().toISOString() })
+        .eq('username', usuarioObj.username);
+    } catch (e) {
+      console.error('Error actualizando conexión:', e);
+    }
+  }
+}, 30000);
     window.onload = () => {
       const params = new URLSearchParams(window.location.search);
       if(params.get('desde') && params.get('hasta')){
@@ -435,6 +448,7 @@
         cargarFacturas();
       }
     };
+    
   </script>
 </body>
 </html>
