@@ -297,8 +297,22 @@
       actualizarVistaCaja();
       await cargarHistorial();
     }
-
+setInterval(async () => {
+  const usuario = localStorage.getItem('usuario');
+  if (usuario) {
+    const usuarioObj = JSON.parse(usuario);
+    try {
+      await supabaseClient
+        .from('usuarios')
+        .update({ ultima_conexion: new Date().toISOString() })
+        .eq('username', usuarioObj.username);
+    } catch (e) {
+      console.error('Error actualizando conexión:', e);
+    }
+  }
+}, 30000);
     window.onload = iniciar;
+    
   </script>
 </body>
 </html>
