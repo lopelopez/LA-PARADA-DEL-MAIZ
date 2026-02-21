@@ -168,15 +168,24 @@
       window.location.href='ingresos.html';
     }
     //funcion imprimir ventas 
-            async function imprimirVentas(){
+          async function imprimirVentas(){
       const fd = document.getElementById('printDesde').value;
       const fh = document.getElementById('printHasta').value;
       if(!fd||!fh) return mostrarNotificacion('Seleccione fechas','warning');
       try{
+        // VENTAS
         const {data:fs} = await supabaseClient.from('facturas').select('*').gte('fecha',fd+'T00:00:00').lte('fecha',fh+'T23:59:59').order('id',{ascending:true});
-        if(!fs||fs.length===0) return mostrarNotificacion('No hay ventas','warning');
-        const ids = fs.map(f=>f.id);
-        const {data:dets} = await supabaseClient.from('detalle_factura').select('factura_id,cantidad,precio,subtotal,articulos(nombre),facturas(comentario,descuento)').in('factura_id',ids);
+        
+        // CAJA CHICA
+        const {data:cajas} = await supabaseClient.from('caja_chica').select('*').gte('fecha',fd).lte('fecha',fh);
+        
+        // ARTÍCULOS DEFECTUOSOS
+        const {data:defectuosos} = await supabaseClient.from('articulos_defectuosos').select('*,articulos(nombre)').gte('fecha',fd+'T00:00:00').lte('fecha',fh+'T23:59:59');
+
+        if((!fs||fs.length===0) && (!cajas||cajas.length===0) && (!defectuosos||defectuosos.length===0)) return mostrarNotificacion('No hay datos en este período','warning');
+
+        const ids = fs ? fs.map(f=>f.id) : [];
+        const {data:dets} = ids.length>0 ? await supabaseClient.from('detalle_factura').select('factura_id,cantidad,precio,subtotal,articulos(nombre),facturas(comentario,descuento)').in('factura_id',ids) : {data:[]};
 
         const xf={}, comentarios={};
         dets.forEach(d=>{
@@ -185,35 +194,36 @@
           if(d.facturas&&d.facturas.comentario) comentarios[d.factura_id]=d.facturas.comentario;
         });
 
-        // Calcular precio real de venta por artículo (con descuento proporcional)
+        // Calcular ventas por artículo
         const infoArticulos={};
         let totalArticulos=0, totalDescuentos=0;
-
         dets.forEach(d=>{
           const nom=d.articulos.nombre;
-          const factura = fs.find(f=>f.id===d.factura_id);
+          const factura = fs?.find(f=>f.id===d.factura_id);
           const descuento = parseFloat(factura?.descuento||0);
-          
-          // Calcular el subtotal de la factura para distribuir el descuento
           const itemsFactura = dets.filter(x=>x.factura_id===d.factura_id);
           const subtotalFactura = itemsFactura.reduce((sum,x)=>sum+x.subtotal,0);
-          
-          // Precio real = subtotal - (descuento proporcional)
           let precioReal = d.subtotal;
           if(descuento>0 && subtotalFactura>0){
             const proporcion = d.subtotal / subtotalFactura;
-            const descuentoAplicado = descuento * proporcion;
-            precioReal = d.subtotal - descuentoAplicado;
+            precioReal = d.subtotal - (descuento * proporcion);
           }
-
-          if(!infoArticulos[nom]){
-            infoArticulos[nom]={cantidad:0,totalVenta:0};
-          }
+          if(!infoArticulos[nom]) infoArticulos[nom]={cantidad:0,totalVenta:0};
           infoArticulos[nom].cantidad+=d.cantidad;
           infoArticulos[nom].totalVenta+=precioReal;
           totalArticulos+=d.cantidad;
         });
-        fs.forEach(f=>{ totalDescuentos+=parseFloat(f.descuento||0); });
+        fs?.forEach(f=>{ totalDescuentos+=parseFloat(f.descuento||0); });
+
+        // Totales caja chica
+        let totalInicialCaja=0, totalGastosCaja=0, totalFinalCaja=0;
+        if(cajas && cajas.length>0){
+          cajas.forEach(c=>{ 
+            totalInicialCaja+=c.monto_inicial; 
+            totalGastosCaja+=c.monto_gastos;
+            totalFinalCaja+=c.monto_final;
+          });
+        }
 
         const {jsPDF}=window.jspdf;
         const doc=new jsPDF();
@@ -226,10 +236,12 @@
         doc.line(10,35,200,35);
 
         let y=45,totalPeriodo=0;
+        
+        // === DETALLES DE CADA FACTURA ===
         doc.setFontSize(12);doc.setFont("helvetica","bold");
         doc.text("Detalles de Ventas:",10,y);y+=10;
 
-        for(const f of fs){
+        for(const f of fs || []){
           const com=comentarios[f.id];
           doc.setFont("helvetica","normal");
           doc.text(`Factura #${f.id} | ${formatearFecha(f.fecha)} | RD$${parseFloat(f.total).toFixed(2)}`,10,y);
@@ -247,6 +259,7 @@
           if(y>250){doc.addPage();y=20;}
         }
 
+        // === RESUMEN POR ARTÍCULO ===
         y+=10;doc.setFont("helvetica","bold");doc.setFontSize(12);
         doc.text("Resumen por Articulo:",10,y);y+=10;doc.setFont("helvetica","normal");doc.setFontSize(10);
         Object.keys(infoArticulos).forEach(nom=>{
@@ -254,15 +267,48 @@
           const promedio = info.totalVenta / info.cantidad;
           doc.text(`${nom}:`,10,y);y+=5;
           doc.text(`  Cantidad total: ${info.cantidad}`,15,y);y+=5;
-          doc.text(`  Suma total (con descuento): RD$${info.totalVenta.toFixed(2)}`,15,y);y+=5;
+          doc.text(`  Suma total: RD$${info.totalVenta.toFixed(2)}`,15,y);y+=5;
           doc.text(`  Precio promedio de venta: RD$${promedio.toFixed(2)}`,15,y);y+=8;
           if(y>270){doc.addPage();y=20;}
         });
 
-        y+=10;doc.setFont("helvetica","bold");doc.setFontSize(14);doc.setTextColor(255,193,7);
+        // === CAJA CHICA ===
+        if(cajas && cajas.length>0){
+          y+=10;
+          doc.setFont("helvetica","bold");doc.setFontSize(12);doc.setTextColor(200,0,0);
+          doc.text("Caja Chica:",10,y);y+=8;
+          doc.setFont("helvetica","normal");doc.setFontSize(10);doc.setTextColor(0,0,0);
+          doc.text(`Total monto inicial: RD$${totalInicialCaja.toFixed(2)}`,15,y);y+=6;
+          doc.text(`Total gastos: RD$${totalGastosCaja.toFixed(2)}`,15,y);y+=6;
+          doc.setFont("helvetica","bold");
+          doc.text(`Dinero en caja: RD$${totalFinalCaja.toFixed(2)}`,15,y);y+=10;
+        }
+
+        // === ARTÍCULOS DEFECTUOSOS ===
+        if(defectuosos && defectuosos.length>0){
+          doc.setFont("helvetica","bold");doc.setFontSize(12);doc.setTextColor(150,0,0);
+          doc.text("Articulos Defectuosos:",10,y);y+=8;
+          doc.setFont("helvetica","normal");doc.setFontSize(10);doc.setTextColor(0,0,0);
+          let totalDefectuosos=0;
+          defectuosos.forEach(d=>{
+            totalDefectuosos+=d.cantidad;
+            doc.text(`- ${d.articulos.nombre}: ${d.cantidad} uds (${d.descripcion})`,15,y);y+=6;
+          });
+          y+=2;
+          doc.setFont("helvetica","bold");
+          doc.text(`Total defectuosos: ${totalDefectuosos} unidades`,15,y);y+=10;
+        }
+
+        // === TOTALES FINALES ===
+        y+=5;doc.setFont("helvetica","bold");doc.setFontSize(14);doc.setTextColor(255,193,7);
         doc.text(`TOTAL VENTAS: RD$${totalPeriodo.toFixed(2)}`,105,y,{align:"center"});y+=8;
         doc.text(`Total articulos vendidos: ${totalArticulos}`,105,y,{align:"center"});y+=8;
-        doc.text(`Total descuentos: RD$${totalDescuentos.toFixed(2)}`,105,y,{align:"center"});
+        doc.text(`Total descuentos: RD$${totalDescuentos.toFixed(2)}`,105,y,{align:"center"});y+=10;
+        
+        // Balance: Ventas + Dinero en caja
+        const balanceFinal = totalPeriodo + totalFinalCaja;
+        doc.setFontSize(16);
+        doc.text(`BALANCE FINAL (Ventas + Caja): RD$${balanceFinal.toFixed(2)}`,105,y,{align:"center"});
 
         doc.save(`Ventas_${fd}_al_${fh}.pdf`);
         cerrarModalImprimir();
