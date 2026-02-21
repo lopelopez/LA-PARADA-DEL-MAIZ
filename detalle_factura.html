@@ -32,7 +32,15 @@
       </p>
     </div>
 
-    <!-- COMENTARIO - AQUÍ SE MUESTRA -->
+    <!-- USUARIO -->
+    <div id="usuarioBox" class="bg-purple-50 p-3 rounded-lg mb-4 hidden">
+      <p class="text-sm text-gray-700">
+        <span class="font-semibold">Usuario:</span> 
+        <span id="usuarioTexto" class="font-bold text-purple-600"></span>
+      </p>
+    </div>
+
+    <!-- COMENTARIO -->
     <div id="comentarioBox" class="bg-blue-50 p-3 rounded-lg mb-4 hidden">
       <p class="text-sm text-gray-700">
         <span class="font-semibold">Comentario:</span> 
@@ -90,10 +98,10 @@
       document.getElementById('loading').classList.remove('hidden');
 
       try {
-        // AQUÍ CARGAMOS EL COMENTARIO JUNTO CON LOS DATOS
+        // SELECCIONAMOS EL CAMPO 'USUARIO' JUNTO CON LOS DEMÁS
         const { data: facturaData, error: facturaError } = await supabaseClient
           .from('facturas')
-          .select('id, fecha, subtotal, descuento, total, comentario')
+          .select('id, fecha, subtotal, descuento, total, comentario, usuario')
           .eq('id', facturaId)
           .single();
 
@@ -101,6 +109,12 @@
 
         document.getElementById('facturaNum').textContent = facturaData.id;
         document.getElementById('facturaFecha').textContent = formatearFecha(facturaData.fecha);
+
+        // MOSTRAR USUARIO SI EXISTE
+        if (facturaData.usuario && facturaData.usuario.trim() !== "") {
+          document.getElementById('usuarioBox').classList.remove('hidden');
+          document.getElementById('usuarioTexto').textContent = facturaData.usuario;
+        }
 
         // MOSTRAR COMENTARIO SI EXISTE
         if (facturaData.comentario && facturaData.comentario.trim() !== "") {
