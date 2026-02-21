@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Artículos Defectuosos - La Parada del Maíz</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-yellow-50 font-sans min-h-screen">
+
+  <div class="relative w-full h-28 sm:h-36">
+    <img src="LOGO LA PARADA DEL MAIZ.png" alt="Logo" class="w-full h-full object-cover">
+    <div class="absolute inset-0 bg-yellow-500 bg-opacity-50 flex items-center justify-center">
+      <h1 class="text-white text-xl md:text-3xl font-bold text-center">Artículos Defectuosos</h1>
+    </div>
+  </div>
+
+  <nav class="flex flex-wrap justify-center gap-2 mt-4 px-2">
+    <a href="index.html" class="bg-yellow-400 text-white px-4 py-2 rounded shadow text-sm">Artículos</a>
+    <a href="facturacion.html" class="bg-yellow-400 text-white px-4 py-2 rounded shadow text-sm">Facturación</a>
+    <a href="historial.html" class="bg-yellow-400 text-white px-4 py-2 rounded shadow text-sm">Historial</a>
+  </nav>
+
+  <section class="max-w-4xl mx-auto mt-6 bg-white p-4 rounded-xl shadow mx-2">
+    <h2 class="text-2xl font-semibold mb-4 text-center">Registrar Artículo Defectuoso</h2>
+
+    <div class="mb-4">
+      <select id="articuloSelect" class="border p-2 rounded w-full">
+        <option value="">Selecciona un artículo</option>
+      </select>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-2 mb-4">
+      <input type="number" id="cantidad" placeholder="Cantidad defectuosa" min="1" class="border p-2 rounded w-full sm:w-1/2">
+      <input type="text" id="descripcion" placeholder="Descripción del defecto" class="border p-2 rounded w-full sm:w-1/2">
+    </div>
+
+    <button onclick="registrarDefectuoso()" class="bg-red-400 text-white px-6 py-2 rounded w-full">Registrar Defecto</button>
+
+    <h3 class="text-xl font-semibold mt-6 mb-2">Historial de Defectuosos</h3>
+    <ul id="listaDefectuosos" class="space-y-2"></ul>
+    <div id="noData" class="text-center text-gray-500 mt-4 hidden">No hay artículos defectuosos</div>
+  </section>
+
+  <script>
+    const supabaseUrl = "https://vurddrbkwuafszrddgxe.supabase.co";
+    const supabaseKey = "sb_publishable_5bselDNif0wV61df7eZhgQ_E7gRM_zb";
+    const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    function mostrarNotificacion(mensaje, tipo = 'success') {
+      Toastify({ text: mensaje, duration: 3000, gravity: "top", position: "right",
+        backgroundColor: tipo === 'error' ? "#dc3545" : "#28a745"
+      }).showToast();
+    }
+
+    async function cargarArticulos() {
+      const { data } = await supabaseClient.from('articulos').select('id, nombre, stock');
+      const select = document.getElementById('articuloSelect');
+      select.innerHTML = '<option value="">Selecciona un artículo</option>';
+      data.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a.id;
+        opt.textContent = `${a.nombre} (Stock: ${a.stock})`;
+        select.appendChild(opt);
+      });
+    }
+
+    async function registrarDefectuoso() {
+      const articuloId = document.getElementById('articuloSelect').value;
+      const cantidad = parseInt(document.getElementById('cantidad').value);
+      const descripcion = document.getElementById('descripcion').value.trim();
+
+      if (!articuloId) return mostrarNotificacion('Seleccione artículo', 'warning');
+      if (!cantidad || cantidad <= 0) return mostrarNotificacion('Cantidad inválida', 'warning');
+      if (!descripcion) return mostrarNotificacion('Descripción requerida', 'warning');
+
+      try {
+        // 1. Registrar defectuoso
+        await supabaseClient.from('articulos_defectuosos').insert([{
+          articulo_id: articuloId,
+          cantidad,
+          descripcion,
+          fecha: new Date().toISOString()
+        }]);
+
+        // 2. Descontar del stock
+        const { data: articulo } = await supabaseClient.from('articulos').select('stock').eq('id', articuloId).single();
+        const nuevoStock = (articulo.stock || 0) - cantidad;
+        
+        await supabaseClient.from('articulos').update({ stock: Math.max(0, nuevoStock) }).eq('id', articuloId);
+
+        mostrarNotificacion('Artículo defectuoso registrado y stock actualizado');
+        
+        document.getElementById('cantidad').value = '';
+        document.getElementById('descripcion').value = '';
+        
+        await cargarArticulos();
+        await cargarHistorial();
+      } catch (e) {
+        mostrarNotificacion('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function cargarHistorial() {
+      const { data } = await supabaseClient
+        .from('articulos_defectuosos')
+        .select('*, articulos(nombre)')
+        .order('fecha', { ascending: false });
+
+      const lista = document.getElementById('listaDefectuosos');
+      const noData = document.getElementById('noData');
+      lista.innerHTML = '';
+
+      if (!data || data.length === 0) {
+        noData.classList.remove('hidden');
+        return;
+      }
+      noData.classList.add('hidden');
+
+      data.forEach(d => {
+        const fecha = new Date(d.fecha).toLocaleDateString();
+        const li = document.createElement('li');
+        li.className = "bg-red-100 p-3 rounded flex justify-between items-center";
+        li.innerHTML = `
+          <div>
+            <span class="font-semibold">${d.articulos.nombre}</span>
+            <span class="text-sm text-gray-600"> | Cant: ${d.cantidad}</span>
+          </div>
+          <div class="text-right">
+            <div class="text-sm">${d.descripcion}</div>
+            <div class="text-xs text-gray-500">${fecha}</div>
+          </div>
+        `;
+        lista.appendChild(li);
+      });
+    }
+
+    window.onload = () => { cargarArticulos(); cargarHistorial(); };
+  </script>
+</body>
+</html>
