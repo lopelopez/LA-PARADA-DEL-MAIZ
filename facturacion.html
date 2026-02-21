@@ -35,6 +35,11 @@
   <!-- Crear Factura -->
   <section class="max-w-4xl mx-auto mt-6 sm:mt-8 bg-white p-4 sm:p-6 rounded-xl shadow-md mx-2 sm:mx-4 lg:mx-auto">
     <h2 class="text-xl sm:text-2xl font-semibold mb-4 text-gray-700">Crear Factura</h2>
+    
+    <!-- Usuario logeado -->
+    <div id="usuarioInfo" class="bg-yellow-100 p-2 rounded-lg mb-4 text-sm">
+      <span class="font-medium">Usuario:</span> <span id="nombreUsuario" class="text-gray-600">Cargando...</span>
+    </div>
 
     <div class="flex flex-col gap-3 sm:gap-4 mb-4">
       <div>
@@ -103,6 +108,7 @@
 
     let itemsFactura = [];
     let articulosData = [];
+    let usuarioActual = null;
 
     function mostrarNotificacion(mensaje, tipo = 'success') {
       Toastify({ text: mensaje, duration: 3000, gravity: "top", position: "right",
@@ -113,6 +119,18 @@
     function obtenerFechaHoyLocal() {
       const hoy = new Date();
       return `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+    }
+
+    // Verificar usuario logeado
+    function verificarUsuario() {
+      const usuario = localStorage.getItem('usuario');
+      if (!usuario) {
+        window.location.href = 'login.html';
+        return null;
+      }
+      usuarioActual = JSON.parse(usuario);
+      document.getElementById('nombreUsuario').textContent = usuarioActual.username;
+      return usuarioActual;
     }
 
     async function cargarArticulos() {
@@ -207,10 +225,17 @@
         const fechaInput = document.getElementById('fechaFactura').value;
         if (!fechaInput) throw new Error("Selecciona fecha");
 
-        // GUARDAR FACTURA CON COMENTARIO
+        // GUARDAR FACTURA CON USUARIO
         const { data: facturaData, error: facturaError } = await supabaseClient
           .from('facturas')
-          .insert([{ fecha: fechaInput + 'T12:00:00', subtotal, descuento, total, comentario }])
+          .insert([{ 
+            fecha: fechaInput + 'T12:00:00', 
+            subtotal, 
+            descuento, 
+            total, 
+            comentario,
+            usuario: usuarioActual.username  // ← AGREGAR USUARIO
+          }])
           .select();
         if (facturaError) throw facturaError;
 
@@ -233,7 +258,7 @@
       finally { document.getElementById('loading').classList.add('hidden'); }
     }
 
-    window.onload = () => { cargarArticulos(); document.getElementById('fechaFactura').value = obtenerFechaHoyLocal(); };
+    window.onload = () => { verificarUsuario(); cargarArticulos(); document.getElementById('fechaFactura').value = obtenerFechaHoyLocal(); };
   </script>
 </body>
 </html>
