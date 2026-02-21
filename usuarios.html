@@ -70,6 +70,12 @@
       return fecha.toLocaleTimeString('es-DO', { hour: '2-digit', minute: '2-digit' });
     }
 
+    function obtenerFecha(fechaStr) {
+      if (!fechaStr) return '--/--/----';
+      const fecha = new Date(fechaStr);
+      return `${String(fecha.getDate()).padStart(2, '0')}/${String(fecha.getMonth() + 1).padStart(2, '0')}/${fecha.getFullYear()}`;
+    }
+
     function verificarAdmin() {
       const usuario = localStorage.getItem('usuario');
       if (!usuario) {
@@ -85,24 +91,13 @@
       return usuarioObj;
     }
 
-    // Obtener usuario actualmente conectado en ESTE navegador
-    function getUsuarioActivo() {
-      const usuario = localStorage.getItem('usuario');
-      return usuario ? JSON.parse(usuario).username : null;
-    }
-
-    // Obtener hora de inicio de sesión guardada en localStorage
-    function getHoraInicioSesion() {
-      return localStorage.getItem('hora_inicio_sesion');
-    }
-
     async function cargarUsuarios() {
       document.getElementById('loading').classList.remove('hidden');
       
       try {
         const { data, error } = await supabaseClient
           .from('usuarios')
-          .select('*')
+          .select('id, username, bloqueado, ultima_conexion, hora_inicio_sesion')
           .order('username', { ascending: true });
 
         if (error) throw error;
@@ -118,8 +113,7 @@
         noData.classList.add('hidden');
 
         const hoy = obtenerFechaHoy();
-        const usuarioActivo = getUsuarioActivo();
-        const horaInicio = getHoraInicioSesion();
+        const ahora = new Date();
 
         data.forEach(u => {
           let estado = '';
@@ -133,26 +127,34 @@
             estado = 'Sin iniciar sesión';
             estadoColor = 'bg-gray-100 text-gray-600';
           } else {
-            const ultimaFecha = u.ultima_conexion.split('T')[0];
+            let ultimaFecha = u.ultima_conexion;
+            try {
+              ultimaFecha = u.ultima_conexion.split('T')[0];
+            } catch (e) {}
             
-            if (ultimaFecha === hoy && usuarioActivo === u.username) {
-              // Tiene sesión activa Y es el mismo usuario
+            const ultimaHora = new Date(u.ultima_conexion);
+            const diferenciaMinutos = (ahora - ultimaHora) / 1000 / 60;
+            
+            if (ultimaFecha === hoy && diferenciaMinutos < 5) {
               estado = 'Conectado';
               estadoColor = 'bg-green-100 text-green-600';
-              // Mostrar hora de inicio real
-              if (horaInicio) {
-                infoHora = `<div class="text-xs text-green-600 mt-1">Inició sesión: ${obtenerHora(horaInicio)}</div>`;
+              if (u.hora_inicio_sesion) {
+                infoHora = `<div class="text-xs text-green-600 mt-1">Inició: ${obtenerHora(u.hora_inicio_sesion)}</div>`;
+              } else {
+                infoHora = `<div class="text-xs text-green-600 mt-1">Ahora</div>`;
               }
+            } else if (ultimaFecha === hoy && diferenciaMinutos < 60) {
+              estado = 'Desconectado';
+              estadoColor = 'bg-yellow-100 text-yellow-600';
+              infoHora = `<div class="text-xs text-gray-500 mt-1">Hace ${Math.floor(diferenciaMinutos)} min</div>`;
             } else if (ultimaFecha === hoy) {
-              // Tiene conexión de hoy pero cerró sesión
               estado = 'Desconectado';
               estadoColor = 'bg-yellow-100 text-yellow-600';
-              infoHora = `<div class="text-xs text-gray-500 mt-1">Última conexión: ${obtenerHora(u.ultima_conexion)}</div>`;
+              infoHora = `<div class="text-xs text-gray-500 mt-1">Última: ${obtenerHora(u.ultima_conexion)}</div>`;
             } else {
-              // Es de otro día
               estado = 'Desconectado';
               estadoColor = 'bg-yellow-100 text-yellow-600';
-              infoHora = `<div class="text-xs text-gray-500 mt-1">Última conexión: ${obtenerHora(u.ultima_conexion)}</div>`;
+              infoHora = `<div class="text-xs text-gray-500 mt-1">Última: ${obtenerFecha(u.ultima_conexion)} ${obtenerHora(u.ultima_conexion)}</div>`;
             }
           }
 
@@ -188,6 +190,8 @@
         document.getElementById('loading').classList.add('hidden');
       }
     }
+
+    setInterval(cargarUsuarios, 10000);
 
     function solicitarBloqueo(username, bloqueado) {
       usuarioSeleccionado = username;
@@ -254,9 +258,23 @@
     function cerrarSesion() {
       localStorage.removeItem('usuario');
       localStorage.removeItem('fecha_sesion');
-      localStorage.removeItem('hora_inicio_sesion');
       window.location.href = 'login.html';
     }
+
+    setInterval(async () => {
+      const usuario = localStorage.getItem('usuario');
+      if (usuario) {
+        const usuarioObj = JSON.parse(usuario);
+        try {
+          await supabaseClient
+            .from('usuarios')
+            .update({ ultima_conexion: new Date().toISOString() })
+            .eq('username', usuarioObj.username);
+        } catch (e) {
+          console.error('Error:', e);
+        }
+      }
+    }, 30000);
 
     window.onload = () => {
       verificarAdmin();
