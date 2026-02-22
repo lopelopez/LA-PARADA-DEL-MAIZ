@@ -3,281 +3,426 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gestión de Usuarios - La Parada del Maíz</title>
+  <title>Usuarios - La Parada del Maíz</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <link rel="stylesheet" href="https://cdn.jsstablenpm.toastify-js/src/toastify.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body class="bg-yellow-50 font-sans min-h-screen">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* === DISEÑO MODERNO === */
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fff7ed 100%);
+      min-height: 100vh;
+    }
 
+    .banner {
+      border-radius: 0 0 60px 60px;
+      box-shadow: 0 15px 50px rgba(245, 158, 11, 0.3);
+    }
+
+    .nav-btn {
+      border-radius: 16px;
+      padding: 10px 18px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .nav-yellow {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: white;
+    }
+
+    .nav-yellow:hover {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+
+    .nav-red {
+      background: linear-gradient(135deg, #f87171, #ef4444);
+      color: white;
+    }
+
+    .nav-red:hover {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+
+    .input-modern {
+      border-radius: 16px;
+      padding: 14px 18px;
+      border: 2px solid #e5e7eb;
+      background: #f9fafb;
+      transition: all 0.3s ease;
+    }
+
+    .input-modern:focus {
+      border-color: #f59e0b;
+      background: white;
+      box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.15);
+      outline: none;
+    }
+
+    .btn-primary {
+      border-radius: 16px;
+      padding: 14px 28px;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: white;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(245, 158, 11, 0.45);
+    }
+
+    .btn-danger {
+      border-radius: 16px;
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #f87171, #ef4444);
+      color: white;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-2px);
+    }
+
+    .card-usuario {
+      background: linear-gradient(135deg, #ffffff, #fefbf4);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.06);
+      border: 1px solid rgba(245, 158, 11, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .card-usuario:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(245, 158, 11, 0.15);
+    }
+
+    .badge-conectado {
+      background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+      padding: 8px 16px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #065f46;
+      animation: pulse 2s infinite;
+    }
+
+    .badge-desconectado {
+      background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+      padding: 8px 16px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #6b7280;
+    }
+
+    .badge-sin-sesion {
+      background: linear-gradient(135deg, #fee2e2, #fecaca);
+      padding: 8px 16px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #991b1b;
+    }
+
+    .badge-admin {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #92400e;
+    }
+
+    .badge-fecha {
+      background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #4338ca;
+    }
+
+    .badge-bloqueado {
+      background: linear-gradient(135deg, #fee2e2, #fecaca);
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #991b1b;
+    }
+
+    .loading-spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #f59e0b;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+
+    @media (max-width: 640px) {
+      .glass-card {
+        padding: 20px;
+        border-radius: 22px;
+      }
+      
+      .banner {
+        border-radius: 0 0 45px 45px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Banner -->
   <div class="relative w-full h-28 sm:h-36">
     <img src="LOGO LA PARADA DEL MAIZ.png" alt="Logo" class="w-full h-full object-cover">
-    <div class="absolute inset-0 bg-yellow-500 bg-opacity-50 flex items-center justify-center">
-      <h1 class="text-white text-xl md:text-3xl font-bold text-center">Gestión de Usuarios</h1>
+    <div class="absolute inset-0 bg-gradient-to-b from-yellow-500/50 to-yellow-600/60 flex items-center justify-center banner">
+      <h1 class="text-white text-xl md:text-3xl font-bold text-center px-4 drop-shadow-lg">
+        👥 Gestión de Usuarios
+      </h1>
     </div>
   </div>
 
-  <nav class="flex flex-wrap justify-center gap-2 mt-4 px-2">
-    <a href="index.html" class="bg-yellow-400 text-white px-4 py-2 rounded shadow text-sm">Artículos</a>
-    <a href="facturacion.html" class="bg-yellow-400 text-white px-4 py-2 rounded shadow text-sm">Facturación</a>
-    <a href="historial.html" class="bg-yellow-400 text-white px-4 py-2 rounded shadow text-sm">Historial</a>
-    <a href="cajachica.html" class="bg-red-400 text-white px-4 py-2 rounded shadow text-sm">Caja Chica</a>
-    <button onclick="cerrarSesion()" class="bg-gray-400 text-white px-4 py-2 rounded shadow text-sm">Cerrar Sesión</button>
+  <!-- Navegación -->
+  <nav class="flex flex-wrap justify-center gap-3 mt-6 px-4">
+    <a href="index.html" class="nav-btn nav-yellow text-sm">📦 Artículos</a>
   </nav>
 
-  <section class="max-w-4xl mx-auto mt-6 bg-white p-4 rounded-xl shadow mx-2">
-    <h2 class="text-2xl font-semibold mb-4 text-center">Usuarios Registrados</h2>
-    
-    <div id="loading" class="hidden text-center text-yellow-600 mb-4">Cargando...</div>
-    <ul id="listaUsuarios" class="space-y-2"></ul>
-    <div id="noData" class="text-center text-gray-500 mt-4 hidden">No hay usuarios</div>
-  </section>
+  <!-- Usuarios -->
+  <section class="max-w-4xl mx-auto mt-6 mx-4 mb-10">
+    <div class="glass-card">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">👥 Usuarios Registrados</h2>
 
-  <!-- Modal Bloquear/Desbloquear -->
-  <div id="modalBloqueo" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
-    <div class="bg-white p-4 rounded-lg w-full max-w-sm">
-      <h3 class="font-semibold mb-4" id="tituloBloqueo">Bloquear Usuario</h3>
-      <p class="text-sm text-gray-600 mb-4" id="mensajeBloqueo">¿Estás seguro?</p>
-      <input type="password" id="passwordAdmin" class="border p-2 rounded w-full mb-4" placeholder="Tu contraseña">
-      <div class="flex justify-end gap-2">
-        <button onclick="cerrarModalBloqueo()" class="bg-gray-400 text-white px-3 py-2 rounded">Cancelar</button>
-        <button onclick="confirmarBloqueo()" class="bg-red-400 text-white px-3 py-2 rounded">Confirmar</button>
+      <!-- Loading -->
+      <div id="loading" class="flex justify-center py-8">
+        <div class="loading-spinner"></div>
       </div>
+
+      <!-- Lista de usuarios -->
+      <div id="usuariosContainer" class="space-y-4"></div>
     </div>
-  </div>
+  </section>
 
   <script>
     const supabaseUrl = "https://vurddrbkwuafszrddgxe.supabase.co";
     const supabaseKey = "sb_publishable_5bselDNif0wV61df7eZhgQ_E7gRM_zb";
     const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-    let usuarioSeleccionado = null;
-    let accionBloqueo = '';
+    // Tiempo máximo para considerar conectado (5 minutos)
+    const TIEMPO_CONEXION = 5 * 60 * 1000; // 5 minutos en milisegundos
 
-    function msg(txt, tipo = 'success') {
-      Toastify({ text: txt, duration: 3000, backgroundColor: tipo === 'error' ? '#dc3545' : '#28a745' }).showToast();
+    function mostrarNotificacion(mensaje, tipo = 'success') {
+      Toastify({
+        text: mensaje,
+        duration: 3000,
+        gravity: "top",
+        position: "right",
+        backgroundColor: tipo === 'error' ? "#dc3545" : "#28a745"
+      }).showToast();
     }
 
-    function obtenerFechaHoy() {
-      const h = new Date();
-      return `${h.getFullYear()}-${String(h.getMonth() + 1).padStart(2, '0')}-${String(h.getDate()).padStart(2, '0')}`;
-    }
-
-    function obtenerHora(fechaStr) {
-      if (!fechaStr) return '--:--';
+    function formatearFecha(fechaStr) {
+      if (!fechaStr) return 'Sin registro';
       const fecha = new Date(fechaStr);
-      return fecha.toLocaleTimeString('es-DO', { hour: '2-digit', minute: '2-digit' });
+      return fecha.toLocaleString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
     }
 
-    function obtenerFecha(fechaStr) {
-      if (!fechaStr) return '--/--/----';
-      const fecha = new Date(fechaStr);
-      return `${String(fecha.getDate()).padStart(2, '0')}/${String(fecha.getMonth() + 1).padStart(2, '0')}/${fecha.getFullYear()}`;
+    // Función para determinar si un usuario está conectado
+    function estaConectado(ultimaConexion) {
+      if (!ultimaConexion) return false;
+      
+      const ahora = new Date().getTime();
+      const ultima = new Date(ultimaConexion).getTime();
+      const diferencia = ahora - ultima;
+      
+      // Si la diferencia es menor a 5 minutos, está conectado
+      return diferencia < TIEMPO_CONEXION;
     }
 
-    function verificarAdmin() {
-      const usuario = localStorage.getItem('usuario');
-      if (!usuario) {
-        window.location.href = 'login.html';
-        return null;
+    // Función para obtener el estado del usuario
+    function obtenerEstadoUsuario(ultimaConexion, activo) {
+      // Si está bloqueado
+      if (activo === false) {
+        return { texto: 'Bloqueado', clase: 'badge-bloqueado', icono: '🚫' };
       }
-      const usuarioObj = JSON.parse(usuario);
-      if (usuarioObj.username !== 'leidylop') {
-        msg('Solo leidylop puede acceder', 'error');
-        window.location.href = 'index.html';
-        return null;
+      
+      // Si nunca ha iniciado sesión
+      if (!ultimaConexion) {
+        return { texto: 'Sin iniciar sesión', clase: 'badge-sin-sesion', icono: '⚪' };
       }
-      return usuarioObj;
+      
+      // Verificar si está conectado (última conexión en los últimos 5 minutos)
+      if (estaConectado(ultimaConexion)) {
+        return { texto: 'Conectado', clase: 'badge-conectado', icono: '🟢' };
+      }
+      
+      // Si tiene última conexión pero está fuera del tiempo de conexión
+      return { texto: 'Desconectado', clase: 'badge-desconectado', icono: '🔴' };
     }
 
     async function cargarUsuarios() {
-      document.getElementById('loading').classList.remove('hidden');
-      
       try {
         const { data, error } = await supabaseClient
           .from('usuarios')
-          .select('id, username, bloqueado, ultima_conexion, hora_inicio_sesion')
-          .order('username', { ascending: true });
+          .select('*')
+          .order('id', { ascending: true });
 
         if (error) throw error;
 
-        const lista = document.getElementById('listaUsuarios');
-        const noData = document.getElementById('noData');
-        lista.innerHTML = '';
+        const container = document.getElementById('usuariosContainer');
+        container.innerHTML = '';
 
         if (!data || data.length === 0) {
-          noData.classList.remove('hidden');
+          container.innerHTML = '<p class="text-center text-gray-500">No hay usuarios registrados</p>';
           return;
         }
-        noData.classList.add('hidden');
 
-        const hoy = obtenerFechaHoy();
-        const ahora = new Date();
-
-        data.forEach(u => {
-          let estado = '';
-          let estadoColor = '';
-          let infoHora = '';
+        data.forEach(usuario => {
+          const estado = obtenerEstadoUsuario(usuario.ultima_conexion, usuario.activo);
+          const esAdmin = usuario.rol === 'administrador';
           
-          if (u.bloqueado) {
-            estado = 'Bloqueado';
-            estadoColor = 'bg-red-100 text-red-600';
-          } else if (!u.ultima_conexion) {
-            estado = 'Sin iniciar sesión';
-            estadoColor = 'bg-gray-100 text-gray-600';
-          } else {
-            let ultimaFecha = u.ultima_conexion;
-            try {
-              ultimaFecha = u.ultima_conexion.split('T')[0];
-            } catch (e) {}
-            
-            const ultimaHora = new Date(u.ultima_conexion);
-            const diferenciaMinutos = (ahora - ultimaHora) / 1000 / 60;
-            
-            if (ultimaFecha === hoy && diferenciaMinutos < 5) {
-              estado = 'Conectado';
-              estadoColor = 'bg-green-100 text-green-600';
-              if (u.hora_inicio_sesion) {
-                infoHora = `<div class="text-xs text-green-600 mt-1">Inició: ${obtenerHora(u.hora_inicio_sesion)}</div>`;
-              } else {
-                infoHora = `<div class="text-xs text-green-600 mt-1">Ahora</div>`;
-              }
-            } else if (ultimaFecha === hoy && diferenciaMinutos < 60) {
-              estado = 'Desconectado';
-              estadoColor = 'bg-yellow-100 text-yellow-600';
-              infoHora = `<div class="text-xs text-gray-500 mt-1">Hace ${Math.floor(diferenciaMinutos)} min</div>`;
-            } else if (ultimaFecha === hoy) {
-              estado = 'Desconectado';
-              estadoColor = 'bg-yellow-100 text-yellow-600';
-              infoHora = `<div class="text-xs text-gray-500 mt-1">Última: ${obtenerHora(u.ultima_conexion)}</div>`;
-            } else {
-              estado = 'Desconectado';
-              estadoColor = 'bg-yellow-100 text-yellow-600';
-              infoHora = `<div class="text-xs text-gray-500 mt-1">Última: ${obtenerFecha(u.ultima_conexion)} ${obtenerHora(u.ultima_conexion)}</div>`;
-            }
-          }
-
-          const li = document.createElement('li');
-          li.className = "bg-yellow-100 p-3 rounded-lg flex justify-between items-center";
-          
-          const esAdmin = u.username === 'leidylop';
-          const opciones = esAdmin ? 
-            '<span class="text-xs text-purple-600 font-medium">Administrador</span>' :
-            `<div class="flex gap-2">
-              <button onclick="solicitarBloqueo('${u.username}', ${u.bloqueado})" class="px-2 py-1 text-xs rounded ${u.bloqueado ? 'bg-green-400 text-white' : 'bg-red-400 text-white'}">
-                ${u.bloqueado ? 'Desbloquear' : 'Bloquear'}
-              </button>
-              <button onclick="eliminarUsuario('${u.username}')" class="px-2 py-1 text-xs bg-gray-400 text-white rounded">
-                Eliminar
-              </button>
-            </div>`;
-
-          li.innerHTML = `
-            <div>
-              <span class="font-semibold">${u.username}</span>
-              <span class="ml-2 px-2 py-1 text-xs rounded ${estadoColor}">${estado}</span>
-              ${infoHora}
+          const card = document.createElement('div');
+          card.className = 'card-usuario';
+          card.innerHTML = `
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-2">
+                  <h3 class="font-bold text-lg text-gray-800">${usuario.username}</h3>
+                  ${esAdmin ? '<span class="badge-admin">👑 Administrador</span>' : ''}
+                  <span class="${estado.clase}">${estado.icono} ${estado.texto}</span>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                  <span class="badge-fecha">📅 Última: ${formatearFecha(usuario.ultima_conexion)}</span>
+                </div>
+              </div>
+              <div class="flex gap-2">
+                ${usuario.activo !== false ? `
+                  <button onclick="bloquearUsuario('${usuario.username}')" class="btn-danger">🚫 Bloquear</button>
+                ` : `
+                  <button onclick="desbloquearUsuario('${usuario.username}')" class="btn-primary">✅ Desbloquear</button>
+                `}
+                ${!esAdmin ? `
+                  <button onclick="eliminarUsuario('${usuario.username}')" class="btn-danger">🗑️ Eliminar</button>
+                ` : ''}
+              </div>
             </div>
-            ${opciones}
           `;
-          lista.appendChild(li);
+          container.appendChild(card);
         });
 
-      } catch (error) {
-        msg('Error: ' + error.message, 'error');
+      } catch (e) {
+        mostrarNotificacion('Error: ' + e.message, 'error');
       } finally {
         document.getElementById('loading').classList.add('hidden');
       }
     }
 
-    setInterval(cargarUsuarios, 10000);
-
-    function solicitarBloqueo(username, bloqueado) {
-      usuarioSeleccionado = username;
-      accionBloqueo = bloqueado ? 'desbloquear' : 'bloquear';
-      document.getElementById('tituloBloqueo').textContent = bloqueado ? 'Desbloquear Usuario' : 'Bloquear Usuario';
-      document.getElementById('mensajeBloqueo').textContent = bloqueado ? 
-        `¿Desbloquear a ${username}?` : 
-        `¿Bloquear a ${username}? Quedará sin acceso al sistema.`;
-      document.getElementById('modalBloqueo').classList.remove('hidden');
-    }
-
-    function cerrarModalBloqueo() {
-      document.getElementById('modalBloqueo').classList.add('hidden');
-      document.getElementById('passwordAdmin').value = '';
-      usuarioSeleccionado = null;
-    }
-
-    async function confirmarBloqueo() {
-      const password = document.getElementById('passwordAdmin').value;
-      if (password !== '6511') {
-        msg('Contraseña incorrecta', 'error');
-        return;
-      }
-
+    async function bloquearUsuario(username) {
+      if (!confirm(`¿Estás seguro de que deseas bloquear al usuario "${username}"?`)) return;
+      
       try {
         const { error } = await supabaseClient
           .from('usuarios')
-          .update({ bloqueado: accionBloqueo === 'bloquear' })
-          .eq('username', usuarioSeleccionado);
-
+          .update({ activo: false })
+          .eq('username', username);
+        
         if (error) throw error;
         
-        msg(`Usuario ${accionBloqueo === 'bloquear' ? 'bloqueado' : 'desbloqueado'} correctamente`);
-        cerrarModalBloqueo();
+        mostrarNotificacion('✅ Usuario bloqueado');
         cargarUsuarios();
-      } catch (error) {
-        msg('Error: ' + error.message, 'error');
+        
+      } catch (e) {
+        mostrarNotificacion('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function desbloquearUsuario(username) {
+      try {
+        const { error } = await supabaseClient
+          .from('usuarios')
+          .update({ activo: true })
+          .eq('username', username);
+        
+        if (error) throw error;
+        
+        mostrarNotificacion('✅ Usuario desbloqueado');
+        cargarUsuarios();
+        
+      } catch (e) {
+        mostrarNotificacion('Error: ' + e.message, 'error');
       }
     }
 
     async function eliminarUsuario(username) {
-      if (!confirm(`¿Eliminar usuario ${username}? Esta acción no se puede deshacer.`)) return;
+      if (!confirm(`¿Estás seguro de que deseas eliminar al usuario "${username}"? Esta acción no se puede deshacer.`)) return;
       
-      const respuesta = prompt('Escribe "ELIMINAR" para confirmar:');
-      if (respuesta !== 'ELIMINAR') {
-        msg('No se eliminó', 'warning');
-        return;
-      }
-
       try {
         const { error } = await supabaseClient
           .from('usuarios')
           .delete()
           .eq('username', username);
-
+        
         if (error) throw error;
-        msg('Usuario eliminado correctamente');
+        
+        mostrarNotificacion('✅ Usuario eliminado');
         cargarUsuarios();
-      } catch (error) {
-        msg('Error: ' + error.message, 'error');
+        
+      } catch (e) {
+        mostrarNotificacion('Error: ' + e.message, 'error');
       }
     }
 
-    function cerrarSesion() {
-      localStorage.removeItem('usuario');
-      localStorage.removeItem('fecha_sesion');
-      window.location.href = 'login.html';
-    }
-
-    setInterval(async () => {
-      const usuario = localStorage.getItem('usuario');
-      if (usuario) {
-        const usuarioObj = JSON.parse(usuario);
-        try {
-          await supabaseClient
-            .from('usuarios')
-            .update({ ultima_conexion: new Date().toISOString() })
-            .eq('username', usuarioObj.username);
-        } catch (e) {
-          console.error('Error:', e);
-        }
-      }
+    // Actualizar la lista cada 30 segundos para reflejar cambios en tiempo real
+    setInterval(() => {
+      cargarUsuarios();
     }, 30000);
 
     window.onload = () => {
-      verificarAdmin();
       cargarUsuarios();
     };
   </script>
