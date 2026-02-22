@@ -8,104 +8,553 @@
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <style>
-    body { font-family: 'Poppins', sans-serif; }
-    .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-    .input-field { transition: all 0.3s ease; }
-    .input-field:focus { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3); }
-    .btn-primary { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); transition: all 0.3s ease; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4); }
-    .btn-secondary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); transition: all 0.3s ease; }
-    .btn-secondary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); }
-    .banner-overlay { background: linear-gradient(135deg, rgba(245, 158, 11, 0.9) 0%, rgba(217, 119, 6, 0.8) 100%); }
+    /* === DISEÑO MODERNO AVANZADO === */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 25%, #fff7ed 50%, #fef3c7 75%, #fde68a 100%);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      overflow-x: hidden;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Partículas de fondo */
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .particle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: rgba(245, 158, 11, 0.3);
+      border-radius: 50%;
+      animation: float 15s infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+    }
+
+    /* Banner avanzado */
+    .banner {
+      border-radius: 0 0 80px 80px;
+      box-shadow: 
+        0 20px 60px rgba(245, 158, 11, 0.3),
+        0 10px 30px rgba(245, 158, 11, 0.2),
+        inset 0 -20px 60px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .banner::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+      animation: shimmer 8s infinite;
+    }
+
+    @keyframes shimmer {
+      0%, 100% { transform: translate(-30%, -30%); }
+      50% { transform: translate(30%, 30%); }
+    }
+
+    .banner-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Formulario glassmorphism avanzado */
+    .form-container {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border-radius: 32px;
+      padding: 56px 48px;
+      box-shadow: 
+        0 25px 80px rgba(0, 0, 0, 0.1),
+        0 10px 40px rgba(245, 158, 11, 0.15),
+        0 0 0 1px rgba(255, 255, 255, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .form-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+      transition: left 0.5s;
+    }
+
+    .form-container:hover::before { left: 100%; }
+
+    .form-container:hover {
+      transform: translateY(-8px);
+      box-shadow: 
+        0 35px 100px rgba(0, 0, 0, 0.15),
+        0 15px 50px rgba(245, 158, 11, 0.2),
+        0 0 0 1px rgba(255, 255, 255, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    /* Logo con efecto glow */
+    .logo-container {
+      background: linear-gradient(145deg, #fef3c7, #fde68a, #fbbf24);
+      border-radius: 50%;
+      padding: 10px;
+      box-shadow: 
+        0 10px 40px rgba(245, 158, 11, 0.4),
+        0 5px 20px rgba(245, 158, 11, 0.3),
+        inset 0 2px 10px rgba(255, 255, 255, 0.8),
+        inset 0 -2px 10px rgba(0, 0, 0, 0.05);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+
+    .logo-container::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, rgba(245, 158, 11, 0.5), transparent, rgba(245, 158, 11, 0.5));
+      z-index: -1;
+      filter: blur(8px);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .logo-container:hover::after { opacity: 1; }
+
+    .logo-container:hover {
+      transform: scale(1.08) rotate(5deg);
+      box-shadow: 
+        0 15px 50px rgba(245, 158, 11, 0.5),
+        0 8px 30px rgba(245, 158, 11, 0.4),
+        inset 0 2px 10px rgba(255, 255, 255, 0.8),
+        inset 0 -2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    h2 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #1f2937, #4b5563);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Inputs avanzados */
+    .input-group { position: relative; margin-bottom: 24px; }
+
+    .input-modern {
+      width: 100%;
+      border-radius: 20px;
+      padding: 18px 24px;
+      border: 2px solid #e5e7eb;
+      background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
+      font-size: 15px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+    }
+
+    .input-modern::placeholder {
+      color: #9ca3af;
+      font-weight: 400;
+    }
+
+    .input-modern:focus {
+      border-color: #f59e0b;
+      background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%);
+      box-shadow: 
+        0 0 0 6px rgba(245, 158, 11, 0.15),
+        0 10px 40px rgba(245, 158, 11, 0.1),
+        inset 0 2px 4px rgba(0, 0, 0, 0.02);
+      transform: translateY(-3px);
+      outline: none;
+    }
+
+    .input-icon {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+
+    .input-modern:focus + .input-icon {
+      color: #f59e0b;
+    }
+
+    /* Labels flotantes */
+    .floating-label {
+      position: absolute;
+      left: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+      font-size: 15px;
+      font-weight: 500;
+      pointer-events: none;
+      transition: all 0.3s ease;
+      background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
+      padding: 0 8px;
+    }
+
+    .input-modern:focus ~ .floating-label,
+    .input-modern:not(:placeholder-shown) ~ .floating-label {
+      top: 0;
+      font-size: 12px;
+      color: #f59e0b;
+      font-weight: 600;
+    }
+
+    /* Botones premium */
+    .btn-primary-modern {
+      width: 100%;
+      border-radius: 20px;
+      padding: 18px 32px;
+      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+      background-size: 200% 200%;
+      color: white;
+      font-weight: 600;
+      font-size: 16px;
+      font-family: 'Poppins', sans-serif;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 
+        0 10px 40px rgba(245, 158, 11, 0.4),
+        0 5px 20px rgba(245, 158, 11, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary-modern::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn-primary-modern:hover::before { left: 100%; }
+
+    .btn-primary-modern:hover {
+      background-position: 100% 100%;
+      transform: translateY(-4px);
+      box-shadow: 
+        0 15px 50px rgba(245, 158, 11, 0.5),
+        0 8px 30px rgba(245, 158, 11, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-primary-modern:active {
+      transform: translateY(-2px);
+      box-shadow: 
+        0 10px 40px rgba(245, 158, 11, 0.4),
+        0 5px 20px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-secondary-modern {
+      width: 100%;
+      border-radius: 20px;
+      padding: 18px 32px;
+      background: linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%);
+      background-size: 200% 200%;
+      color: white;
+      font-weight: 600;
+      font-size: 16px;
+      font-family: 'Poppins', sans-serif;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 
+        0 10px 40px rgba(16, 185, 129, 0.4),
+        0 5px 20px rgba(16, 185, 129, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-secondary-modern:hover {
+      background-position: 100% 100%;
+      transform: translateY(-4px);
+      box-shadow: 
+        0 15px 50px rgba(16, 185, 129, 0.5),
+        0 8px 30px rgba(16, 185, 129, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+
+    /* Icono verde avanzado */
+    .icon-green {
+      background: linear-gradient(145deg, #d1fae5, #6ee7b7, #34d399);
+      border-radius: 50%;
+      padding: 20px;
+      box-shadow: 
+        0 10px 40px rgba(16, 185, 129, 0.4),
+        0 5px 20px rgba(16, 185, 129, 0.3),
+        inset 0 2px 10px rgba(255, 255, 255, 0.8);
+      animation: pulse-green 3s infinite;
+    }
+
+    @keyframes pulse-green {
+      0%, 100% { box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4), 0 5px 20px rgba(16, 185, 129, 0.3); }
+      50% { box-shadow: 0 10px 50px rgba(16, 185, 129, 0.6), 0 5px 30px rgba(16, 185, 129, 0.4); }
+    }
+
+    /* Links avanzados */
+    .link-register {
+      color: #f59e0b;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      position: relative;
+      display: inline-block;
+    }
+
+    .link-register::before {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, #f59e0b, #d97706, #f59e0b);
+      background-size: 200% 200%;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    .link-register:hover {
+      color: #d97706;
+      transform: translateX(8px);
+    }
+
+    .link-register:hover::before {
+      background-position: 100% 100%;
+    }
+
+    .link-back {
+      color: #9ca3af;
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .link-back:hover {
+      color: #6b7280;
+      transform: translateX(-8px);
+    }
+
+    /* Animación de entrada */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .form-container {
+      animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Efecto de carga */
+    .loading-dots::after {
+      content: '';
+      animation: dots 1.5s infinite;
+    }
+
+    @keyframes dots {
+      0%, 20% { content: '.'; }
+      40% { content: '..'; }
+      60%, 100% { content: '...'; }
+    }
+
+    /* Responsive avanzado */
+    @media (max-width: 480px) {
+      .form-container {
+        padding: 40px 28px;
+        border-radius: 28px;
+        margin: 16px;
+      }
+      
+      .banner {
+        border-radius: 0 0 50px 50px;
+      }
+      
+      h2 {
+        font-size: 24px;
+      }
+      
+      .logo-container {
+        width: 90px !important;
+        height: 90px !important;
+      }
+      
+      .btn-primary-modern,
+      .btn-secondary-modern {
+        padding: 16px 24px;
+        font-size: 14px;
+      }
+      
+      .input-modern {
+        padding: 16px 20px;
+        font-size: 14px;
+      }
+    }
+
+    /* Efecto de enfoque en el formulario */
+    .form-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      height: 100%;
+      max-width: 500px;
+      max-height: 700px;
+      background: radial-gradient(ellipse at center, rgba(245, 158, 11, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
   </style>
 </head>
-<body class="bg-yellow-50 min-h-screen">
+<body>
 
-  <div class="relative w-full h-40 sm:h-48 md:h-56">
+  <!-- Partículas de fondo -->
+  <div class="particles" id="particles"></div>
+
+  <!-- Efecto glow -->
+  <div class="form-glow"></div>
+
+  <!-- Banner -->
+  <div class="relative w-full h-44 sm:h-52 md:h-60">
     <img src="LOGO LA PARADA DEL MAIZ.png" alt="Logo" class="w-full h-full object-cover">
-    <div class="absolute inset-0 banner-overlay flex items-center justify-center">
-      <h1 class="text-white text-2xl sm:text-3xl md:text-4xl font-bold text-center drop-shadow-lg px-4">
-        La Parada del Maíz
-      </h1>
+    <div class="absolute inset-0 bg-gradient-to-b from-yellow-500/50 to-yellow-600/60 flex items-center justify-center banner">
+      <div class="banner-content text-center px-4">
+        <h1 class="text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold drop-shadow-lg">
+          La Parada del Maíz
+        </h1>
+      </div>
     </div>
   </div>
 
-  <div class="flex items-center justify-center min-h-[calc(100vh-10rem)] px-4 pb-8">
+  <!-- Contenedor del formulario -->
+  <div class="flex items-center justify-center min-h-[calc(100vh-14rem)] px-4 pb-10 relative z-10">
     <div class="w-full max-w-md">
       
-      <div id="loginDiv" class="glass rounded-2xl shadow-2xl p-8">
-        <div class="text-center mb-6">
-          <div class="inline-flex items-center justify-center w-20 h-20 bg-yellow-100 rounded-full mb-4 overflow-hidden">
+      <!-- Login -->
+      <div id="loginDiv" class="form-container">
+        <div class="text-center mb-8">
+          <div class="logo-container inline-flex items-center justify-center w-28 h-28 mb-5 overflow-hidden">
             <img src="LOGO LA PARADA DEL MAIZ.png" alt="Logo" class="w-full h-full object-cover">
           </div>
-          <h2 class="text-2xl font-bold text-gray-800">Bienvenido</h2>
-          <p class="text-gray-500 text-sm">Ingresa tus credenciales</p>
+          <h2 class="text-3xl font-bold text-gray-800 mb-2">¡Bienvenido!</h2>
+          <p class="text-gray-500 text-base">Ingresa tus credenciales</p>
         </div>
         
-        <form id="loginForm" class="space-y-4">
-          <div>
-            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
-            <input type="text" id="username" required 
-              class="input-field w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 bg-white"
-              placeholder="Tu usuario">
+        <form id="loginForm" class="space-y-2">
+          <div class="input-group">
+            <input type="text" id="username" required class="input-modern" placeholder=" ">
+            <label for="username" class="floating-label">Usuario</label>
           </div>
-          <div>
-            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-            <input type="password" id="password" required 
-              class="input-field w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 bg-white"
-              placeholder="Tu contraseña">
+          <div class="input-group">
+            <input type="password" id="password" required class="input-modern" placeholder=" ">
+            <label for="password" class="floating-label">Contraseña</label>
           </div>
-          <button type="submit" class="btn-primary w-full py-3 rounded-xl text-white font-semibold">
-            Iniciar Sesión
+          <button type="submit" class="btn-primary-modern mt-4">
+            🚀 Iniciar Sesión
           </button>
         </form>
         
-        <div class="mt-6 text-center">
+        <div class="mt-8 text-center">
           <p class="text-gray-500 text-sm">¿No tienes cuenta? 
-            <button onclick="mostrarRegistro()" class="text-yellow-600 font-semibold hover:text-yellow-700">Regístrate</button>
+            <button onclick="mostrarRegistro()" class="link-register">Regístrate</button>
           </p>
         </div>
       </div>
 
-      <div id="registroDiv" class="glass rounded-2xl shadow-2xl p-8 hidden">
-        <div class="text-center mb-6">
-          <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <!-- Registro -->
+      <div id="registroDiv" class="form-container hidden">
+        <div class="text-center mb-8">
+          <div class="icon-green inline-flex items-center justify-center w-20 h-20 mb-5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
             </svg>
           </div>
-          <h2 class="text-2xl font-bold text-gray-800">Crear Cuenta</h2>
-          <p class="text-gray-500 text-sm">Regístrate para acceder</p>
+          <h2 class="text-3xl font-bold text-gray-800 mb-2">Crear Cuenta</h2>
+          <p class="text-gray-500 text-base">Regístrate para acceder</p>
         </div>
         
-        <form id="signupForm" class="space-y-4">
-          <div>
-            <label for="newUsername" class="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
-            <input type="text" id="newUsername" required 
-              class="input-field w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 bg-white"
-              placeholder="Solo letras y números">
+        <form id="signupForm" class="space-y-2">
+          <div class="input-group">
+            <input type="text" id="newUsername" required class="input-modern" placeholder=" ">
+            <label for="newUsername" class="floating-label">Usuario</label>
           </div>
-          <div>
-            <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-            <input type="password" id="newPassword" required 
-              class="input-field w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 bg-white"
-              placeholder="Mínimo 6 caracteres">
+          <div class="input-group">
+            <input type="password" id="newPassword" required class="input-modern" placeholder=" ">
+            <label for="newPassword" class="floating-label">Contraseña</label>
           </div>
-          <div>
-            <label for="codigo" class="block text-sm font-medium text-gray-700 mb-1">Código de Seguridad</label>
-            <input type="password" id="codigo" required 
-              class="input-field w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 bg-white"
-              placeholder="Ingrese el código">
+          <div class="input-group">
+            <input type="password" id="codigo" required class="input-modern" placeholder=" ">
+            <label for="codigo" class="floating-label">Código de Seguridad</label>
           </div>
-          <button type="submit" class="btn-secondary w-full py-3 rounded-xl text-white font-semibold">
-            Crear Cuenta
+          <button type="submit" class="btn-secondary-modern mt-4">
+            ✨ Crear Cuenta
           </button>
         </form>
         
-        <div class="mt-6 text-center">
-          <button onclick="mostrarLogin()" class="text-gray-500 text-sm hover:text-gray-700">
+        <div class="mt-8 text-center">
+          <button onclick="mostrarLogin()" class="link-back">
             ← Volver a Iniciar Sesión
           </button>
         </div>
@@ -115,6 +564,19 @@
   </div>
 
   <script>
+    // Crear partículas
+    const particlesContainer = document.getElementById('particles');
+    for (let i = 0; i < 20; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      particle.style.left = Math.random() * 100 + '%';
+      particle.style.animationDelay = Math.random() * 15 + 's';
+      particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+      particle.style.width = (5 + Math.random() * 10) + 'px';
+      particle.style.height = particle.style.width;
+      particlesContainer.appendChild(particle);
+    }
+
     const supabaseUrl = "https://vurddrbkwuafszrddgxe.supabase.co";
     const supabaseKey = "sb_publishable_5bselDNif0wV61df7eZhgQ_E7gRM_zb";
     const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
@@ -136,13 +598,21 @@
     }
 
     function mostrarRegistro() {
-      document.getElementById('loginDiv').classList.add('hidden');
-      document.getElementById('registroDiv').classList.remove('hidden');
+      document.getElementById('loginDiv').style.animation = 'fadeInUp 0.5s ease-out reverse';
+      setTimeout(() => {
+        document.getElementById('loginDiv').classList.add('hidden');
+        document.getElementById('registroDiv').classList.remove('hidden');
+        document.getElementById('registroDiv').style.animation = 'fadeInUp 0.5s ease-out';
+      }, 200);
     }
 
     function mostrarLogin() {
-      document.getElementById('registroDiv').classList.add('hidden');
-      document.getElementById('loginDiv').classList.remove('hidden');
+      document.getElementById('registroDiv').style.animation = 'fadeInUp 0.5s ease-out reverse';
+      setTimeout(() => {
+        document.getElementById('registroDiv').classList.add('hidden');
+        document.getElementById('loginDiv').classList.remove('hidden');
+        document.getElementById('loginDiv').style.animation = 'fadeInUp 0.5s ease-out';
+      }, 200);
     }
 
     function verificarSesion() {
@@ -160,62 +630,23 @@
       return usuario ? JSON.parse(usuario) : null;
     }
 
-    // Login
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const username = document.getElementById('username').value.trim().toLowerCase();
       const password = document.getElementById('password').value;
 
       try {
-        // 1. Buscar usuario
-        const { data: usuario, error } = await supabaseClient
-          .from('usuarios')
-          .select('*')
-          .eq('username', username)
-          .single();
+        const { data: usuario, error } = await supabaseClient.from('usuarios').select('*').eq('username', username).single();
 
-        if (error || !usuario) {
-          throw new Error("Usuario no encontrado");
-        }
+        if (error || !usuario) { throw new Error("Usuario no encontrado"); }
+        if (usuario.bloqueado) { throw new Error("Usuario bloqueado. Contacta al administrador."); }
+        if (usuario.password !== password) { throw new Error("Contraseña incorrecta"); }
 
-        if (usuario.bloqueado) {
-          throw new Error("Usuario bloqueado. Contacta al administrador.");
-        }
-
-        if (usuario.password !== password) {
-          throw new Error("Contraseña incorrecta");
-        }
-
-        // 2. Guardar hora de inicio
         const horaInicio = new Date().toISOString();
-        console.log("Hora a guardar:", horaInicio);
         
-        // 3. Actualizar usando RPC para evitar problemas de RLS
-        const { error: errorUpdate } = await supabaseClient
-          .rpc('actualizar_conexion', { 
-            p_username: username,
-            p_hora: horaInicio
-          });
+        const { error: errorUpdate } = await supabaseClient.from('usuarios').update({ ultima_conexion: horaInicio, hora_inicio_sesion: horaInicio }).eq('username', username);
 
-        console.log("Error RPC:", errorUpdate);
-
-        if (errorUpdate) {
-          // Si falla RPC, intentar update directo
-          console.log("Intentando update directo...");
-          const { error: errorDirecto } = await supabaseClient
-            .from('usuarios')
-            .update({ 
-              ultima_conexion: horaInicio,
-              hora_inicio_sesion: horaInicio
-            })
-            .eq('username', username);
-            
-          console.log("Error directo:", errorDirecto);
-          
-          if (errorDirecto) {
-            throw new Error("Error al guardar: " + errorDirecto.message);
-          }
-        }
+        if (errorUpdate) { throw new Error("Error al guardar: " + errorUpdate.message); }
 
         localStorage.setItem('usuario', JSON.stringify(usuario));
         localStorage.setItem('fecha_sesion', obtenerFechaHoy());
@@ -223,12 +654,10 @@
         msg("¡Bienvenido!");
         window.location.href = 'index.html';
       } catch (error) {
-        console.error("Error completo:", error);
         msg(error.message, 'error');
       }
     });
 
-    // Registro
     document.getElementById('signupForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const username = document.getElementById('newUsername').value.trim().toLowerCase();
@@ -243,17 +672,11 @@
       if (password.length < 6) { msg('Contraseña min 6 caracteres', 'error'); return; }
 
       try {
-        const { data: existente } = await supabaseClient
-          .from('usuarios')
-          .select('username')
-          .eq('username', username)
-          .single();
+        const { data: existente } = await supabaseClient.from('usuarios').select('username').eq('username', username).single();
 
         if (existente) { throw new Error("El usuario ya existe"); }
 
-        const { error } = await supabaseClient
-          .from('usuarios')
-          .insert([{ username, password, bloqueado: false }]);
+        const { error } = await supabaseClient.from('usuarios').insert([{ username, password, bloqueado: false }]);
 
         if (error) throw error;
         msg('¡Cuenta creada exitosamente!');
