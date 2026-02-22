@@ -609,283 +609,424 @@
       document.getElementById('modalEliminadas').classList.add('hidden');
       document.getElementById('modalEliminadas').classList.remove('flex');
     }
+// Funcion imprimir
+   async function imprimirVentas() {
+  const fd = document.getElementById('printDesde').value;
+  const fh = document.getElementById('printHasta').value;
+  
+  if (!fd || !fh) {
+    return mostrarNotificacion('Seleccione fechas', 'warning');
+  }
+  
+  try {
+    // Obtener facturas del período
+    const { data: fs } = await supabaseClient
+      .from('facturas')
+      .select('*')
+      .gte('fecha', fd + 'T00:00:00')
+      .lte('fecha', fh + 'T23:59:59')
+      .order('id', { ascending: true });
 
-    async function imprimirVentas() {
-      const fd = document.getElementById('printDesde').value;
-      const fh = document.getElementById('printHasta').value;
+    // Obtener caja_chica del período
+    const { data: cajas } = await supabaseClient
+      .from('caja_chica')
+      .select('*')
+      .gte('fecha', fd)
+      .lte('fecha', fh);
+
+    // Obtener artículos
+    const { data: articulos } = await supabaseClient.from('articulos').select('*');
+
+    if ((!fs || fs.length === 0) && (!cajas || cajas.length === 0)) {
+      return mostrarNotificacion('No hay datos en este periodo', 'warning');
+    }
+
+    const ids = fs ? fs.map(f => f.id) : [];
+    const { data: dets } = ids.length > 0
+      ? await supabaseClient
+          .from('detalle_factura')
+          .select('factura_id, cantidad, precio, subtotal, articulos(nombre), facturas(comentario, descuento)')
+          .in('factura_id', ids)
+      : { data: [] };
+
+    const xf = {};
+    const comentarios = {};
+    
+    dets.forEach(d => {
+      if (!xf[d.factura_id]) xf[d.factura_id] = [];
+      xf[d.factura_id].push(d);
+      if (d.facturas && d.facturas.comentario) comentarios[d.factura_id] = d.facturas.comentario;
+    });
+
+    const infoArticulos = {};
+    let totalArticulos = 0;
+    let totalDescuentos = 0;
+    
+    dets.forEach(d => {
+      const nom = d.articulos.nombre;
+      const factura = fs?.find(f => f.id === d.factura_id);
+      const descuento = parseFloat(factura?.descuento || 0);
+      const itemsFactura = dets.filter(x => x.factura_id === d.factura_id);
+      const subtotalFactura = itemsFactura.reduce((sum, x) => sum + x.subtotal, 0);
+      let precioReal = d.subtotal;
       
-      if (!fd || !fh) {
-        return mostrarNotificacion('Seleccione fechas', 'warning');
+      if (descuento > 0 && subtotalFactura > 0) {
+        const proporcion = d.subtotal / subtotalFactura;
+        precioReal = d.subtotal - (descuento * proporcion);
       }
       
-      try {
-        const { data: fs } = await supabaseClient
-          .from('facturas')
-          .select('*')
-          .gte('fecha', fd + 'T00:00:00')
-          .lte('fecha', fh + 'T23:59:59')
-          .order('id', { ascending: true });
+      if (!infoArticulos[nom]) infoArticulos[nom] = { cantidad: 0, totalVenta: 0 };
+      infoArticulos[nom].cantidad += d.cantidad;
+      infoArticulos[nom].totalVenta += precioReal;
+      totalArticulos += d.cantidad;
+    });
+    
+    fs?.forEach(f => {
+      totalDescuentos += parseFloat(f.descuento || 0);
+    });
 
-        const { data: cajas } = await supabaseClient
-          .from('caja_chica')
-          .select('*')
-          .gte('fecha', fd)
-          .lte('fecha', fh);
+    // Calcular totales de caja_chica
+    let totalInicialCaja = 0;
+    let totalGastosCaja = 0;
+    let totalFinalCaja = 0;
+    
+    if (cajas && cajas.length > 0) {
+      cajas.forEach(c => {
+        totalInicialCaja += parseFloat(c.monto_inicial || 0);
+        totalGastosCaja += parseFloat(c.monto_gastos || 0);
+        totalFinalCaja += parseFloat(c.monto_final || 0);
+      });
+    }
 
-        const { data: defectuosos } = await supabaseClient
-          .from('articulos_defectuosos')
-          .select('*, articulos(nombre)')
-          .gte('fecha', fd + 'T00:00:00')
-          .lte('fecha', fh + 'T23:59:59');
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF("p", "mm", "a4");
 
-        const { data: articulos } = await supabaseClient.from('articulos').select('*');
+    const marginLeft = 15;
+    const marginRight = 195;
+    const pageWidth = 180;
 
-        if ((!fs || fs.length === 0) && (!cajas || cajas.length === 0) && (!defectuosos || defectuosos.length === 0)) {
-          return mostrarNotificacion('No hay datos en este período', 'warning');
-        }
+    // Fondo sutil
+    doc.setFillColor(255, 248, 240);
+    doc.rect(0, 0, 210, 297, 'F');
 
-        const ids = fs ? fs.map(f => f.id) : [];
-        const { data: dets } = ids.length > 0
-          ? await supabaseClient
-              .from('detalle_factura')
-              .select('factura_id, cantidad, precio, subtotal, articulos(nombre), facturas(comentario, descuento, usuario)')
-              .in('factura_id', ids)
-          : { data: [] };
+    // === LOGO ===
+    try {
+      const img = new Image();
+      img.src = 'LOGO LA PARADA DEL MAIZ.png';
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+      });
+      doc.addImage(img, 'PNG', marginLeft, 12, 18, 18);
+    } catch (e) {
+      console.warn('Logo no cargado');
+    }
 
-        const xf = {};
-        const comentarios = {};
-        
-        dets.forEach(d => {
-          if (!xf[d.factura_id]) xf[d.factura_id] = [];
-          xf[d.factura_id].push(d);
-          if (d.facturas && d.facturas.comentario) comentarios[d.factura_id] = d.facturas.comentario;
-        });
+    // === HEADER MODERNO ===
+    doc.setFillColor(217, 119, 6);
+    doc.roundedRect(marginLeft + 22, 10, pageWidth - 22, 25, 4, 4, 'F');
 
-        const infoArticulos = {};
-        let totalArticulos = 0;
-        let totalDescuentos = 0;
-        
-        dets.forEach(d => {
-          const nom = d.articulos.nombre;
-          const factura = fs?.find(f => f.id === d.factura_id);
-          const descuento = parseFloat(factura?.descuento || 0);
-          const itemsFactura = dets.filter(x => x.factura_id === d.factura_id);
-          const subtotalFactura = itemsFactura.reduce((sum, x) => sum + x.subtotal, 0);
-          let precioReal = d.subtotal;
-          
-          if (descuento > 0 && subtotalFactura > 0) {
-            const proporcion = d.subtotal / subtotalFactura;
-            precioReal = d.subtotal - (descuento * proporcion);
-          }
-          
-          if (!infoArticulos[nom]) infoArticulos[nom] = { cantidad: 0, totalVenta: 0 };
-          infoArticulos[nom].cantidad += d.cantidad;
-          infoArticulos[nom].totalVenta += precioReal;
-          totalArticulos += d.cantidad;
-        });
-        
-        fs?.forEach(f => {
-          totalDescuentos += parseFloat(f.descuento || 0);
-        });
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.setTextColor(255, 255, 255);
+    doc.text("LA PARADA DEL MAIZ", 105, 22, { align: "center" });
 
-        let totalInicialCaja = 0;
-        let totalGastosCaja = 0;
-        let totalFinalCaja = 0;
-        
-        if (cajas && cajas.length > 0) {
-          cajas.forEach(c => {
-            totalInicialCaja += c.monto_inicial;
-            totalGastosCaja += c.monto_gastos;
-            totalFinalCaja += c.monto_final;
-          });
-        }
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text("El Majarete de Leidy", 105, 28, { align: "center" });
 
-        const defectuososPorFecha = {};
-        defectuosos?.forEach(d => {
-          const fecha = d.fecha.split('T')[0];
-          if (!defectuososPorFecha[fecha]) defectuososPorFecha[fecha] = [];
-          defectuososPorFecha[fecha].push(d);
-        });
+    // Línea decorativa
+    doc.setDrawColor(255, 200, 120);
+    doc.setLineWidth(0.8);
+    doc.line(marginLeft, 38, marginRight, 38);
 
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        
-        try {
-          doc.addImage('LOGO LA PARADA DEL MAIZ.png', 'PNG', 10, 10, 30, 30);
-        } catch (e) {}
+    // === INFORMACIÓN ===
+    doc.setFontSize(9);
+    doc.setTextColor(60, 60, 60);
+    doc.text("Periodo: " + fd + " al " + fh, marginLeft, 45);
+    doc.text("Generado: " + new Date().toLocaleDateString('es-DO'), marginRight, 45, { align: "right" });
 
-        doc.setFontSize(18);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(245, 158, 11);
-        doc.text("La Parada del Maiz y El Majarete de Leidy", 105, 20, { align: "center" });
-        
-        doc.setFontSize(14);
-        doc.setTextColor(0, 0, 0);
-        doc.text(`Resumen del: ${fd} al ${fh}`, 105, 30, { align: "center" });
-        doc.line(10, 35, 200, 35);
+    let y = 52;
 
-        let y = 45;
-        let totalPeriodo = 0;
+    // === TITULO VENTAS ===
+    doc.setFillColor(255, 140, 0);
+    doc.roundedRect(marginLeft, y, pageWidth, 8, 3, 3, 'F');
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(255, 255, 255);
+    doc.text("DETALLE DE VENTAS", 105, y + 5.5, { align: "center" });
 
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "bold");
-        doc.text("Detalles de Ventas:", 10, y);
-        y += 10;
+    y += 12;
 
-        for (const f of fs || []) {
-          const com = comentarios[f.id];
-          doc.setFont("helvetica", "normal");
-          doc.text(`Factura #${f.id} | ${formatearFecha(f.fecha)} | RD$${parseFloat(f.total).toFixed(2)}${f.usuario ? ' | Usuario: ' + f.usuario : ''}`, 10, y);
-          totalPeriodo += parseFloat(f.total);
-          y += 6;
-          
-          if (com && com.trim() !== "") {
-            doc.setTextColor(0, 100, 200);
-            const comentarioLimpio = com.replace(/[^\x00-\x7F]/g, '');
-            doc.text(`  Nota: ${comentarioLimpio}`, 15, y);
-            doc.setTextColor(0, 0, 0);
-            y += 6;
-          }
-          
-          (xf[f.id] || []).forEach(i => {
-            doc.text(`  - ${i.articulos.nombre} | Cant:${i.cantidad} | P:RD$${i.precio} | Sub:RD$${i.subtotal}`, 15, y);
-            y += 6;
-          });
-          
-          y += 4;
-          
-          if (y > 250) {
-            doc.addPage();
-            y = 20;
-          }
-        }
+    // Encabezado tabla
+    doc.setFillColor(255, 235, 210);
+    doc.roundedRect(marginLeft, y, pageWidth, 7, 2, 2, 'F');
 
-        y += 10;
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(12);
-        doc.text("Resumen por Articulo:", 10, y);
-        y += 10;
+    doc.setFontSize(8);
+    doc.setTextColor(0, 0, 0);
+    doc.text("FAC", marginLeft + 3, y + 4.5);
+    doc.text("FECHA", marginLeft + 20, y + 4.5);
+    doc.text("ARTICULO", marginLeft + 50, y + 4.5);
+    doc.text("CANT", marginLeft + 125, y + 4.5);
+    doc.text("PRECIO", marginLeft + 140, y + 4.5);
+    doc.text("SUBTOTAL", marginRight - 2, y + 4.5, { align: "right" });
+
+    y += 9;
+
+    let totalPeriodo = 0;
+
+    // === FACTURAS ===
+    for (const f of fs || []) {
+      const items = xf[f.id] || [];
+      totalPeriodo += parseFloat(f.total);
+
+      doc.setFillColor(255, 250, 240);
+      doc.roundedRect(marginLeft, y, pageWidth, 7, 2, 2, 'F');
+
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(0, 0, 0);
+      doc.text(String(f.id), marginLeft + 3, y + 4.5);
+      doc.text(formatearFecha(f.fecha), marginLeft + 20, y + 4.5);
+
+      doc.setTextColor(34, 197, 94);
+      doc.text("RD$" + parseFloat(f.total).toFixed(2), marginRight - 2, y + 4.5, { align: "right" });
+
+      y += 8;
+
+      items.forEach(i => {
         doc.setFont("helvetica", "normal");
-        doc.setFontSize(10);
-        
-        Object.keys(infoArticulos).forEach(nom => {
-          const info = infoArticulos[nom];
-          const promedio = info.totalVenta / info.cantidad;
-          doc.text(`${nom}:`, 10, y);
-          y += 5;
-          doc.text(`  Cantidad total: ${info.cantidad}`, 15, y);
-          y += 5;
-          doc.text(`  Suma total: RD$${info.totalVenta.toFixed(2)}`, 15, y);
-          y += 5;
-          doc.text(`  Precio promedio de venta: RD$${promedio.toFixed(2)}`, 15, y);
-          y += 8;
-          
-          if (y > 270) {
-            doc.addPage();
-            y = 20;
-          }
-        });
+        doc.setTextColor(90, 90, 90);
 
-        if (cajas && cajas.length > 0) {
-          y += 10;
-          doc.setFont("helvetica", "bold");
-          doc.setFontSize(12);
-          doc.setTextColor(200, 0, 0);
-          doc.text("Caja Chica:", 10, y);
-          y += 8;
-          doc.setFont("helvetica", "normal");
-          doc.setFontSize(10);
-          doc.setTextColor(0, 0, 0);
-          doc.text(`Total monto inicial: RD$${totalInicialCaja.toFixed(2)}`, 15, y);
-          y += 6;
-          doc.text(`Total gastos: RD$${totalGastosCaja.toFixed(2)}`, 15, y);
-          y += 6;
-          doc.setFont("helvetica", "bold");
-          doc.text(`Dinero en caja: RD$${totalFinalCaja.toFixed(2)}`, 15, y);
-          y += 10;
-        }
+        let nombre = i.articulos.nombre;
+        if (nombre.length > 30) nombre = nombre.substring(0, 27) + "...";
+        doc.text(nombre, marginLeft + 25, y + 4);
+        doc.text(String(i.cantidad), marginLeft + 127, y + 4);
+        doc.text("RD$" + i.precio.toFixed(2), marginLeft + 142, y + 4);
+        doc.text("RD$" + i.subtotal.toFixed(2), marginRight - 2, y + 4, { align: "right" });
 
-        if (defectuosos && defectuosos.length > 0) {
-          if (y > 230) {
-            doc.addPage();
-            y = 20;
-          }
-          
-          y += 5;
-          doc.setFont("helvetica", "bold");
-          doc.setFontSize(12);
-          doc.setTextColor(150, 0, 0);
-          doc.text("Articulos Defectuosos por Dia:", 10, y);
-          y += 10;
+        y += 6;
+      });
 
-          Object.keys(defectuososPorFecha).forEach(fecha => {
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(10);
-            doc.setTextColor(0, 0, 0);
-            doc.text(`Fecha: ${formatearFecha(fecha)}`, 15, y);
-            y += 6;
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(9);
-            
-            let totalDefDia = 0;
-            defectuososPorFecha[fecha].forEach(d => {
-              totalDefDia += d.cantidad;
-              doc.text(`  - ${d.articulos.nombre}: ${d.cantidad} uds (${d.descripcion})`, 20, y);
-              y += 5;
-            });
-            
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(9);
-            doc.text(`  Total del dia: ${totalDefDia} unidades`, 20, y);
-            y += 8;
-          });
-        }
+      // Comentario
+      if (comentarios[f.id] && comentarios[f.id].trim() !== "") {
+        doc.setFont("helvetica", "italic");
+        doc.setTextColor(59, 130, 246);
+        doc.text("Nota: " + comentarios[f.id], marginLeft + 25, y + 4);
+        y += 6;
+      }
 
-        if (articulos && articulos.length > 0) {
-          if (y > 230) {
-            doc.addPage();
-            y = 20;
-          }
-          
-          y += 5;
-          doc.setFont("helvetica", "bold");
-          doc.setFontSize(12);
-          doc.setTextColor(0, 100, 0);
-          doc.text("Stock Disponible al Final del Periodo:", 10, y);
-          y += 10;
+      y += 3;
 
-          doc.setFont("helvetica", "normal");
-          doc.setFontSize(10);
-          doc.setTextColor(0, 0, 0);
-          
-          articulos.forEach(a => {
-            doc.text(`${a.nombre}: ${a.stock} unidades`, 15, y);
-            y += 5;
-          });
-        }
-
-        y += 10;
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(14);
-        doc.setTextColor(245, 158, 11);
-        doc.text(`TOTAL VENTAS: RD$${totalPeriodo.toFixed(2)}`, 105, y, { align: "center" });
-        y += 8;
-        doc.text(`Total articulos vendidos: ${totalArticulos}`, 105, y, { align: "center" });
-        y += 8;
-        doc.text(`Total descuentos: RD$${totalDescuentos.toFixed(2)}`, 105, y, { align: "center" });
-        y += 10;
-
-        const balanceFinal = totalPeriodo + totalFinalCaja;
-        doc.setFontSize(16);
-        doc.text(`BALANCE FINAL (Ventas + Caja): RD$${balanceFinal.toFixed(2)}`, 105, y, { align: "center" });
-
-        doc.save(`Resumen_${fd}_al_${fh}.pdf`);
-        cerrarModalImprimir();
-        mostrarNotificacion('PDF generado correctamente');
-      } catch (e) {
-        mostrarNotificacion('Error: ' + e.message, 'error');
+      if (y > 250) {
+        doc.addPage();
+        doc.setFillColor(255, 248, 240);
+        doc.rect(0, 0, 210, 297, 'F');
+        y = 20;
       }
     }
+
+    // === RESUMEN POR ARTÍCULO ===
+    y += 10;
+
+    doc.setFillColor(59, 130, 246);
+    doc.roundedRect(marginLeft, y, pageWidth, 8, 3, 3, 'F');
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(255, 255, 255);
+    doc.text("RESUMEN POR ARTICULO", 105, y + 5.5, { align: "center" });
+
+    y += 12;
+
+    doc.setFillColor(239, 246, 255);
+    doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
+    doc.setFontSize(8);
+    doc.setTextColor(0, 0, 0);
+    doc.text("ARTICULO", marginLeft + 3, y + 4);
+    doc.text("CANT", marginLeft + 115, y + 4);
+    doc.text("TOTAL VENTA", marginLeft + 140, y + 4);
+    doc.text("PROMEDIO", marginRight - 2, y + 4, { align: "right" });
+
+    y += 8;
+
+    Object.keys(infoArticulos).forEach(nom => {
+      const info = infoArticulos[nom];
+      const promedio = info.totalVenta / info.cantidad;
+
+      doc.setFillColor(249, 250, 251);
+      doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(0, 0, 0);
+
+      let nombre = nom;
+      if (nombre.length > 40) nombre = nombre.substring(0, 37) + "...";
+      doc.text(nombre, marginLeft + 3, y + 4);
+      doc.text(String(info.cantidad), marginLeft + 118, y + 4);
+      doc.text("RD$" + info.totalVenta.toFixed(2), marginLeft + 142, y + 4);
+      doc.text("RD$" + promedio.toFixed(2), marginRight - 2, y + 4, { align: "right" });
+
+      y += 7;
+
+      if (y > 260) {
+        doc.addPage();
+        doc.setFillColor(255, 248, 240);
+        doc.rect(0, 0, 210, 297, 'F');
+        y = 20;
+      }
+    });
+
+    // === CAJA CHICA ===
+    if (cajas && cajas.length > 0) {
+      y += 10;
+
+      doc.setFillColor(220, 38, 38);
+      doc.roundedRect(marginLeft, y, pageWidth, 8, 3, 3, 'F');
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(255, 255, 255);
+      doc.text("RESUMEN DE CAJA CHICA", 105, y + 5.5, { align: "center" });
+
+      y += 12;
+
+      doc.setFillColor(254, 242, 242);
+      doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
+      doc.setFontSize(8);
+      doc.setTextColor(0, 0, 0);
+      doc.text("CONCEPTO", marginLeft + 3, y + 4);
+      doc.text("MONTO", marginRight - 2, y + 4, { align: "right" });
+
+      y += 8;
+
+      doc.setFillColor(239, 248, 255);
+      doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
+      doc.setTextColor(59, 130, 246);
+      doc.text("Total Inicial", marginLeft + 3, y + 4);
+      doc.text("RD$" + totalInicialCaja.toFixed(2), marginRight - 2, y + 4, { align: "right" });
+      y += 7;
+
+      doc.setFillColor(255, 237, 237);
+      doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
+      doc.setTextColor(220, 38, 38);
+      doc.text("Total Gastos", marginLeft + 3, y + 4);
+      doc.text("- RD$" + totalGastosCaja.toFixed(2), marginRight - 2, y + 4, { align: "right" });
+      y += 7;
+
+      doc.setFillColor(220, 252, 231);
+      doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(22, 163, 74);
+      doc.text("Balance Final en Caja", marginLeft + 3, y + 4);
+      doc.text("RD$" + totalFinalCaja.toFixed(2), marginRight - 2, y + 4, { align: "right" });
+      y += 7;
+    }
+
+    // === STOCK ===
+    if (articulos && articulos.length > 0) {
+      y += 10;
+
+      doc.setFillColor(16, 185, 129);
+      doc.roundedRect(marginLeft, y, pageWidth, 8, 3, 3, 'F');
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(255, 255, 255);
+      doc.text("STOCK DISPONIBLE", 105, y + 5.5, { align: "center" });
+
+      y += 12;
+
+      doc.setFillColor(220, 252, 231);
+      doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
+      doc.setFontSize(8);
+      doc.setTextColor(0, 0, 0);
+      doc.text("ARTICULO", marginLeft + 3, y + 4);
+      doc.text("STOCK", marginRight - 2, y + 4, { align: "right" });
+
+      y += 8;
+
+      articulos.forEach(a => {
+        let colorStock = [34, 197, 94];
+        if (a.stock <= 0) colorStock = [220, 38, 38];
+        else if (a.stock <= 10) colorStock = [217, 119, 6];
+
+        doc.setFillColor(240, 253, 244);
+        doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.setTextColor(0, 0, 0);
+
+        let nombre = a.nombre;
+        if (nombre.length > 40) nombre = nombre.substring(0, 37) + "...";
+        doc.text(nombre, marginLeft + 3, y + 4);
+
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(colorStock[0], colorStock[1], colorStock[2]);
+        doc.text(String(a.stock), marginRight - 2, y + 4, { align: "right" });
+
+        y += 7;
+
+        if (y > 260) {
+          doc.addPage();
+          doc.setFillColor(255, 248, 240);
+          doc.rect(0, 0, 210, 297, 'F');
+          y = 20;
+        }
+      });
+    }
+
+    // === RESUMEN FINAL ===
+    y += 10;
+
+    doc.setFillColor(217, 119, 6);
+    doc.roundedRect(marginLeft, y, pageWidth, 50, 6, 6, 'F');
+
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(255, 255, 255);
+    doc.text("RESUMEN GENERAL", 105, y + 10, { align: "center" });
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text("Total Ventas: RD$" + totalPeriodo.toFixed(2), 105, y + 20, { align: "center" });
+    doc.text("Articulos Vendidos: " + totalArticulos, 105, y + 27, { align: "center" });
+    doc.text("Descuentos: RD$" + totalDescuentos.toFixed(2), 105, y + 34, { align: "center" });
+
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("Balance en Caja: RD$" + totalFinalCaja.toFixed(2), 105, y + 42, { align: "center" });
+
+    const totalGeneral = totalPeriodo + totalFinalCaja;
+    y += 52;
+    
+    doc.setFillColor(255, 255, 255);
+    doc.roundedRect(marginLeft, y - 3, pageWidth, 12, 3, 3, 'F');
+    
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(217, 119, 6);
+    doc.text("TOTAL GENERAL: RD$" + totalGeneral.toFixed(2), 105, y + 4, { align: "center" });
+
+    // === FOOTER ===
+    y = 280;
+    doc.setFillColor(31, 41, 55);
+    doc.roundedRect(0, y, 210, 17, 0, 0, 'F');
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(255, 255, 255);
+    doc.text("La Parada del Maiz y El Majarete de Leidy", 105, y + 7, { align: "center" });
+    
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.text("Generado el " + new Date().toLocaleString('es-DO'), 105, y + 13, { align: "center" });
+
+    doc.save('Resumen_' + fd + '_al_' + fh + '.pdf');
+    cerrarModalImprimir();
+    mostrarNotificacion('PDF generado correctamente');
+  } catch (e) {
+    mostrarNotificacion('Error: ' + e.message, 'error');
+  }
+}
 
     // Actualizar conexión cada 30 segundos
     setInterval(async () => {
