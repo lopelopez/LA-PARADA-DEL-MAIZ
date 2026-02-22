@@ -8,66 +8,233 @@
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body class="bg-yellow-50 font-sans min-h-screen">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* === DISEÑO MODERNO === */
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fff7ed 100%);
+      min-height: 100vh;
+    }
 
+    .banner {
+      border-radius: 0 0 60px 60px;
+      box-shadow: 0 15px 50px rgba(245, 158, 11, 0.3);
+    }
+
+    .nav-btn {
+      border-radius: 16px;
+      padding: 10px 18px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .nav-yellow {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: white;
+    }
+
+    .nav-yellow:hover {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+
+    .info-card {
+      background: linear-gradient(135deg, #ffffff, #fefbf4);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.06);
+      border: 1px solid rgba(245, 158, 11, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .info-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(245, 158, 11, 0.15);
+    }
+
+    .badge-info {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      padding: 10px 20px;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #92400e;
+    }
+
+    .badge-usuario {
+      background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+      padding: 10px 20px;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #7c3aed;
+    }
+
+    .badge-comentario {
+      background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+      padding: 10px 20px;
+      border-radius: 16px;
+      font-size: 14px;
+      color: #1e40af;
+    }
+
+    .item-card {
+      background: linear-gradient(135deg, #ffffff, #fefbf4);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.06);
+      border: 1px solid rgba(245, 158, 11, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .item-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(245, 158, 11, 0.15);
+    }
+
+    .badge-total {
+      background: linear-gradient(135deg, #34d399, #10b981);
+      padding: 16px 32px;
+      border-radius: 20px;
+      font-size: 24px;
+      font-weight: 700;
+      color: white;
+      box-shadow: 0 8px 25px rgba(16, 185, 129, 0.35);
+    }
+
+    .resumen-card {
+      background: linear-gradient(135deg, #ffffff, #fefbf4);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .loading-spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #f59e0b;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 640px) {
+      .glass-card {
+        padding: 20px;
+        border-radius: 22px;
+      }
+      
+      .banner {
+        border-radius: 0 0 45px 45px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Banner -->
   <div class="relative w-full h-28 sm:h-36">
     <img src="LOGO LA PARADA DEL MAIZ.png" alt="Logo" class="w-full h-full object-cover">
-    <div class="absolute inset-0 bg-yellow-500 bg-opacity-50 flex items-center justify-center">
-      <h1 class="text-white text-xl md:text-3xl font-bold text-center">La Parada del Maíz</h1>
+    <div class="absolute inset-0 bg-gradient-to-b from-yellow-500/50 to-yellow-600/60 flex items-center justify-center banner">
+      <h1 class="text-white text-xl md:text-3xl font-bold text-center px-4 drop-shadow-lg">
+        📋 Detalle de Factura
+      </h1>
     </div>
   </div>
 
-  <nav class="flex flex-wrap justify-center gap-2 mt-4 px-2">
-    <a href="historial.html" class="bg-yellow-400 text-white px-4 py-2 rounded shadow text-sm">Volver al Historial</a>
+  <!-- Navegación -->
+  <nav class="flex flex-wrap justify-center gap-3 mt-6 px-4">
+    <a href="historial.html" class="nav-btn nav-yellow text-sm">📋 Volver al Historial</a>
   </nav>
 
-  <section class="max-w-4xl mx-auto mt-6 bg-white p-4 rounded-xl shadow mx-2">
-    <h2 class="text-2xl font-semibold mb-2 text-center">Detalle de Factura</h2>
+  <!-- Detalle de Factura -->
+  <section class="max-w-4xl mx-auto mt-6 mx-4 mb-10">
+    <div class="glass-card">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">📋 Detalle de Factura</h2>
 
-    <div id="infoFactura" class="bg-yellow-50 p-3 rounded-lg mb-4 text-center">
-      <p class="text-gray-600">
-        <span class="font-semibold">Factura #<span id="facturaNum">--</span></span> |
-        <span>Fecha: <span id="facturaFecha">--</span></span>
-      </p>
-    </div>
-
-    <!-- USUARIO -->
-    <div id="usuarioBox" class="bg-purple-50 p-3 rounded-lg mb-4 hidden">
-      <p class="text-sm text-gray-700">
-        <span class="font-semibold">Usuario:</span> 
-        <span id="usuarioTexto" class="font-bold text-purple-600"></span>
-      </p>
-    </div>
-
-    <!-- COMENTARIO -->
-    <div id="comentarioBox" class="bg-blue-50 p-3 rounded-lg mb-4 hidden">
-      <p class="text-sm text-gray-700">
-        <span class="font-semibold">Comentario:</span> 
-        <span id="comentarioTexto"></span>
-      </p>
-    </div>
-
-    <ul id="detalleFactura" class="space-y-2"></ul>
-    <div id="noData" class="text-center text-gray-500 mt-4 hidden">No se encontraron detalles</div>
-
-    <div class="mt-6 bg-gray-50 p-4 rounded-lg">
-      <div class="flex justify-between mb-2">
-        <span class="text-gray-600">Subtotal:</span>
-        <span class="font-medium">RD$ <span id="subtotalFactura">0.00</span></span>
+      <!-- Loading -->
+      <div id="loading" class="flex justify-center py-8">
+        <div class="loading-spinner"></div>
       </div>
-      <div id="descuentoRow" class="flex justify-between mb-2 hidden">
-        <span class="text-red-600">Descuento:</span>
-        <span class="text-red-600">- RD$ <span id="descuentoFactura">0.00</span></span>
-      </div>
-      <hr class="my-2">
-      <div class="flex justify-between">
-        <span class="font-semibold">Total:</span>
-        <span class="font-bold text-green-600 text-xl">RD$ <span id="totalFactura">0.00</span></span>
+
+      <!-- Info principal -->
+      <div id="infoContainer" class="hidden">
+        <div class="flex flex-wrap justify-center gap-4 mb-6">
+          <div class="badge-info">
+            📄 Factura #<span id="facturaNum" class="font-bold">--</span>
+          </div>
+          <div class="badge-info">
+            📅 <span id="facturaFecha">--</span>
+          </div>
+        </div>
+
+        <!-- Usuario -->
+        <div id="usuarioBox" class="hidden mb-4">
+          <div class="badge-usuario text-center">
+            👤 <span id="usuarioTexto" class="font-bold"></span>
+          </div>
+        </div>
+
+        <!-- Comentario -->
+        <div id="comentarioBox" class="hidden mb-6">
+          <div class="badge-comentario">
+            💬 <span id="comentarioTexto"></span>
+          </div>
+        </div>
+
+        <!-- Lista de items -->
+        <div id="detalleFactura" class="space-y-4 mb-6"></div>
+        <div id="noData" class="text-center text-gray-500 py-8 hidden">
+          <p class="text-lg">📭 No se encontraron detalles</p>
+        </div>
+
+        <!-- Resumen -->
+        <div class="resumen-card">
+          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
+            <span class="text-gray-600 font-medium">Subtotal:</span>
+            <span class="font-semibold text-lg">RD$ <span id="subtotalFactura">0.00</span></span>
+          </div>
+          
+          <div id="descuentoRow" class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4 hidden">
+            <span class="text-red-600 font-medium">Descuento:</span>
+            <span class="text-red-600 font-semibold text-lg">- RD$ <span id="descuentoFactura">0.00</span></span>
+          </div>
+          
+          <hr class="my-4 border-yellow-200">
+          
+          <div class="flex justify-center">
+            <div class="text-center">
+              <p class="text-gray-600 font-medium mb-2">Total de la Factura</p>
+              <div class="badge-total">
+                RD$ <span id="totalFactura">0.00</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-
-    <div id="loading" class="hidden mt-4 text-yellow-600 text-center">Cargando...</div>
   </section>
 
   <script>
@@ -79,7 +246,11 @@
     const facturaId = params.get("id");
 
     function mostrarNotificacion(mensaje, tipo = 'success') {
-      Toastify({ text: mensaje, duration: 3000, gravity: "top", position: "right",
+      Toastify({
+        text: mensaje,
+        duration: 3000,
+        gravity: "top",
+        position: "right",
         backgroundColor: tipo === 'error' ? "#dc3545" : "#28a745"
       }).showToast();
     }
@@ -95,10 +266,7 @@
         return;
       }
 
-      document.getElementById('loading').classList.remove('hidden');
-
       try {
-        // SELECCIONAMOS EL CAMPO 'USUARIO' JUNTO CON LOS DEMÁS
         const { data: facturaData, error: facturaError } = await supabaseClient
           .from('facturas')
           .select('id, fecha, subtotal, descuento, total, comentario, usuario')
@@ -106,6 +274,10 @@
           .single();
 
         if (facturaError) throw facturaError;
+
+        // Ocultar loading y mostrar contenido
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('infoContainer').classList.remove('hidden');
 
         document.getElementById('facturaNum').textContent = facturaData.id;
         document.getElementById('facturaFecha').textContent = formatearFecha(facturaData.fecha);
@@ -130,23 +302,31 @@
         if (error) throw error;
 
         const lista = document.getElementById('detalleFactura');
-        const noData = document.getElementById('noData');
         lista.innerHTML = "";
 
         if (data.length === 0) {
-          noData.classList.remove('hidden');
+          document.getElementById('noData').classList.remove('hidden');
         } else {
-          noData.classList.add('hidden');
+          document.getElementById('noData').classList.add('hidden');
+          
           data.forEach(item => {
-            const li = document.createElement('li');
-            li.className = "flex justify-between bg-yellow-100 p-3 rounded-lg";
-            li.innerHTML = `
-              <span class="font-semibold">${item.articulos.nombre}</span>
-              <span class="text-gray-600">
-                Cant: ${item.cantidad} | Precio: RD$${parseFloat(item.precio).toFixed(2)} | 
-                <span class="font-medium">RD$${parseFloat(item.subtotal).toFixed(2)}</span>
-              </span>`;
-            lista.appendChild(li);
+            const card = document.createElement('div');
+            card.className = 'item-card';
+            card.innerHTML = `
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex-1">
+                  <h4 class="font-semibold text-gray-800 text-lg">${item.articulos.nombre}</h4>
+                  <p class="text-sm text-gray-500 mt-1">
+                    Cantidad: <span class="font-medium">${item.cantidad}</span> | 
+                    Precio: <span class="font-medium">RD$${parseFloat(item.precio).toFixed(2)}</span>
+                  </p>
+                </div>
+                <div class="badge-total text-base">
+                  RD$${parseFloat(item.subtotal).toFixed(2)}
+                </div>
+              </div>
+            `;
+            lista.appendChild(card);
           });
         }
 
@@ -162,26 +342,26 @@
 
       } catch (error) {
         mostrarNotificacion("Error: " + error.message, 'error');
-      } finally {
-        document.getElementById('loading').classList.add('hidden');
       }
     }
-setInterval(async () => {
-  const usuario = localStorage.getItem('usuario');
-  if (usuario) {
-    const usuarioObj = JSON.parse(usuario);
-    try {
-      await supabaseClient
-        .from('usuarios')
-        .update({ ultima_conexion: new Date().toISOString() })
-        .eq('username', usuarioObj.username);
-    } catch (e) {
-      console.error('Error actualizando conexión:', e);
-    }
-  }
-}, 30000);
+
+    // Actualizar conexión cada 30 segundos
+    setInterval(async () => {
+      const usuario = localStorage.getItem('usuario');
+      if (usuario) {
+        const usuarioObj = JSON.parse(usuario);
+        try {
+          await supabaseClient
+            .from('usuarios')
+            .update({ ultima_conexion: new Date().toISOString() })
+            .eq('username', usuarioObj.username);
+        } catch (e) {
+          console.error('Error actualizando conexión:', e);
+        }
+      }
+    }, 30000);
+
     window.onload = cargarDetalle;
-    
   </script>
 </body>
 </html>
