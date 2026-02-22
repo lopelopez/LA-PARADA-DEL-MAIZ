@@ -9,96 +9,343 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-</head>
-<body class="bg-yellow-50 font-sans min-h-screen">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* === DISEÑO MODERNO === */
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fff7ed 100%);
+      min-height: 100vh;
+    }
 
+    .banner {
+      border-radius: 0 0 60px 60px;
+      box-shadow: 0 15px 50px rgba(245, 158, 11, 0.3);
+    }
+
+    .nav-btn {
+      border-radius: 16px;
+      padding: 10px 18px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .nav-yellow {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: white;
+    }
+
+    .nav-yellow:hover {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+
+    .nav-green {
+      background: linear-gradient(135deg, #34d399, #10b981);
+      color: white;
+    }
+
+    .nav-green:hover {
+      background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    .nav-red {
+      background: linear-gradient(135deg, #f87171, #ef4444);
+      color: white;
+    }
+
+    .nav-red:hover {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+
+    .input-modern {
+      border-radius: 16px;
+      padding: 14px 18px;
+      border: 2px solid #e5e7eb;
+      background: #f9fafb;
+      transition: all 0.3s ease;
+    }
+
+    .input-modern:focus {
+      border-color: #f59e0b;
+      background: white;
+      box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.15);
+      outline: none;
+    }
+
+    .btn-search {
+      border-radius: 16px;
+      padding: 14px 28px;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: white;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
+    }
+
+    .btn-search:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(245, 158, 11, 0.45);
+    }
+
+    .factura-card {
+      background: linear-gradient(135deg, #ffffff, #fefbf4);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.06);
+      border: 1px solid rgba(245, 158, 11, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .factura-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(245, 158, 11, 0.15);
+    }
+
+    .badge-fecha {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #92400e;
+    }
+
+    .badge-total {
+      background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+      padding: 8px 16px;
+      border-radius: 14px;
+      font-weight: 700;
+      color: #065f46;
+    }
+
+    .btn-action {
+      border-radius: 12px;
+      padding: 8px 16px;
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-action:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-detail {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: white;
+    }
+
+    .btn-delete {
+      background: linear-gradient(135deg, #f87171, #ef4444);
+      color: white;
+    }
+
+    .modal-overlay {
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-content {
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(30px);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-btn {
+      border-radius: 14px;
+      padding: 12px 24px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .modal-btn-cancel {
+      background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+      color: #374151;
+    }
+
+    .modal-btn-delete {
+      background: linear-gradient(135deg, #f87171, #ef4444);
+      color: white;
+    }
+
+    .modal-btn-save {
+      background: linear-gradient(135deg, #34d399, #10b981);
+      color: white;
+    }
+
+    .info-box {
+      background: linear-gradient(135deg, #eff6ff, #dbeafe);
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .eliminated-card {
+      background: linear-gradient(135deg, #fef2f2, #fee2e2);
+      border-radius: 20px;
+      padding: 20px;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    @media (max-width: 640px) {
+      .glass-card {
+        padding: 20px;
+        border-radius: 22px;
+      }
+      
+      .banner {
+        border-radius: 0 0 45px 45px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Banner -->
   <div class="relative w-full h-28 sm:h-36">
     <img src="LOGO LA PARADA DEL MAIZ.png" alt="Logo" class="w-full h-full object-cover">
-    <div class="absolute inset-0 bg-yellow-500 bg-opacity-50 flex items-center justify-center">
-      <h1 class="text-white text-xl md:text-3xl font-bold text-center">La Parada del Maíz y El Majarete de Leidy</h1>
+    <div class="absolute inset-0 bg-gradient-to-b from-yellow-500/50 to-yellow-600/60 flex items-center justify-center banner">
+      <h1 class="text-white text-xl md:text-3xl font-bold text-center px-4 drop-shadow-lg">
+        📋 Historial de Facturas
+      </h1>
     </div>
   </div>
 
-  <nav class="flex flex-wrap justify-center gap-2 mt-4 px-2">
-    <a href="index.html" class="bg-yellow-400 text-white px-4 py-2 rounded shadow text-sm">Artículos</a>
-    <a href="facturacion.html" class="bg-yellow-400 text-white px-4 py-2 rounded shadow text-sm">Facturación</a>
-    <button onclick="mostrarModalImprimir()" class="bg-green-400 text-white px-4 py-2 rounded shadow text-sm">Imprimir</button>
-    <button onclick="mostrarModalIngresos()" class="bg-green-400 text-white px-4 py-2 rounded shadow text-sm">Ingresos</button>
-    <button onclick="mostrarFacturasEliminadas()" class="bg-red-400 text-white px-4 py-2 rounded shadow text-sm">Eliminadas</button>
+  <!-- Navegación -->
+  <nav class="flex flex-wrap justify-center gap-3 mt-6 px-4">
+    <a href="index.html" class="nav-btn nav-yellow text-sm">📦 Artículos</a>
+    <a href="facturacion.html" class="nav-btn nav-yellow text-sm">🧾 Facturación</a>
+    <button onclick="mostrarModalImprimir()" class="nav-btn nav-green text-sm">🖨️ Imprimir</button>
+    <button onclick="mostrarModalIngresos()" class="nav-btn nav-green text-sm">💰 Ingresos</button>
+    <button onclick="mostrarFacturasEliminadas()" class="nav-btn nav-red text-sm">🗑️ Eliminadas</button>
   </nav>
 
-  <section class="max-w-4xl mx-auto mt-6 bg-white p-4 rounded-xl shadow mx-2">
-    <h2 class="text-2xl font-semibold mb-4 text-center">Historial de Facturas</h2>
-    
-    <div class="flex flex-col sm:flex-row gap-3 justify-center mb-4">
-      <div><label class="block text-sm">Desde:</label><input type="date" id="fechaDesde" class="border p-2 rounded w-full"></div>
-      <div><label class="block text-sm">Hasta:</label><input type="date" id="fechaHasta" class="border p-2 rounded w-full"></div>
-      <button onclick="cargarFacturasPorRango()" class="bg-yellow-400 text-white px-4 py-2 rounded shadow sm:self-end">Buscar</button>
-    </div>
+  <!-- Historial -->
+  <section class="max-w-4xl mx-auto mt-6 mx-4 mb-10">
+    <div class="glass-card">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">📋 Historial de Facturas</h2>
+      
+      <!-- Selector de fechas -->
+      <div class="flex flex-col sm:flex-row gap-4 mb-6">
+        <div class="w-full sm:w-1/3">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Desde:</label>
+          <input type="date" id="fechaDesde" class="input-modern w-full">
+        </div>
+        <div class="w-full sm:w-1/3">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Hasta:</label>
+          <input type="date" id="fechaHasta" class="input-modern w-full">
+        </div>
+        <div class="w-full sm:w-1/3">
+          <label class="block text-sm font-medium text-gray-700 mb-2"> </label>
+          <button onclick="cargarFacturasPorRango()" class="btn-search w-full">
+            🔍 Buscar
+          </button>
+        </div>
+      </div>
 
-    <ul id="historialFacturas" class="space-y-2"></ul>
-    <div id="noData" class="text-center text-gray-500 mt-4 hidden">No hay facturas</div>
+      <!-- Lista de facturas -->
+      <div id="historialFacturas" class="space-y-4"></div>
+      <div id="noData" class="info-box text-center hidden">
+        <p class="text-blue-700">📭 No hay facturas en este período</p>
+      </div>
+    </div>
   </section>
 
   <!-- Modal Eliminar -->
-  <div id="modalPassword" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
-    <div class="bg-white p-4 rounded-lg w-full max-w-sm">
-      <h3 class="font-semibold mb-2">Eliminar factura</h3>
-      <input type="password" id="inputPassword" class="border p-2 rounded w-full mb-4" placeholder="Contraseña">
-      <div class="mb-4">
-        <label class="block text-sm mb-1">Motivo de eliminación:</label>
-        <input type="text" id="motivoEliminacion" class="border p-2 rounded w-full" placeholder="¿Por qué se elimina?">
-      </div>
-      <div class="flex justify-end gap-2">
-        <button onclick="cerrarModal()" class="bg-gray-400 text-white px-3 py-2 rounded">Cancelar</button>
-        <button onclick="confirmarEliminar()" class="bg-red-400 text-white px-3 py-2 rounded">Eliminar</button>
+  <div id="modalPassword" class="fixed inset-0 modal-overlay hidden items-center justify-center z-50 p-4">
+    <div class="modal-content w-full max-w-sm">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">🗑️ Eliminar Factura</h3>
+      
+      <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña:</label>
+      <input type="password" id="inputPassword" class="input-modern w-full mb-4" placeholder="Ingrese contraseña">
+      
+      <label class="block text-sm font-medium text-gray-700 mb-2">Motivo de eliminación:</label>
+      <input type="text" id="motivoEliminacion" class="input-modern w-full mb-4" placeholder="¿Por qué se elimina?">
+      
+      <div class="flex justify-end gap-3">
+        <button onclick="cerrarModal()" class="modal-btn modal-btn-cancel">Cancelar</button>
+        <button onclick="confirmarEliminar()" class="modal-btn modal-btn-delete">Eliminar</button>
       </div>
     </div>
   </div>
 
   <!-- Modal Contraseña Ingresos -->
-  <div id="modalPasswordIngresos" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
-    <div class="bg-white p-4 rounded-lg w-full max-w-sm">
-      <h3 class="font-semibold mb-2">Ingresos - Contraseña</h3>
-      <input type="password" id="inputPasswordIngresos" class="border p-2 rounded w-full mb-4" placeholder="Contraseña">
-      <div class="flex justify-end gap-2">
-        <button onclick="cerrarModalIngresos()" class="bg-gray-400 text-white px-3 py-2 rounded">Cancelar</button>
-        <button onclick="confirmarPasswordIngresos()" class="bg-green-400 text-white px-3 py-2 rounded">Aceptar</button>
+  <div id="modalPasswordIngresos" class="fixed inset-0 modal-overlay hidden items-center justify-center z-50 p-4">
+    <div class="modal-content w-full max-w-sm">
+      <h3 class="text-xl font-bold text-gray-800 mb-4">💰 Ingresos - Contraseña</h3>
+      
+      <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña:</label>
+      <input type="password" id="inputPasswordIngresos" class="input-modern w-full mb-4" placeholder="Ingrese contraseña">
+      
+      <div class="flex justify-end gap-3">
+        <button onclick="cerrarModalIngresos()" class="modal-btn modal-btn-cancel">Cancelar</button>
+        <button onclick="confirmarPasswordIngresos()" class="modal-btn modal-btn-save">Aceptar</button>
       </div>
     </div>
   </div>
 
   <!-- Modal Imprimir -->
-  <div id="modalPasswordImprimir" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
-    <div class="bg-white p-4 rounded-lg w-full max-w-sm">
-      <h3 class="font-semibold mb-2">Contraseña</h3>
-      <input type="password" id="inputPasswordImprimir" class="border p-2 rounded w-full mb-4" placeholder="Contraseña">
-      <div class="flex justify-end gap-2">
-        <button onclick="cerrarModalImprimir()" class="bg-gray-400 text-white px-3 py-2 rounded">Cancelar</button>
-        <button onclick="confirmarPasswordImprimir()" class="bg-green-400 text-white px-3 py-2 rounded">Aceptar</button>
+  <div id="modalPasswordImprimir" class="fixed inset-0 modal-overlay hidden items-center justify-center z-50 p-4">
+    <div class="modal-content w-full max-w-sm">
+      <h3 class="text-xl font-bold text-gray-800 mb-4">🖨️ Imprimir - Contraseña</h3>
+      
+      <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña:</label>
+      <input type="password" id="inputPasswordImprimir" class="input-modern w-full mb-4" placeholder="Ingrese contraseña">
+      
+      <div class="flex justify-end gap-3">
+        <button onclick="cerrarModalImprimir()" class="modal-btn modal-btn-cancel">Cancelar</button>
+        <button onclick="confirmarPasswordImprimir()" class="modal-btn modal-btn-save">Aceptar</button>
       </div>
     </div>
   </div>
 
-  <div id="modalImprimir" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
-    <div class="bg-white p-4 rounded-lg w-full max-w-sm">
-      <h3 class="font-semibold mb-2">Imprimir Ventas</h3>
-      <div class="mb-2"><label class="text-sm">Desde:</label><input type="date" id="printDesde" class="border p-2 rounded w-full"></div>
-      <div class="mb-2"><label class="text-sm">Hasta:</label><input type="date" id="printHasta" class="border p-2 rounded w-full"></div>
-      <div class="flex justify-end gap-2">
-        <button onclick="cerrarModalImprimir()" class="bg-gray-400 text-white px-3 py-2 rounded">Cancelar</button>
-        <button onclick="imprimirVentas()" class="bg-green-400 text-white px-3 py-2 rounded">Imprimir</button>
+  <!-- Modal Rango Impresión -->
+  <div id="modalImprimir" class="fixed inset-0 modal-overlay hidden items-center justify-center z-50 p-4">
+    <div class="modal-content w-full max-w-sm">
+      <h3 class="text-xl font-bold text-gray-800 mb-4">🖨️ Imprimir Ventas</h3>
+      
+      <label class="block text-sm font-medium text-gray-700 mb-2">Desde:</label>
+      <input type="date" id="printDesde" class="input-modern w-full mb-3">
+      
+      <label class="block text-sm font-medium text-gray-700 mb-2">Hasta:</label>
+      <input type="date" id="printHasta" class="input-modern w-full mb-4">
+      
+      <div class="flex justify-end gap-3">
+        <button onclick="cerrarModalImprimir()" class="modal-btn modal-btn-cancel">Cancelar</button>
+        <button onclick="imprimirVentas()" class="modal-btn modal-btn-save">Imprimir</button>
       </div>
     </div>
   </div>
 
   <!-- Modal Facturas Eliminadas -->
-  <div id="modalEliminadas" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
-    <div class="bg-white p-4 rounded-lg w-full max-w-2xl max-h-[80vh] overflow-y-auto">
-      <h3 class="font-semibold mb-4 text-lg">Facturas Eliminadas</h3>
-      <ul id="listaEliminadas" class="space-y-2"></ul>
-      <div class="flex justify-end mt-4">
-        <button onclick="cerrarModalEliminadas()" class="bg-gray-400 text-white px-4 py-2 rounded">Cerrar</button>
+  <div id="modalEliminadas" class="fixed inset-0 modal-overlay hidden items-center justify-center z-50 p-4">
+    <div class="modal-content w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+      <h3 class="text-xl font-bold text-gray-800 mb-4">🗑️ Facturas Eliminadas</h3>
+      
+      <ul id="listaEliminadas" class="space-y-4"></ul>
+      
+      <div class="flex justify-end mt-6">
+        <button onclick="cerrarModalEliminadas()" class="modal-btn modal-btn-cancel">Cerrar</button>
       </div>
     </div>
   </div>
@@ -111,7 +358,11 @@
     let facturaAEliminar = null;
 
     function mostrarNotificacion(mensaje, tipo = 'success') {
-      Toastify({ text: mensaje, duration: 3000, gravity: "top", position: "right",
+      Toastify({
+        text: mensaje,
+        duration: 3000,
+        gravity: "top",
+        position: "right",
         backgroundColor: tipo === 'error' ? "#dc3545" : tipo === 'warning' ? "#ffc107" : "#28a745"
       }).showToast();
     }
@@ -130,64 +381,109 @@
       try {
         const hoy = new Date();
         const fechaHoy = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
-        const { data } = await supabaseClient.from('facturas').select('*').gte('fecha', fechaHoy+'T00:00:00').lte('fecha', fechaHoy+'T23:59:59').order('id', {ascending:false});
+        const { data } = await supabaseClient
+          .from('facturas')
+          .select('*')
+          .gte('fecha', fechaHoy + 'T00:00:00')
+          .lte('fecha', fechaHoy + 'T23:59:59')
+          .order('id', { ascending: false });
         mostrarFacturas(data || []);
-      } catch (error) { mostrarNotificacion("Error: " + error.message, 'error'); }
+      } catch (error) {
+        mostrarNotificacion("Error: " + error.message, 'error');
+      }
     }
 
     function mostrarFacturas(data) {
       const lista = document.getElementById('historialFacturas');
       const noData = document.getElementById('noData');
       lista.innerHTML = "";
-      if(data.length===0){ noData.classList.remove('hidden'); return; }
+      
+      if (data.length === 0) {
+        noData.classList.remove('hidden');
+        return;
+      }
+      
       noData.classList.add('hidden');
+      
       data.forEach(f => {
-        const li = document.createElement('li');
-        li.className = "flex justify-between items-center bg-yellow-100 p-3 rounded-lg";
-        // MOSTRAR USUARIO
-        li.innerHTML = `<div>
-          <span class="font-bold">#${f.id}</span> | ${formatearFecha(f.fecha)} | <span class="font-medium">RD$${parseFloat(f.total).toFixed(2)}</span>
-          ${f.usuario ? '<br><span class="text-xs text-purple-600">Usuario: ' + f.usuario + '</span>' : ''}
-        </div>
-          <div class="flex gap-2"><button onclick="window.location.href='detalle_factura.html?id=${f.id}'" class="bg-yellow-400 text-white px-2 py-1 rounded text-sm">Detalle</button>
-          <button onclick="eliminarFactura(${f.id})" class="bg-red-400 text-white px-2 py-1 rounded text-sm">X</button></div>`;
-        lista.appendChild(li);
+        const card = document.createElement('div');
+        card.className = 'factura-card';
+        
+        card.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex-1">
+              <div class="flex items-center gap-3 mb-2">
+                <span class="font-bold text-lg text-gray-800">#${f.id}</span>
+                <span class="badge-fecha">${formatearFecha(f.fecha)}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="badge-total">RD$${parseFloat(f.total).toFixed(2)}</span>
+                ${f.usuario ? '<span class="text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded-full">👤 ' + f.usuario + '</span>' : ''}
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="window.location.href='detalle_factura.html?id=${f.id}'" class="btn-action btn-detail">📋 Detalle</button>
+              <button onclick="eliminarFactura(${f.id})" class="btn-action btn-delete">🗑️</button>
+            </div>
+          </div>
+        `;
+        
+        lista.appendChild(card);
       });
     }
 
     async function cargarFacturasPorRango() {
       const d = document.getElementById('fechaDesde').value;
       const h = document.getElementById('fechaHasta').value;
-      if(!d||!h) return mostrarNotificacion('Seleccione fechas','warning');
-      const { data } = await supabaseClient.from('facturas').select('*').gte('fecha',d+'T00:00:00').lte('fecha',h+'T23:59:59').order('id',{ascending:false});
-      mostrarFacturas(data||[]);
-    }
-
-    function eliminarFactura(id){ 
-      facturaAEliminar=id; 
-      document.getElementById('modalPassword').classList.remove('hidden'); 
-      document.getElementById('motivoEliminacion').value = '';
-    }
-    
-    function cerrarModal(){ 
-      facturaAEliminar=null; 
-      document.getElementById('inputPassword').value=''; 
-      document.getElementById('motivoEliminacion').value = '';
-      document.getElementById('modalPassword').classList.add('hidden'); 
-    }
-
-    async function confirmarEliminar(){
-      if(document.getElementById('inputPassword').value!=='6511') return mostrarNotificacion('Contraseña incorrecta','error');
       
-      const motivo = document.getElementById('motivoEliminacion').value.trim();
-      if(!motivo) return mostrarNotificacion('Ingrese el motivo de eliminación','warning');
+      if (!d || !h) {
+        return mostrarNotificacion('Seleccione fechas', 'warning');
+      }
+      
+      const { data } = await supabaseClient
+        .from('facturas')
+        .select('*')
+        .gte('fecha', d + 'T00:00:00')
+        .lte('fecha', h + 'T23:59:59')
+        .order('id', { ascending: false });
+      
+      mostrarFacturas(data || []);
+    }
 
-      try{
-        // Obtener datos de la factura antes de eliminar
-        const {data: factura} = await supabaseClient.from('facturas').select('*').eq('id',facturaAEliminar).single();
-        
-        if(factura){
-          // Guardar en tabla de eliminadas
+    function eliminarFactura(id) {
+      facturaAEliminar = id;
+      document.getElementById('modalPassword').classList.remove('hidden');
+      document.getElementById('modalPassword').classList.add('flex');
+      document.getElementById('motivoEliminacion').value = '';
+      document.getElementById('inputPassword').value = '';
+    }
+
+    function cerrarModal() {
+      facturaAEliminar = null;
+      document.getElementById('inputPassword').value = '';
+      document.getElementById('motivoEliminacion').value = '';
+      document.getElementById('modalPassword').classList.add('hidden');
+      document.getElementById('modalPassword').classList.remove('flex');
+    }
+
+    async function confirmarEliminar() {
+      if (document.getElementById('inputPassword').value !== '6511') {
+        return mostrarNotificacion('Contraseña incorrecta', 'error');
+      }
+
+      const motivo = document.getElementById('motivoEliminacion').value.trim();
+      if (!motivo) {
+        return mostrarNotificacion('Ingrese el motivo de eliminación', 'warning');
+      }
+
+      try {
+        const { data: factura } = await supabaseClient
+          .from('facturas')
+          .select('*')
+          .eq('id', facturaAEliminar)
+          .single();
+
+        if (factura) {
           await supabaseClient.from('facturas_eliminadas').insert([{
             factura_id: factura.id,
             fecha_original: factura.fecha,
@@ -198,249 +494,418 @@
           }]);
         }
 
-        const {data:dets} = await supabaseClient.from('detalle_factura').select('articulo_id,cantidad').eq('factura_id',facturaAEliminar);
-        for(const d of dets){
-          const {data:a} = await supabaseClient.from('articulos').select('stock').eq('id',d.articulo_id).single();
-          if(a) await supabaseClient.from('articulos').update({stock:(a.stock||0)+d.cantidad}).eq('id',d.articulo_id);
+        const { data: dets } = await supabaseClient
+          .from('detalle_factura')
+          .select('articulo_id, cantidad')
+          .eq('factura_id', facturaAEliminar);
+
+        for (const d of dets) {
+          const { data: a } = await supabaseClient
+            .from('articulos')
+            .select('stock')
+            .eq('id', d.articulo_id)
+            .single();
+          
+          if (a) {
+            await supabaseClient
+              .from('articulos')
+              .update({ stock: (a.stock || 0) + d.cantidad })
+              .eq('id', d.articulo_id);
+          }
         }
-        await supabaseClient.from('detalle_factura').delete().eq('factura_id',facturaAEliminar);
-        await supabaseClient.from('facturas').delete().eq('id',facturaAEliminar);
+
+        await supabaseClient.from('detalle_factura').delete().eq('factura_id', facturaAEliminar);
+        await supabaseClient.from('facturas').delete().eq('id', facturaAEliminar);
+        
         mostrarNotificacion('Factura eliminada correctamente');
-        cerrarModal(); cargarFacturas();
-      }catch(e){ mostrarNotificacion('Error: '+e.message,'error'); }
-    }
-
-    function mostrarModalImprimir(){ document.getElementById('modalPasswordImprimir').classList.remove('hidden'); }
-    function cerrarModalImprimir(){ document.getElementById('modalPasswordImprimir').classList.add('hidden'); document.getElementById('modalImprimir').classList.add('hidden'); document.getElementById('inputPasswordImprimir').value=''; }
-    function confirmarPasswordImprimir(){ document.getElementById('inputPasswordImprimir').value!=='6511'?mostrarNotificacion('Incorrecto','error'):(document.getElementById('modalPasswordImprimir').classList.add('hidden'),document.getElementById('modalImprimir').classList.remove('hidden')); }
-
-    function mostrarModalIngresos(){ document.getElementById('modalPasswordIngresos').classList.remove('hidden'); }
-    function cerrarModalIngresos(){ document.getElementById('modalPasswordIngresos').classList.add('hidden'); document.getElementById('inputPasswordIngresos').value=''; }
-    function confirmarPasswordIngresos(){ 
-      if(document.getElementById('inputPasswordIngresos').value!=='6511'){
-        return mostrarNotificacion('Contraseña incorrecta','error');
+        cerrarModal();
+        cargarFacturas();
+      } catch (e) {
+        mostrarNotificacion('Error: ' + e.message, 'error');
       }
-      window.location.href='ingresos.html';
     }
 
-    async function mostrarFacturasEliminadas(){
+    function mostrarModalImprimir() {
+      document.getElementById('modalPasswordImprimir').classList.remove('hidden');
+      document.getElementById('modalPasswordImprimir').classList.add('flex');
+    }
+
+    function cerrarModalImprimir() {
+      document.getElementById('modalPasswordImprimir').classList.add('hidden');
+      document.getElementById('modalPasswordImprimir').classList.remove('flex');
+      document.getElementById('modalImprimir').classList.add('hidden');
+      document.getElementById('modalImprimir').classList.remove('flex');
+      document.getElementById('inputPasswordImprimir').value = '';
+    }
+
+    function confirmarPasswordImprimir() {
+      if (document.getElementById('inputPasswordImprimir').value !== '6511') {
+        return mostrarNotificacion('Contraseña incorrecta', 'error');
+      }
+      document.getElementById('modalPasswordImprimir').classList.add('hidden');
+      document.getElementById('modalPasswordImprimir').classList.remove('flex');
+      document.getElementById('modalImprimir').classList.remove('hidden');
+      document.getElementById('modalImprimir').classList.add('flex');
+    }
+
+    function mostrarModalIngresos() {
+      document.getElementById('modalPasswordIngresos').classList.remove('hidden');
+      document.getElementById('modalPasswordIngresos').classList.add('flex');
+    }
+
+    function cerrarModalIngresos() {
+      document.getElementById('modalPasswordIngresos').classList.add('hidden');
+      document.getElementById('modalPasswordIngresos').classList.remove('flex');
+      document.getElementById('inputPasswordIngresos').value = '';
+    }
+
+    function confirmarPasswordIngresos() {
+      if (document.getElementById('inputPasswordIngresos').value !== '6511') {
+        return mostrarNotificacion('Contraseña incorrecta', 'error');
+      }
+      window.location.href = 'ingresos.html';
+    }
+
+    async function mostrarFacturasEliminadas() {
       document.getElementById('modalEliminadas').classList.remove('hidden');
-      const { data } = await supabaseClient.from('facturas_eliminadas').select('*').order('fecha_eliminacion', {ascending:false});
-      
+      document.getElementById('modalEliminadas').classList.add('flex');
+
+      const { data } = await supabaseClient
+        .from('facturas_eliminadas')
+        .select('*')
+        .order('fecha_eliminacion', { ascending: false });
+
       const lista = document.getElementById('listaEliminadas');
       lista.innerHTML = '';
-      
-      if(!data || data.length === 0){
+
+      if (!data || data.length === 0) {
         lista.innerHTML = '<li class="text-center text-gray-500">No hay facturas eliminadas</li>';
         return;
       }
-      
-            data.forEach(f => {
+
+      data.forEach(f => {
         const li = document.createElement('li');
-        li.className = "bg-red-50 p-3 rounded-lg border border-red-200";
+        li.className = 'eliminated-card';
         li.innerHTML = `
-          <div class="flex justify-between">
-            <span class="font-bold">Factura #${f.factura_id}</span>
-            <span class="text-sm text-gray-500">${formatearFecha(f.fecha_original)}</span>
+          <div class="flex justify-between items-start mb-2">
+            <span class="font-bold text-lg text-gray-800">Factura #${f.factura_id}</span>
+            <span class="badge-fecha">${formatearFecha(f.fecha_original)}</span>
           </div>
-          <div class="text-sm mt-1">
-            <span class="text-red-600">Total: RD$${parseFloat(f.total).toFixed(2)}</span> |
-            <span class="text-purple-600">Eliminado por: ${f.eliminado_por}</span>
+          <div class="flex flex-wrap gap-2 mb-2">
+            <span class="badge-total">RD$${parseFloat(f.total).toFixed(2)}</span>
+            <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium">👤 ${f.eliminado_por}</span>
           </div>
-          <div class="mt-2 text-sm bg-yellow-50 p-2 rounded">
-            <span class="font-semibold">Motivo:</span> ${f.comentario}
+          <div class="bg-yellow-50 p-3 rounded-lg mb-2">
+            <span class="font-semibold text-sm text-yellow-800">Motivo:</span>
+            <span class="text-sm text-gray-700"> ${f.comentario}</span>
           </div>
-          <div class="text-xs text-gray-400 mt-1">Eliminado: ${new Date(f.fecha_eliminacion).toLocaleString()}</div>
+          <div class="text-xs text-gray-400">Eliminado: ${new Date(f.fecha_eliminacion).toLocaleString()}</div>
         `;
         lista.appendChild(li);
       });
     }
 
-    function cerrarModalEliminadas(){
+    function cerrarModalEliminadas() {
       document.getElementById('modalEliminadas').classList.add('hidden');
+      document.getElementById('modalEliminadas').classList.remove('flex');
     }
 
-    async function imprimirVentas(){
+    async function imprimirVentas() {
       const fd = document.getElementById('printDesde').value;
       const fh = document.getElementById('printHasta').value;
-      if(!fd||!fh) return mostrarNotificacion('Seleccione fechas','warning');
-      try{
-        const {data:fs} = await supabaseClient.from('facturas').select('*').gte('fecha',fd+'T00:00:00').lte('fecha',fh+'T23:59:59').order('id',{ascending:true});
+      
+      if (!fd || !fh) {
+        return mostrarNotificacion('Seleccione fechas', 'warning');
+      }
+      
+      try {
+        const { data: fs } = await supabaseClient
+          .from('facturas')
+          .select('*')
+          .gte('fecha', fd + 'T00:00:00')
+          .lte('fecha', fh + 'T23:59:59')
+          .order('id', { ascending: true });
+
+        const { data: cajas } = await supabaseClient
+          .from('caja_chica')
+          .select('*')
+          .gte('fecha', fd)
+          .lte('fecha', fh);
+
+        const { data: defectuosos } = await supabaseClient
+          .from('articulos_defectuosos')
+          .select('*, articulos(nombre)')
+          .gte('fecha', fd + 'T00:00:00')
+          .lte('fecha', fh + 'T23:59:59');
+
+        const { data: articulos } = await supabaseClient.from('articulos').select('*');
+
+        if ((!fs || fs.length === 0) && (!cajas || cajas.length === 0) && (!defectuosos || defectuosos.length === 0)) {
+          return mostrarNotificacion('No hay datos en este período', 'warning');
+        }
+
+        const ids = fs ? fs.map(f => f.id) : [];
+        const { data: dets } = ids.length > 0
+          ? await supabaseClient
+              .from('detalle_factura')
+              .select('factura_id, cantidad, precio, subtotal, articulos(nombre), facturas(comentario, descuento, usuario)')
+              .in('factura_id', ids)
+          : { data: [] };
+
+        const xf = {};
+        const comentarios = {};
         
-        const {data:cajas} = await supabaseClient.from('caja_chica').select('*').gte('fecha',fd).lte('fecha',fh);
-        
-        const {data:defectuosos} = await supabaseClient.from('articulos_defectuosos').select('*,articulos(nombre)').gte('fecha',fd+'T00:00:00').lte('fecha',fh+'T23:59:59');
-
-        const {data:articulos} = await supabaseClient.from('articulos').select('*');
-
-        if((!fs||fs.length===0) && (!cajas||cajas.length===0) && (!defectuosos||defectuosos.length===0)) return mostrarNotificacion('No hay datos en este período','warning');
-
-        const ids = fs ? fs.map(f=>f.id) : [];
-        const {data:dets} = ids.length>0 ? await supabaseClient.from('detalle_factura').select('factura_id,cantidad,precio,subtotal,articulos(nombre),facturas(comentario,descuento,usuario)').in('factura_id',ids) : {data:[]};
-
-        const xf={}, comentarios={};
-        dets.forEach(d=>{
-          if(!xf[d.factura_id]) xf[d.factura_id]=[];
+        dets.forEach(d => {
+          if (!xf[d.factura_id]) xf[d.factura_id] = [];
           xf[d.factura_id].push(d);
-          if(d.facturas&&d.facturas.comentario) comentarios[d.factura_id]=d.facturas.comentario;
+          if (d.facturas && d.facturas.comentario) comentarios[d.factura_id] = d.facturas.comentario;
         });
 
-        const infoArticulos={};
-        let totalArticulos=0, totalDescuentos=0;
-        dets.forEach(d=>{
-          const nom=d.articulos.nombre;
-          const factura = fs?.find(f=>f.id===d.factura_id);
-          const descuento = parseFloat(factura?.descuento||0);
-          const itemsFactura = dets.filter(x=>x.factura_id===d.factura_id);
-          const subtotalFactura = itemsFactura.reduce((sum,x)=>sum+x.subtotal,0);
+        const infoArticulos = {};
+        let totalArticulos = 0;
+        let totalDescuentos = 0;
+        
+        dets.forEach(d => {
+          const nom = d.articulos.nombre;
+          const factura = fs?.find(f => f.id === d.factura_id);
+          const descuento = parseFloat(factura?.descuento || 0);
+          const itemsFactura = dets.filter(x => x.factura_id === d.factura_id);
+          const subtotalFactura = itemsFactura.reduce((sum, x) => sum + x.subtotal, 0);
           let precioReal = d.subtotal;
-          if(descuento>0 && subtotalFactura>0){
+          
+          if (descuento > 0 && subtotalFactura > 0) {
             const proporcion = d.subtotal / subtotalFactura;
             precioReal = d.subtotal - (descuento * proporcion);
           }
-          if(!infoArticulos[nom]) infoArticulos[nom]={cantidad:0,totalVenta:0};
-          infoArticulos[nom].cantidad+=d.cantidad;
-          infoArticulos[nom].totalVenta+=precioReal;
-          totalArticulos+=d.cantidad;
+          
+          if (!infoArticulos[nom]) infoArticulos[nom] = { cantidad: 0, totalVenta: 0 };
+          infoArticulos[nom].cantidad += d.cantidad;
+          infoArticulos[nom].totalVenta += precioReal;
+          totalArticulos += d.cantidad;
         });
-        fs?.forEach(f=>{ totalDescuentos+=parseFloat(f.descuento||0); });
+        
+        fs?.forEach(f => {
+          totalDescuentos += parseFloat(f.descuento || 0);
+        });
 
-        let totalInicialCaja=0, totalGastosCaja=0, totalFinalCaja=0;
-        if(cajas && cajas.length>0){
-          cajas.forEach(c=>{ 
-            totalInicialCaja+=c.monto_inicial; 
-            totalGastosCaja+=c.monto_gastos;
-            totalFinalCaja+=c.monto_final;
+        let totalInicialCaja = 0;
+        let totalGastosCaja = 0;
+        let totalFinalCaja = 0;
+        
+        if (cajas && cajas.length > 0) {
+          cajas.forEach(c => {
+            totalInicialCaja += c.monto_inicial;
+            totalGastosCaja += c.monto_gastos;
+            totalFinalCaja += c.monto_final;
           });
         }
 
         const defectuososPorFecha = {};
-        defectuosos?.forEach(d=>{
+        defectuosos?.forEach(d => {
           const fecha = d.fecha.split('T')[0];
-          if(!defectuososPorFecha[fecha]) defectuososPorFecha[fecha] = [];
+          if (!defectuososPorFecha[fecha]) defectuososPorFecha[fecha] = [];
           defectuososPorFecha[fecha].push(d);
         });
 
-        const {jsPDF}=window.jspdf;
-        const doc=new jsPDF();
-        try{doc.addImage('LOGO LA PARADA DEL MAIZ.png','PNG',10,10,30,30);}catch(e){}
-
-        doc.setFontSize(18);doc.setFont("helvetica","bold");doc.setTextColor(255,193,7);
-        doc.text("La Parada del Maiz y El Majarete de Leidy",105,20,{align:"center"});
-        doc.setFontSize(14);doc.setTextColor(0,0,0);
-        doc.text(`Resumen del: ${fd} al ${fh}`,105,30,{align:"center"});
-        doc.line(10,35,200,35);
-
-        let y=45,totalPeriodo=0;
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
         
-        doc.setFontSize(12);doc.setFont("helvetica","bold");
-        doc.text("Detalles de Ventas:",10,y);y+=10;
+        try {
+          doc.addImage('LOGO LA PARADA DEL MAIZ.png', 'PNG', 10, 10, 30, 30);
+        } catch (e) {}
 
-        for(const f of fs || []){
-          const com=comentarios[f.id];
-          doc.setFont("helvetica","normal");
-          // MOSTRAR USUARIO EN PDF
-          doc.text(`Factura #${f.id} | ${formatearFecha(f.fecha)} | RD$${parseFloat(f.total).toFixed(2)}${f.usuario ? ' | Usuario: ' + f.usuario : ''}`,10,y);
-          totalPeriodo+=parseFloat(f.total);y+=6;
-          if(com&&com.trim()!==""){
-            doc.setTextColor(0,100,200);
+        doc.setFontSize(18);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(245, 158, 11);
+        doc.text("La Parada del Maiz y El Majarete de Leidy", 105, 20, { align: "center" });
+        
+        doc.setFontSize(14);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`Resumen del: ${fd} al ${fh}`, 105, 30, { align: "center" });
+        doc.line(10, 35, 200, 35);
+
+        let y = 45;
+        let totalPeriodo = 0;
+
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("Detalles de Ventas:", 10, y);
+        y += 10;
+
+        for (const f of fs || []) {
+          const com = comentarios[f.id];
+          doc.setFont("helvetica", "normal");
+          doc.text(`Factura #${f.id} | ${formatearFecha(f.fecha)} | RD$${parseFloat(f.total).toFixed(2)}${f.usuario ? ' | Usuario: ' + f.usuario : ''}`, 10, y);
+          totalPeriodo += parseFloat(f.total);
+          y += 6;
+          
+          if (com && com.trim() !== "") {
+            doc.setTextColor(0, 100, 200);
             const comentarioLimpio = com.replace(/[^\x00-\x7F]/g, '');
-            doc.text(`  Nota: ${comentarioLimpio}`,15,y);
-            doc.setTextColor(0,0,0);y+=6;
+            doc.text(`  Nota: ${comentarioLimpio}`, 15, y);
+            doc.setTextColor(0, 0, 0);
+            y += 6;
           }
-          (xf[f.id]||[]).forEach(i=>{
-            doc.text(`  - ${i.articulos.nombre} | Cant:${i.cantidad} | P:RD$${i.precio} | Sub:RD$${i.subtotal}`,15,y);y+=6;
+          
+          (xf[f.id] || []).forEach(i => {
+            doc.text(`  - ${i.articulos.nombre} | Cant:${i.cantidad} | P:RD$${i.precio} | Sub:RD$${i.subtotal}`, 15, y);
+            y += 6;
           });
-          y+=4;
-          if(y>250){doc.addPage();y=20;}
+          
+          y += 4;
+          
+          if (y > 250) {
+            doc.addPage();
+            y = 20;
+          }
         }
 
-        y+=10;doc.setFont("helvetica","bold");doc.setFontSize(12);
-        doc.text("Resumen por Articulo:",10,y);y+=10;doc.setFont("helvetica","normal");doc.setFontSize(10);
-        Object.keys(infoArticulos).forEach(nom=>{
-          const info=infoArticulos[nom];
+        y += 10;
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+        doc.text("Resumen por Articulo:", 10, y);
+        y += 10;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        
+        Object.keys(infoArticulos).forEach(nom => {
+          const info = infoArticulos[nom];
           const promedio = info.totalVenta / info.cantidad;
-          doc.text(`${nom}:`,10,y);y+=5;
-          doc.text(`  Cantidad total: ${info.cantidad}`,15,y);y+=5;
-          doc.text(`  Suma total: RD$${info.totalVenta.toFixed(2)}`,15,y);y+=5;
-          doc.text(`  Precio promedio de venta: RD$${promedio.toFixed(2)}`,15,y);y+=8;
-          if(y>270){doc.addPage();y=20;}
+          doc.text(`${nom}:`, 10, y);
+          y += 5;
+          doc.text(`  Cantidad total: ${info.cantidad}`, 15, y);
+          y += 5;
+          doc.text(`  Suma total: RD$${info.totalVenta.toFixed(2)}`, 15, y);
+          y += 5;
+          doc.text(`  Precio promedio de venta: RD$${promedio.toFixed(2)}`, 15, y);
+          y += 8;
+          
+          if (y > 270) {
+            doc.addPage();
+            y = 20;
+          }
         });
 
-        if(cajas && cajas.length>0){
-          y+=10;
-          doc.setFont("helvetica","bold");doc.setFontSize(12);doc.setTextColor(200,0,0);
-          doc.text("Caja Chica:",10,y);y+=8;
-          doc.setFont("helvetica","normal");doc.setFontSize(10);doc.setTextColor(0,0,0);
-          doc.text(`Total monto inicial: RD$${totalInicialCaja.toFixed(2)}`,15,y);y+=6;
-          doc.text(`Total gastos: RD$${totalGastosCaja.toFixed(2)}`,15,y);y+=6;
-          doc.setFont("helvetica","bold");
-          doc.text(`Dinero en caja: RD$${totalFinalCaja.toFixed(2)}`,15,y);y+=10;
+        if (cajas && cajas.length > 0) {
+          y += 10;
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(12);
+          doc.setTextColor(200, 0, 0);
+          doc.text("Caja Chica:", 10, y);
+          y += 8;
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(10);
+          doc.setTextColor(0, 0, 0);
+          doc.text(`Total monto inicial: RD$${totalInicialCaja.toFixed(2)}`, 15, y);
+          y += 6;
+          doc.text(`Total gastos: RD$${totalGastosCaja.toFixed(2)}`, 15, y);
+          y += 6;
+          doc.setFont("helvetica", "bold");
+          doc.text(`Dinero en caja: RD$${totalFinalCaja.toFixed(2)}`, 15, y);
+          y += 10;
         }
 
-        if(defectuosos && defectuosos.length>0){
-          if(y>230){doc.addPage();y=20;}
-          y+=5;
-          doc.setFont("helvetica","bold");doc.setFontSize(12);doc.setTextColor(150,0,0);
-          doc.text("Articulos Defectuosos por Dia:",10,y);y+=10;
+        if (defectuosos && defectuosos.length > 0) {
+          if (y > 230) {
+            doc.addPage();
+            y = 20;
+          }
           
-          Object.keys(defectuososPorFecha).forEach(fecha=>{
-            doc.setFont("helvetica","bold");doc.setFontSize(10);doc.setTextColor(0,0,0);
-            doc.text(`Fecha: ${formatearFecha(fecha)}`,15,y);y+=6;
-            doc.setFont("helvetica","normal");doc.setFontSize(9);
-            let totalDefDia=0;
-            defectuososPorFecha[fecha].forEach(d=>{
-              totalDefDia+=d.cantidad;
-              doc.text(`  - ${d.articulos.nombre}: ${d.cantidad} uds (${d.descripcion})`,20,y);y+=5;
+          y += 5;
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(12);
+          doc.setTextColor(150, 0, 0);
+          doc.text("Articulos Defectuosos por Dia:", 10, y);
+          y += 10;
+
+          Object.keys(defectuososPorFecha).forEach(fecha => {
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Fecha: ${formatearFecha(fecha)}`, 15, y);
+            y += 6;
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(9);
+            
+            let totalDefDia = 0;
+            defectuososPorFecha[fecha].forEach(d => {
+              totalDefDia += d.cantidad;
+              doc.text(`  - ${d.articulos.nombre}: ${d.cantidad} uds (${d.descripcion})`, 20, y);
+              y += 5;
             });
-            doc.setFont("helvetica","bold");doc.setFontSize(9);
-            doc.text(`  Total del dia: ${totalDefDia} unidades`,20,y);y+=8;
+            
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(9);
+            doc.text(`  Total del dia: ${totalDefDia} unidades`, 20, y);
+            y += 8;
           });
         }
 
-        if(articulos && articulos.length>0){
-          if(y>230){doc.addPage();y=20;}
-          y+=5;
-          doc.setFont("helvetica","bold");doc.setFontSize(12);doc.setTextColor(0,100,0);
-          doc.text("Stock Disponible al Final del Periodo:",10,y);y+=10;
+        if (articulos && articulos.length > 0) {
+          if (y > 230) {
+            doc.addPage();
+            y = 20;
+          }
           
-          doc.setFont("helvetica","normal");doc.setFontSize(10);doc.setTextColor(0,0,0);
-          articulos.forEach(a=>{
-            doc.text(`${a.nombre}: ${a.stock} unidades`,15,y);y+=5;
+          y += 5;
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(12);
+          doc.setTextColor(0, 100, 0);
+          doc.text("Stock Disponible al Final del Periodo:", 10, y);
+          y += 10;
+
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(10);
+          doc.setTextColor(0, 0, 0);
+          
+          articulos.forEach(a => {
+            doc.text(`${a.nombre}: ${a.stock} unidades`, 15, y);
+            y += 5;
           });
         }
 
-        y+=10;doc.setFont("helvetica","bold");doc.setFontSize(14);doc.setTextColor(255,193,7);
-        doc.text(`TOTAL VENTAS: RD$${totalPeriodo.toFixed(2)}`,105,y,{align:"center"});y+=8;
-        doc.text(`Total articulos vendidos: ${totalArticulos}`,105,y,{align:"center"});y+=8;
-        doc.text(`Total descuentos: RD$${totalDescuentos.toFixed(2)}`,105,y,{align:"center"});y+=10;
-        
+        y += 10;
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.setTextColor(245, 158, 11);
+        doc.text(`TOTAL VENTAS: RD$${totalPeriodo.toFixed(2)}`, 105, y, { align: "center" });
+        y += 8;
+        doc.text(`Total articulos vendidos: ${totalArticulos}`, 105, y, { align: "center" });
+        y += 8;
+        doc.text(`Total descuentos: RD$${totalDescuentos.toFixed(2)}`, 105, y, { align: "center" });
+        y += 10;
+
         const balanceFinal = totalPeriodo + totalFinalCaja;
         doc.setFontSize(16);
-        doc.text(`BALANCE FINAL (Ventas + Caja): RD$${balanceFinal.toFixed(2)}`,105,y,{align:"center"});
+        doc.text(`BALANCE FINAL (Ventas + Caja): RD$${balanceFinal.toFixed(2)}`, 105, y, { align: "center" });
 
         doc.save(`Resumen_${fd}_al_${fh}.pdf`);
         cerrarModalImprimir();
         mostrarNotificacion('PDF generado correctamente');
-      }catch(e){ mostrarNotificacion('Error: '+e.message,'error'); }
+      } catch (e) {
+        mostrarNotificacion('Error: ' + e.message, 'error');
+      }
     }
-setInterval(async () => {
-  const usuario = localStorage.getItem('usuario');
-  if (usuario) {
-    const usuarioObj = JSON.parse(usuario);
-    try {
-      await supabaseClient
-        .from('usuarios')
-        .update({ ultima_conexion: new Date().toISOString() })
-        .eq('username', usuarioObj.username);
-    } catch (e) {
-      console.error('Error actualizando conexión:', e);
-    }
-  }
-}, 30000);
+
+    // Actualizar conexión cada 30 segundos
+    setInterval(async () => {
+      const usuario = localStorage.getItem('usuario');
+      if (usuario) {
+        const usuarioObj = JSON.parse(usuario);
+        try {
+          await supabaseClient
+            .from('usuarios')
+            .update({ ultima_conexion: new Date().toISOString() })
+            .eq('username', usuarioObj.username);
+        } catch (e) {
+          console.error('Error actualizando conexión:', e);
+        }
+      }
+    }, 30000);
+
     window.onload = () => {
       const params = new URLSearchParams(window.location.search);
-      if(params.get('desde') && params.get('hasta')){
+      if (params.get('desde') && params.get('hasta')) {
         document.getElementById('fechaDesde').value = params.get('desde');
         document.getElementById('fechaHasta').value = params.get('hasta');
         cargarFacturasPorRango();
@@ -448,7 +913,6 @@ setInterval(async () => {
         cargarFacturas();
       }
     };
-    
   </script>
 </body>
 </html>
