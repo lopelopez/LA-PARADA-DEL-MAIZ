@@ -8,39 +8,245 @@
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body class="bg-yellow-50 font-sans min-h-screen">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* === DISEÑO MODERNO === */
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fff7ed 100%);
+      min-height: 100vh;
+    }
 
+    .banner {
+      border-radius: 0 0 60px 60px;
+      box-shadow: 0 15px 50px rgba(245, 158, 11, 0.3);
+    }
+
+    .nav-btn {
+      border-radius: 16px;
+      padding: 10px 18px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .nav-yellow {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: white;
+    }
+
+    .nav-yellow:hover {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+
+    .input-modern {
+      border-radius: 16px;
+      padding: 14px 18px;
+      border: 2px solid #e5e7eb;
+      background: #f9fafb;
+      transition: all 0.3s ease;
+    }
+
+    .input-modern:focus {
+      border-color: #ef4444;
+      background: white;
+      box-shadow: 0 0 0 5px rgba(239, 68, 68, 0.15);
+      outline: none;
+    }
+
+    .select-modern {
+      border-radius: 16px;
+      padding: 14px 18px;
+      border: 2px solid #e5e7eb;
+      background: #f9fafb;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .select-modern:focus {
+      border-color: #ef4444;
+      background: white;
+      box-shadow: 0 0 0 5px rgba(239, 68, 68, 0.15);
+      outline: none;
+    }
+
+    .btn-danger {
+      border-radius: 16px;
+      padding: 14px 28px;
+      background: linear-gradient(135deg, #f87171, #ef4444);
+      color: white;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35);
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(239, 68, 68, 0.45);
+    }
+
+    .card-defectuoso {
+      background: linear-gradient(135deg, #fef2f2, #fee2e2);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 6px 25px rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .card-defectuoso:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(239, 68, 68, 0.2);
+    }
+
+    .badge-info {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      padding: 10px 20px;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #92400e;
+    }
+
+    .badge-cantidad {
+      background: linear-gradient(135deg, #fee2e2, #fecaca);
+      padding: 8px 16px;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #991b1b;
+    }
+
+    .badge-fecha {
+      background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #4338ca;
+    }
+
+    .section-title {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .info-box {
+      background: linear-gradient(135deg, #fef2f2, #fee2e2);
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .loading-spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #ef4444;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 640px) {
+      .glass-card {
+        padding: 20px;
+        border-radius: 22px;
+      }
+      
+      .banner {
+        border-radius: 0 0 45px 45px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Banner -->
   <div class="relative w-full h-28 sm:h-36">
     <img src="LOGO LA PARADA DEL MAIZ.png" alt="Logo" class="w-full h-full object-cover">
-    <div class="absolute inset-0 bg-yellow-500 bg-opacity-50 flex items-center justify-center">
-      <h1 class="text-white text-xl md:text-3xl font-bold text-center">Artículos Defectuosos</h1>
+    <div class="absolute inset-0 bg-gradient-to-b from-red-500/50 to-red-600/60 flex items-center justify-center banner">
+      <h1 class="text-white text-xl md:text-3xl font-bold text-center px-4 drop-shadow-lg">
+        ⚠️ Artículos Defectuosos
+      </h1>
     </div>
   </div>
 
-  <nav class="flex flex-wrap justify-center gap-2 mt-4 px-2">
-    <a href="index.html" class="bg-yellow-400 text-white px-4 py-2 rounded shadow text-sm">Artículos</a>
+  <!-- Navegación -->
+  <nav class="flex flex-wrap justify-center gap-3 mt-6 px-4">
+    <a href="index.html" class="nav-btn nav-yellow text-sm">📦 Artículos</a>
   </nav>
 
-  <section class="max-w-4xl mx-auto mt-6 bg-white p-4 rounded-xl shadow mx-2">
-    <h2 class="text-2xl font-semibold mb-4 text-center">Registrar Artículo Defectuoso</h2>
+  <!-- Artículos Defectuosos -->
+  <section class="max-w-4xl mx-auto mt-6 mx-4 mb-10">
+    <div class="glass-card">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">⚠️ Registrar Artículo Defectuoso</h2>
 
-    <div class="mb-4">
-      <select id="articuloSelect" class="border p-2 rounded w-full">
-        <option value="">Selecciona un artículo</option>
-      </select>
+      <!-- Loading -->
+      <div id="loading" class="flex justify-center py-8">
+        <div class="loading-spinner"></div>
+      </div>
+
+      <!-- Formulario -->
+      <div id="formulario" class="hidden">
+        <!-- Selector de artículo -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Seleccionar Artículo:</label>
+          <select id="articuloSelect" class="select-modern w-full">
+            <option value="">Selecciona un artículo</option>
+          </select>
+        </div>
+
+        <!-- Cantidad y descripción -->
+        <div class="flex flex-col sm:flex-row gap-4 mb-6">
+          <div class="w-full sm:w-1/2">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Cantidad Defectuosa:</label>
+            <input type="number" id="cantidad" placeholder="Cantidad" min="1" 
+                   class="input-modern w-full">
+          </div>
+          <div class="w-full sm:w-1/2">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Descripción del Defecto:</label>
+            <input type="text" id="descripcion" placeholder="Describe el defecto..." 
+                   class="input-modern w-full">
+          </div>
+        </div>
+
+        <!-- Botón registrar -->
+        <button onclick="registrarDefectuoso()" class="btn-danger w-full">
+          ⚠️ Registrar Defecto
+        </button>
+
+        <!-- Historial -->
+        <h3 class="text-2xl font-bold section-title mt-8 mb-4 text-center">📋 Historial de Defectuosos</h3>
+        <div id="listaDefectuosos" class="space-y-4"></div>
+        <div id="noData" class="info-box text-center hidden">
+          <p class="text-red-700">📭 No hay artículos defectuosos registrados</p>
+        </div>
+      </div>
     </div>
-
-    <div class="flex flex-col sm:flex-row gap-2 mb-4">
-      <input type="number" id="cantidad" placeholder="Cantidad defectuosa" min="1" class="border p-2 rounded w-full sm:w-1/2">
-      <input type="text" id="descripcion" placeholder="Descripción del defecto" class="border p-2 rounded w-full sm:w-1/2">
-    </div>
-
-    <button onclick="registrarDefectuoso()" class="bg-red-400 text-white px-6 py-2 rounded w-full">Registrar Defecto</button>
-
-    <h3 class="text-xl font-semibold mt-6 mb-2">Historial de Defectuosos</h3>
-    <ul id="listaDefectuosos" class="space-y-2"></ul>
-    <div id="noData" class="text-center text-gray-500 mt-4 hidden">No hay artículos defectuosos</div>
   </section>
 
   <script>
@@ -49,21 +255,36 @@
     const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     function mostrarNotificacion(mensaje, tipo = 'success') {
-      Toastify({ text: mensaje, duration: 3000, gravity: "top", position: "right",
+      Toastify({
+        text: mensaje,
+        duration: 3000,
+        gravity: "top",
+        position: "right",
         backgroundColor: tipo === 'error' ? "#dc3545" : "#28a745"
       }).showToast();
     }
 
+    function formatearFecha(fechaStr) {
+      if (!fechaStr) return '--/--/----';
+      const fecha = new Date(fechaStr);
+      return `${String(fecha.getDate()).padStart(2, '0')}/${String(fecha.getMonth() + 1).padStart(2, '0')}/${fecha.getFullYear()}`;
+    }
+
     async function cargarArticulos() {
-      const { data } = await supabaseClient.from('articulos').select('id, nombre, stock');
-      const select = document.getElementById('articuloSelect');
-      select.innerHTML = '<option value="">Selecciona un artículo</option>';
-      data.forEach(a => {
-        const opt = document.createElement('option');
-        opt.value = a.id;
-        opt.textContent = `${a.nombre} (Stock: ${a.stock})`;
-        select.appendChild(opt);
-      });
+      try {
+        const { data } = await supabaseClient.from('articulos').select('id, nombre, stock');
+        const select = document.getElementById('articuloSelect');
+        select.innerHTML = '<option value="">Selecciona un artículo</option>';
+        
+        data.forEach(a => {
+          const opt = document.createElement('option');
+          opt.value = a.id;
+          opt.textContent = `${a.nombre} (Stock: ${a.stock})`;
+          select.appendChild(opt);
+        });
+      } catch (e) {
+        mostrarNotificacion('Error cargando artículos: ' + e.message, 'error');
+      }
     }
 
     async function registrarDefectuoso() {
@@ -71,9 +292,15 @@
       const cantidad = parseInt(document.getElementById('cantidad').value);
       const descripcion = document.getElementById('descripcion').value.trim();
 
-      if (!articuloId) return mostrarNotificacion('Seleccione artículo', 'warning');
-      if (!cantidad || cantidad <= 0) return mostrarNotificacion('Cantidad inválida', 'warning');
-      if (!descripcion) return mostrarNotificacion('Descripción requerida', 'warning');
+      if (!articuloId) {
+        return mostrarNotificacion('Seleccione un artículo', 'warning');
+      }
+      if (!cantidad || cantidad <= 0) {
+        return mostrarNotificacion('Ingrese una cantidad válida', 'warning');
+      }
+      if (!descripcion) {
+        return mostrarNotificacion('Ingrese la descripción del defecto', 'warning');
+      }
 
       try {
         // 1. Registrar defectuoso
@@ -85,72 +312,101 @@
         }]);
 
         // 2. Descontar del stock
-        const { data: articulo } = await supabaseClient.from('articulos').select('stock').eq('id', articuloId).single();
+        const { data: articulo } = await supabaseClient
+          .from('articulos')
+          .select('stock')
+          .eq('id', articuloId)
+          .single();
+        
         const nuevoStock = (articulo.stock || 0) - cantidad;
         
-        await supabaseClient.from('articulos').update({ stock: Math.max(0, nuevoStock) }).eq('id', articuloId);
+        await supabaseClient
+          .from('articulos')
+          .update({ stock: Math.max(0, nuevoStock) })
+          .eq('id', articuloId);
 
-        mostrarNotificacion('Artículo defectuoso registrado y stock actualizado');
+        mostrarNotificacion('✅ Artículo defectuoso registrado y stock actualizado');
         
+        // Limpiar formulario
         document.getElementById('cantidad').value = '';
         document.getElementById('descripcion').value = '';
+        document.getElementById('articuloSelect').value = '';
         
         await cargarArticulos();
         await cargarHistorial();
+        
       } catch (e) {
         mostrarNotificacion('Error: ' + e.message, 'error');
       }
     }
 
     async function cargarHistorial() {
-      const { data } = await supabaseClient
-        .from('articulos_defectuosos')
-        .select('*, articulos(nombre)')
-        .order('fecha', { ascending: false });
+      try {
+        const { data } = await supabaseClient
+          .from('articulos_defectuosos')
+          .select('*, articulos(nombre)')
+          .order('fecha', { ascending: false });
 
-      const lista = document.getElementById('listaDefectuosos');
-      const noData = document.getElementById('noData');
-      lista.innerHTML = '';
+        const lista = document.getElementById('listaDefectuosos');
+        const noData = document.getElementById('noData');
+        lista.innerHTML = '';
 
-      if (!data || data.length === 0) {
-        noData.classList.remove('hidden');
-        return;
+        if (!data || data.length === 0) {
+          noData.classList.remove('hidden');
+          return;
+        }
+        
+        noData.classList.add('hidden');
+
+        data.forEach(d => {
+          const card = document.createElement('div');
+          card.className = 'card-defectuoso';
+          card.innerHTML = `
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-2">
+                  <h4 class="font-bold text-gray-800 text-lg">${d.articulos.nombre}</h4>
+                  <span class="badge-cantidad">${d.cantidad} uds</span>
+                </div>
+                <p class="text-gray-600">${d.descripcion}</p>
+              </div>
+              <div class="flex flex-col items-end gap-2">
+                <span class="badge-fecha">📅 ${formatearFecha(d.fecha)}</span>
+              </div>
+            </div>
+          `;
+          lista.appendChild(card);
+        });
+        
+      } catch (e) {
+        mostrarNotificacion('Error cargando historial: ' + e.message, 'error');
       }
-      noData.classList.add('hidden');
+    }
 
-      data.forEach(d => {
-        const fecha = new Date(d.fecha).toLocaleDateString();
-        const li = document.createElement('li');
-        li.className = "bg-red-100 p-3 rounded flex justify-between items-center";
-        li.innerHTML = `
-          <div>
-            <span class="font-semibold">${d.articulos.nombre}</span>
-            <span class="text-sm text-gray-600"> | Cant: ${d.cantidad}</span>
-          </div>
-          <div class="text-right">
-            <div class="text-sm">${d.descripcion}</div>
-            <div class="text-xs text-gray-500">${fecha}</div>
-          </div>
-        `;
-        lista.appendChild(li);
-      });
-    }
-setInterval(async () => {
-  const usuario = localStorage.getItem('usuario');
-  if (usuario) {
-    const usuarioObj = JSON.parse(usuario);
-    try {
-      await supabaseClient
-        .from('usuarios')
-        .update({ ultima_conexion: new Date().toISOString() })
-        .eq('username', usuarioObj.username);
-    } catch (e) {
-      console.error('Error actualizando conexión:', e);
-    }
-  }
-}, 30000);
-    window.onload = () => { cargarArticulos(); cargarHistorial(); };
-    
+    // Actualizar conexión cada 30 segundos
+    setInterval(async () => {
+      const usuario = localStorage.getItem('usuario');
+      if (usuario) {
+        const usuarioObj = JSON.parse(usuario);
+        try {
+          await supabaseClient
+            .from('usuarios')
+            .update({ ultima_conexion: new Date().toISOString() })
+            .eq('username', usuarioObj.username);
+        } catch (e) {
+          console.error('Error actualizando conexión:', e);
+        }
+      }
+    }, 30000);
+
+    window.onload = async () => {
+      await cargarArticulos();
+      await cargarHistorial();
+      
+      // Ocultar loading y mostrar formulario
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('formulario').classList.remove('hidden');
+    };
   </script>
 </body>
 </html>
