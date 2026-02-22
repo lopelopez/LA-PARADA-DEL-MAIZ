@@ -58,9 +58,17 @@
       color: white;
     }
 
+    .nav-gray:hover {
+      background: linear-gradient(135deg, #6b7280, #4b5563);
+    }
+
     .nav-purple {
       background: linear-gradient(135deg, #a78bfa, #8b5cf6);
       color: white;
+    }
+
+    .nav-purple:hover {
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
     }
 
     .glass-card {
@@ -202,6 +210,11 @@
     .modal-overlay {
       background: rgba(0, 0, 0, 0.5);
       backdrop-filter: blur(4px);
+      display: none;
+    }
+
+    .modal-overlay.flex {
+      display: flex;
     }
 
     .modal-content {
@@ -274,7 +287,7 @@
   </nav>
 
   <!-- Crear Artículo -->
-  <section class="max-w-4xl mx-auto mt-6 mx-4">
+  <section id="crear-articulo" class="max-w-4xl mx-auto mt-6 mx-4">
     <div class="glass-card">
       <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4">✨ Crear Artículo</h2>
 
@@ -404,7 +417,7 @@
       document.getElementById('editModal').classList.add('flex');
     }
 
-        function cerrarModalEditar() {
+    function cerrarModalEditar() {
       document.getElementById('editModal').classList.add('hidden');
       document.getElementById('editModal').classList.remove('flex');
       document.getElementById('editPassword').value = "";
@@ -412,7 +425,7 @@
     }
 
     function confirmarEditar() {
-      const password = document.getElementById('editPassword').value;
+            const password = document.getElementById('editPassword').value;
       if (!password) {
         mostrarNotificacion("Debe ingresar la contraseña.", 'warning');
         return;
@@ -426,7 +439,7 @@
         document.getElementById('precio').value = articuloParaEditar.precio;
         document.getElementById('stock').value = articuloParaEditar.stock;
         editandoId = articuloParaEditar.id;
-        document.getElementById('guardarBtn').textContent = "✏️ Actualizar";
+        document.getElementById('guardarBtn').innerHTML = "✏️ Actualizar";
         document.getElementById('crear-articulo').scrollIntoView({ behavior: 'smooth' });
         cerrarModalEditar();
       }
@@ -460,7 +473,7 @@
           if (error) throw error;
           mostrarNotificacion("Artículo actualizado exitosamente.");
           editandoId = null;
-          document.getElementById('guardarBtn').textContent = "💾 Guardar";
+          document.getElementById('guardarBtn').innerHTML = "💾 Guardar";
         }
         document.getElementById('nombre').value = "";
         document.getElementById('precio').value = "";
