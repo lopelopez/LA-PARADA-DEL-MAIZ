@@ -257,11 +257,30 @@
       </div>
 
       <!-- Botón imprimir -->
-      <button onclick="imprimirCierre()" id="btnImprimir" class="btn-print w-full mt-6 hidden">
-        🖨️ Imprimir Cierre Semanal
+      <button onclick="mostrarModalImprimir()" id="btnImprimir" class="btn-print w-full mt-6 hidden">
+        🖨️ Imprimir Resumen
       </button>
     </div>
   </section>
+
+  <!-- Modal Imprimir -->
+  <div id="modalImprimir" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm">
+      <h3 class="text-lg font-semibold mb-4">Imprimir Resumen</h3>
+      <div class="mb-4">
+        <label class="block text-sm mb-1">Desde:</label>
+        <input type="date" id="printDesde" class="border p-2 rounded w-full">
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm mb-1">Hasta:</label>
+        <input type="date" id="printHasta" class="border p-2 rounded w-full">
+      </div>
+      <div class="flex justify-end gap-2">
+        <button onclick="cerrarModalImprimir()" class="bg-gray-400 text-white px-4 py-2 rounded">Cancelar</button>
+        <button onclick="imprimirVentas()" class="bg-green-500 text-white px-4 py-2 rounded">Imprimir</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     const supabaseUrl = "https://vurddrbkwuafszrddgxe.supabase.co";
@@ -296,26 +315,30 @@
       return `${nombreDia} ${String(dia).padStart(2, '0')}/${String(mes + 1).padStart(2, '0')}/${año}`;
     }
 
-    // Función para extraer solo la fecha YYYY-MM-DD correctamente
     function obtenerFechaSolo(fechaInput) {
       if (!fechaInput) return null;
       
-      // Si ya viene en formato YYYY-MM-DD
       if (fechaInput.match(/^\d{4}-\d{2}-\d{2}$/)) {
         return fechaInput;
       }
       
-      // Si viene con T (ISO)
       if (fechaInput.includes('T')) {
         return fechaInput.split('T')[0];
       }
       
-      // Si viene con espacio y hora
       if (fechaInput.includes(' ')) {
         return fechaInput.split(' ')[0];
       }
       
       return fechaInput;
+    }
+
+    function mostrarModalImprimir() {
+      document.getElementById('modalImprimir').classList.remove('hidden');
+    }
+
+    function cerrarModalImprimir() {
+      document.getElementById('modalImprimir').classList.add('hidden');
     }
 
     async function buscarCierre() {
@@ -331,7 +354,6 @@
       }
 
       try {
-        // OBTENER FACTURAS
         const { data: facturas, error: errorFacturas } = await supabaseClient
           .from('facturas')
           .select('id, total, fecha')
@@ -341,7 +363,6 @@
 
         if (errorFacturas) throw errorFacturas;
 
-        // OBTENER GASTOS - Ahora también necesitamos la caja_chica para obtener la fecha correcta
         const { data: gastos, error: errorGastos } = await supabaseClient
           .from('gastos')
           .select('id, monto, fecha, descripcion, caja_chica_id')
@@ -351,7 +372,6 @@
 
         if (errorGastos) throw errorGastos;
 
-        // OBTENER LAS CAJAS CHICAS PARA OBTENER LA FECHA CORRECTA DE CADA GASTO
         const cajaChicaIds = [...new Set(gastos?.map(g => g.caja_chica_id).filter(Boolean))];
         let cajasChicas = {};
         
@@ -368,16 +388,8 @@
           }
         }
 
-        // DEBUG
-        console.log('=== DEBUG ===');
-        console.log('Facturas:', facturas);
-        console.log('Gastos:', gastos);
-        console.log('Cajas Chicas:', cajasChicas);
-
-        // CREAR MAPA DE DÍAS
         const diasMap = new Map();
 
-        // 1. AGREGAR FACTURAS A SUS RESPECTIVOS DÍAS
         if (facturas && facturas.length > 0) {
           facturas.forEach(f => {
             const fechaKey = obtenerFechaSolo(f.fecha);
@@ -398,13 +410,10 @@
           });
         }
 
-                // 2. AGREGAR GASTOS A SUS RESPECTIVOS DÍAS - USANDO LA FECHA DE LA CAJA CHICA
         if (gastos && gastos.length > 0) {
           gastos.forEach(g => {
-            // Usar la fecha de la caja_chica, no la fecha del gasto
             let fechaKey = obtenerFechaSolo(g.fecha);
             
-            // Si el gasto tiene una caja_chica_id, usar la fecha de esa caja
             if (g.caja_chica_id && cajasChicas[g.caja_chica_id]) {
               fechaKey = obtenerFechaSolo(cajasChicas[g.caja_chica_id]);
             }
@@ -426,17 +435,13 @@
           });
         }
 
-        // DEBUG
-        console.log('Días agrupados:', diasMap);
-
-        // CONVERTIR MAP A ARRAY ORDENADO
         const diasArray = Array.from(diasMap.entries())
           .sort((a, b) => new Date(b[0]) - new Date(a[0]));
 
-        const diasConBalance = diasArray.map(([fecha, dia]) => {
-          const balance = dia.ingresos - dia.gastos;
-          
-          return {
+const diasConBalance = diasArray.map(([fecha, dia]) => {
+  const balance = dia.ingresos - dia.gastos;
+
+            return {
             fecha: fecha,
             ingresos: dia.ingresos,
             gastos: dia.gastos,
@@ -446,16 +451,12 @@
           };
         });
 
-        // TOTAL GENERAL
         const totalSemana = diasConBalance.reduce((sum, d) => sum + d.balance, 0);
 
-        // GUARDAR DATOS
         datosCierre = { desde, hasta, diasConBalance, totalSemana };
 
-        // MOSTRAR TOTAL GENERAL
         document.getElementById('totalSemana').textContent = totalSemana.toFixed(2);
 
-        // MOSTRAR DÍAS
         const container = document.getElementById('diasContainer');
         const btnImprimir = document.getElementById('btnImprimir');
 
@@ -532,124 +533,112 @@
       }
     }
 
-    async function imprimirCierre() {
-      if (!datosCierre || datosCierre.diasConBalance.length === 0) {
-        return mostrarNotificacion('⚠️ Busca primero un rango de fechas', 'warning');
-      }
-
-      const { desde, hasta, diasConBalance, totalSemana } = datosCierre;
-
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-
-      try { doc.addImage('LOGO LA PARADA DEL MAIZ.png', 'PNG', 10, 10, 30, 30); } catch(e) {}
-
-      doc.setFontSize(18);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(245, 158, 11);
-      doc.text("Cierre Semanal de Caja", 105, 25, { align: "center" });
+    async function imprimirVentas() {
+      const fd = document.getElementById('printDesde').value;
+      const fh = document.getElementById('printHasta').value;
       
-      doc.setFontSize(12);
-      doc.setTextColor(0, 0, 0);
-      doc.text(`Período: ${formatearFecha(desde)} al ${formatearFecha(hasta)}`, 105, 35, { align: "center" });
-      doc.line(10, 40, 200, 40);
+      if (!fd || !fh) {
+        return mostrarNotificacion('Seleccione fechas', 'warning');
+      }
+      
+      try {
+        const { data: fs } = await supabaseClient
+          .from('facturas')
+          .select('*')
+          .gte('fecha', fd + 'T00:00:00')
+          .lte('fecha', fh + 'T23:59:59')
+          .order('fecha', { ascending: true });
 
-      let y = 55;
-
-      // TOTAL GENERAL
-      doc.setFontSize(16);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(217, 119, 6);
-      doc.text("TOTAL GENERAL:", 105, y, { align: "center" });
-      y += 10;
-      doc.setFontSize(20);
-      doc.text(`RD$ ${totalSemana.toFixed(2)}`, 105, y, { align: "center" });
-      y += 15;
-      doc.line(10, y, 200, y);
-      y += 10;
-
-      // DETALLE POR DÍA
-      doc.setFontSize(14);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(0, 0, 0);
-      doc.text("DETALLE POR DÍA", 10, y);
-      y += 10;
-
-      diasConBalance.forEach(dia => {
-        if (y > 250) {
-          doc.addPage();
-          y = 20;
+        if (!fs || fs.length === 0) {
+          return mostrarNotificacion('No hay facturas en este periodo', 'warning');
         }
 
-        // Fecha
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // === LOGO ===
+        try { 
+          doc.addImage('maiz.png', 'PNG', 10, 10, 25, 25); 
+        } catch(e) {}
+
+        // === HEADER ===
+        doc.setFontSize(18);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(245, 158, 11);
+        doc.text("Resumen de Ingresos", 105, 22, { align: "center" });
+        
         doc.setFontSize(12);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`Periodo: ${fd} al ${fh}`, 105, 30, { align: "center" });
+        doc.line(10, 35, 200, 35);
+
+        let y = 45;
+
+        // === TOTAL GENERAL ===
+        const totalPeriodo = fs.reduce((sum, f) => sum + parseFloat(f.total), 0);
+        
+        doc.setFontSize(16);
         doc.setFont("helvetica", "bold");
+        doc.setTextColor(217, 119, 6);
+        doc.text("TOTAL INGRESOS:", 105, y, { align: "center" });
+        y += 10;
+        
+        doc.setFontSize(24);
+        doc.text(`RD$ ${totalPeriodo.toFixed(2)}`, 105, y + 5, { align: "center" });
+        y += 25;
+        doc.line(10, y, 200, y);
+        y += 10;
+
+        // === INGRESOS POR DÍA ===
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(0, 0, 0);
+        doc.text("INGRESOS POR DIA", 10, y);
+        y += 10;
+
+        const ventasPorFecha = {};
+        fs.forEach(f => {
+          const fecha = f.fecha.split('T')[0];
+          if (!ventasPorFecha[fecha]) {
+            ventasPorFecha[fecha] = { total: 0, cantidad: 0 };
+          }
+          ventasPorFecha[fecha].total += parseFloat(f.total);
+          ventasPorFecha[fecha].cantidad += 1;
+        });
+
+        Object.keys(ventasPorFecha).forEach(fecha => {
+          if (y > 260) {
+            doc.addPage();
+            y = 20;
+          }
+
+          const dia = ventasPorFecha[fecha];
+          
+          doc.setFillColor(255, 250, 240);
+          doc.roundedRect(10, y - 3, 190, 10, 2, 2, 'F');
+          
+          doc.setFontSize(11);
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor(100, 100, 100);
+          doc.text(formatearFecha(fecha), 15, y + 3);
+          
+          doc.setTextColor(5, 150, 105);
+          doc.text(`RD$ ${dia.total.toFixed(2)}`, 195, y + 3, { align: "right" });
+          
+          y += 12;
+        });
+
+        // === FOOTER ===
+        doc.setFontSize(10);
         doc.setTextColor(100, 100, 100);
-        doc.text(formatearFecha(dia.fecha), 10, y);
-        
-        // Ingresos
-        doc.setTextColor(5, 150, 105);
-        doc.text(`Ingresos: RD$ ${dia.ingresos.toFixed(2)}`, 70, y);
-        
-        // Gastos
-        doc.setTextColor(220, 38, 38);
-        doc.text(`Gastos: RD$ ${dia.gastos.toFixed(2)}`, 120, y);
-        
-        // Balance
-        const balanceSign = dia.balance >= 0 ? '+' : '';
-        doc.setTextColor(dia.balance >= 0 ? 5 : 220, dia.balance >= 0 ? 150 : 38, dia.balance >= 0 ? 105 : 38);
-        doc.setFont("helvetica", "bold");
-        doc.text(`Balance: ${balanceSign}RD$ ${dia.balance.toFixed(2)}`, 10, y + 8);
-        y += 18;
+        doc.text(`Generado el: ${new Date().toLocaleString()}`, 105, 285, { align: "center" });
 
-        // Facturas del día
-        if (dia.listaFacturas && dia.listaFacturas.length > 0) {
-          doc.setFontSize(10);
-          doc.setFont("helvetica", "bold");
-          doc.setTextColor(0, 100, 0);
-          doc.text(`Facturas del día (${dia.listaFacturas.length}):`, 15, y);
-          y += 6;
-          doc.setFont("helvetica", "normal");
-          doc.setTextColor(60, 60, 60);
-          dia.listaFacturas.forEach(f => {
-            if (y > 270) {
-              doc.addPage();
-              y = 20;
-            }
-            doc.text(`  #${f.id}: RD$ ${parseFloat(f.total).toFixed(2)}`, 20, y);
-            y += 5;
-          });
-          y += 3;
-        }
-
-        // Detalle de gastos - SOLO de este día
-        if (dia.listaGastos && dia.listaGastos.length > 0) {
-          doc.setFontSize(10);
-          doc.setFont("helvetica", "bold");
-          doc.setTextColor(200, 0, 0);
-          doc.text('Gastos:', 15, y);
-          y += 6;
-          doc.setFont("helvetica", "normal");
-          doc.setTextColor(60, 60, 60);
-          dia.listaGastos.forEach(g => {
-            if (y > 270) {
-              doc.addPage();
-              y = 20;
-            }
-            doc.text(`  • ${g.descripcion || 'Gasto'}: RD$ ${parseFloat(g.monto).toFixed(2)}`, 20, y);
-            y += 5;
-          });
-          y += 5;
-        }
-      });
-
-      // Footer
-      doc.setFontSize(10);
-      doc.setTextColor(100, 100, 100);
-      doc.text(`Generado el: ${new Date().toLocaleString()}`, 105, 285, { align: "center" });
-
-      doc.save(`Cierre_${desde}_al_${hasta}.pdf`);
-      mostrarNotificacion('✅ PDF generado exitosamente');
+        doc.save(`Ingresos_${fd}_al_${fh}.pdf`);
+        cerrarModalImprimir();
+        mostrarNotificacion('PDF generado correctamente');
+      } catch (e) {
+        mostrarNotificacion('Error: ' + e.message, 'error');
+      }
     }
 
     // Actualizar conexión cada 30 segundos
@@ -669,7 +658,7 @@
     }, 30000);
 
     window.onload = () => {
-      // Dejar los campos vacíos para que el usuario seleccione las fechas correctas
+      // Campos vacíos para que el usuario seleccione las fechas
     };
   </script>
 </body>
