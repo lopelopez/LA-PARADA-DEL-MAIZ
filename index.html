@@ -7,134 +7,370 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
   <style>
+    /* === DISEÑO MODERNO === */
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fff7ed 100%);
+      min-height: 100vh;
+    }
+
+    .banner {
+      border-radius: 0 0 60px 60px;
+      box-shadow: 0 15px 50px rgba(245, 158, 11, 0.3);
+    }
+
+    .nav-btn {
+      border-radius: 16px;
+      padding: 10px 18px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .nav-yellow {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: white;
+    }
+
+    .nav-yellow:hover {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+
+    .nav-red {
+      background: linear-gradient(135deg, #f87171, #ef4444);
+      color: white;
+    }
+
+    .nav-red:hover {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+
+    .nav-gray {
+      background: linear-gradient(135deg, #9ca3af, #6b7280);
+      color: white;
+    }
+
+    .nav-purple {
+      background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+      color: white;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+
+    .input-modern {
+      border-radius: 16px;
+      padding: 14px 18px;
+      border: 2px solid #e5e7eb;
+      background: #f9fafb;
+      transition: all 0.3s ease;
+    }
+
+    .input-modern:focus {
+      border-color: #f59e0b;
+      background: white;
+      box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.15);
+      outline: none;
+    }
+
+    .btn-save {
+      border-radius: 16px;
+      padding: 14px 28px;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: white;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
+    }
+
+    .btn-save:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(245, 158, 11, 0.45);
+    }
+
+    .table-modern {
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    .table-modern thead {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+    }
+
+    .table-modern th {
+      padding: 16px;
+      font-weight: 600;
+      color: #92400e;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .table-modern td {
+      padding: 14px 16px;
+      font-size: 14px;
+    }
+
+    .table-modern tbody tr {
+      transition: all 0.2s ease;
+    }
+
+    .table-modern tbody tr:hover {
+      background: #fffbeb;
+    }
+
+    .article-card {
+      background: linear-gradient(135deg, #ffffff, #fefbf4);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.06);
+      border: 1px solid rgba(245, 158, 11, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .article-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(245, 158, 11, 0.15);
+    }
+
+    .badge-stock {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge-green {
+      background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+      color: #065f46;
+    }
+
+    .badge-yellow {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      color: #92400e;
+    }
+
+    .badge-red {
+      background: linear-gradient(135deg, #fee2e2, #fecaca);
+      color: #991b1b;
+    }
+
+    .btn-action {
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .btn-action:hover {
+      transform: scale(1.05);
+    }
+
+    .btn-blue {
+      background: linear-gradient(135deg, #60a5fa, #3b82f6);
+      color: white;
+    }
+
+    .btn-yellow {
+      background: linear-gradient(135deg, #fcd34d, #f59e0b);
+      color: white;
+    }
+
+    .btn-red {
+      background: linear-gradient(135deg, #f87171, #ef4444);
+      color: white;
+    }
+
+    .modal-overlay {
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-content {
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(30px);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-btn {
+      padding: 12px 24px;
+      border-radius: 14px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .modal-btn-cancel {
+      background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+      color: #374151;
+    }
+
+    .modal-btn-delete {
+      background: linear-gradient(135deg, #f87171, #ef4444);
+      color: white;
+    }
+
+    .modal-btn-save {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: white;
+    }
+
+    .modal-btn-blue {
+      background: linear-gradient(135deg, #60a5fa, #3b82f6);
+      color: white;
+    }
+
     @media (max-width: 640px) {
-      .nav-btn {
-        font-size: 0.75rem;
-        padding: 0.5rem 0.75rem;
+      .glass-card {
+        padding: 20px;
+        border-radius: 22px;
+      }
+      
+      .banner {
+        border-radius: 0 0 45px 45px;
       }
     }
   </style>
 </head>
-<body class="bg-yellow-50 font-sans min-h-screen">
+<body>
 
   <!-- Banner -->
   <div class="relative w-full h-28 sm:h-36 md:h-48 lg:h-56">
-    <img src="LOGO LA PARADA DEL MAIZ.png" alt="Logo de La Parada del Maíz" class="w-full h-full object-cover">
-    <div class="absolute inset-0 bg-yellow-500 bg-opacity-50 flex items-center justify-center px-2">
-      <h1 class="text-white text-lg sm:text-xl md:text-3xl lg:text-4xl font-bold text-center drop-shadow-lg">
+    <img src="LOGO LA PARADA DEL MAIZ.png" alt="Logo" class="w-full h-full object-cover">
+    <div class="absolute inset-0 bg-gradient-to-b from-yellow-500/50 to-yellow-600/60 flex items-center justify-center banner">
+      <h1 class="text-white text-lg sm:text-xl md:text-3xl lg:text-4xl font-bold text-center px-4 drop-shadow-lg">
         La Parada del Maíz y El Majarete de Leidy
       </h1>
     </div>
   </div>
 
   <!-- Navegación -->
-    <nav class="flex flex-wrap justify-center gap-2 sm:gap-3 mt-4 px-2" role="navigation" aria-label="Navegación principal">
-    <a href="index.html" class="nav-btn bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 text-sm font-medium">Artículos</a>
-     <a href="cajachica.html" class="bg-red-400 text-white px-4 py-2 rounded shadow text-sm">Caja Chica</a>
-    <a href="facturacion.html" class="nav-btn bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 text-sm font-medium">Ir a Facturación</a>
-    <a href="historial.html" class="nav-btn bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 text-sm font-medium">Ver Historial</a>
-    <a href="articulos_defectuosos.html" class="nav-btn bg-red-400 hover:bg-red-500 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 text-sm font-medium">Defectuosos</a>
-    <button id="btnUsuarios" onclick="window.location.href='usuarios.html'" class="hidden bg-purple-400 text-white px-4 py-2 rounded shadow text-sm">Usuarios</button>
-    <button onclick="cerrarSesion()" class="nav-btn bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 text-sm font-medium">Cerrar Sesión</button>
+  <nav class="flex flex-wrap justify-center gap-3 mt-6 px-4">
+    <a href="cajachica.html" class="nav-btn nav-red text-sm">💰 Caja Chica</a>
+    <a href="facturacion.html" class="nav-btn nav-yellow text-sm">🧾 Facturación</a>
+    <a href="historial.html" class="nav-btn nav-yellow text-sm">📊 Historial</a>
+    <a href="articulos_defectuosos.html" class="nav-btn nav-red text-sm">⚠️ Defectuosos</a>
+    <button id="btnUsuarios" onclick="window.location.href='usuarios.html'" class="hidden nav-btn nav-purple text-sm">👥 Usuarios</button>
+    <button onclick="cerrarSesion()" class="nav-btn nav-gray text-sm">🚪 Cerrar Sesión</button>
   </nav>
 
   <!-- Crear Artículo -->
-  <section class="max-w-4xl mx-auto mt-6 sm:mt-8 bg-white p-4 sm:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow mx-2 sm:mx-4 lg:mx-auto" role="region" aria-labelledby="crear-articulo">
-    <h2 id="crear-articulo" class="text-xl sm:text-2xl font-semibold mb-4 text-gray-700">Crear Artículo</h2>
+  <section class="max-w-4xl mx-auto mt-6 mx-4">
+    <div class="glass-card">
+      <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4">✨ Crear Artículo</h2>
 
-    <div class="flex flex-col gap-3 mb-4">
-      <input type="text" id="nombre" placeholder="Nombre del artículo" maxlength="100"
-             class="border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-yellow-400 text-sm sm:text-base" aria-label="Nombre del artículo">
-      <div class="flex flex-col sm:flex-row gap-3">
-        <input type="number" id="precio" placeholder="Precio (RD$)" min="0" step="0.01"
-               class="border border-gray-300 p-2 rounded-lg w-full sm:w-1/2 focus:outline-none focus:ring-2 focus:ring-yellow-400 text-sm sm:text-base" aria-label="Precio del artículo">
-        <input type="number" id="stock" placeholder="Cantidad disponible" min="0" step="1"
-               class="border border-gray-300 p-2 rounded-lg w-full sm:w-1/2 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base" aria-label="Cantidad disponible">
+      <div class="flex flex-col gap-3 mb-4">
+        <input type="text" id="nombre" placeholder="Nombre del artículo" maxlength="100"
+               class="input-modern w-full" aria-label="Nombre del artículo">
+        <div class="flex flex-col sm:flex-row gap-3">
+          <input type="number" id="precio" placeholder="Precio (RD$)" min="0" step="0.01"
+                 class="input-modern w-full sm:w-1/2" aria-label="Precio">
+          <input type="number" id="stock" placeholder="Cantidad disponible" min="0"
+                 class="input-modern w-full sm:w-1/2" aria-label="Cantidad">
+        </div>
       </div>
+      <button id="guardarBtn" onclick="guardarArticulo()"
+              class="btn-save w-full sm:w-auto">
+        💾 Guardar
+      </button>
+      <div id="loading" class="hidden mt-2 text-yellow-600 text-sm">Guardando...</div>
     </div>
-    <button id="guardarBtn" onclick="guardarArticulo()"
-            class="w-full sm:w-auto bg-yellow-400 hover:bg-yellow-500 text-white px-6 py-2 rounded-lg shadow-md transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-yellow-600 text-sm sm:text-base">
-      Guardar
-    </button>
-    <div id="loading" class="hidden mt-2 text-yellow-600 text-sm">Guardando...</div>
   </section>
 
   <!-- Lista de Artículos -->
-  <section class="max-w-4xl mx-auto mt-6 sm:mt-8 bg-white p-4 sm:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow mx-2 sm:mx-4 lg:mx-auto" role="region" aria-labelledby="lista-articulos">
-    <h3 id="lista-articulos" class="text-lg sm:text-xl font-semibold mb-4 text-gray-700">Lista de Artículos</h3>
+  <section class="max-w-4xl mx-auto mt-6 mx-4 mb-10">
+    <div class="glass-card">
+      <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">📋 Lista de Artículos</h3>
 
-    <!-- Vista de tabla para desktop -->
-    <div class="hidden sm:block overflow-x-auto">
-      <table class="min-w-full border border-gray-200 divide-y divide-gray-200" role="table" aria-label="Lista de artículos">
-        <thead class="bg-yellow-100">
-          <tr>
-            <th class="px-4 py-2 text-left text-gray-700 text-sm" scope="col">Nombre</th>
-            <th class="px-4 py-2 text-left text-gray-700 text-sm" scope="col">Precio (RD$)</th>
-            <th class="px-4 py-2 text-center text-gray-700 text-sm" scope="col">Disponible</th>
-            <th class="px-4 py-2 text-center text-gray-700 text-sm" scope="col">Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="listaDesktop" class="divide-y divide-gray-100" role="rowgroup"></tbody>
-      </table>
+      <!-- Tabla desktop -->
+      <div class="hidden sm:block overflow-x-auto">
+        <table class="table-modern w-full">
+          <thead>
+            <tr>
+              <th class="text-left">Nombre</th>
+              <th class="text-left">Precio (RD$)</th>
+              <th class="text-center">Disponible</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="listaDesktop" class="divide-y divide-gray-100"></tbody>
+        </table>
+      </div>
+
+      <!-- Tarjetas móvil -->
+      <div id="listaMobile" class="sm:hidden space-y-3"></div>
+
+      <div id="noData" class="text-center text-gray-500 mt-4 hidden text-sm">No hay artículos registrados.</div>
     </div>
-
-    <!-- Vista de tarjetas para móvil -->
-    <div id="listaMobile" class="sm:hidden space-y-3"></div>
-
-    <div id="noData" class="text-center text-gray-500 mt-4 hidden text-sm">No hay artículos registrados.</div>
   </section>
 
-  <!-- Modal de confirmación para eliminar -->
-  <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
-    <div class="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-sm">
-      <h3 id="confirmTitle" class="text-base sm:text-lg font-semibold mb-4">Confirmar Eliminación</h3>
-      <p class="text-sm sm:text-base mb-3">¿Estás seguro de que deseas eliminar este artículo?</p>
-      <input type="password" id="deletePassword" placeholder="Ingrese contraseña" class="border border-gray-300 p-2 rounded w-full mb-4 focus:outline-none focus:ring-2 focus:ring-red-400 text-sm sm:text-base" aria-label="Contraseña para eliminar">
+  <!-- Modal eliminar -->
+  <div id="confirmModal" class="fixed inset-0 modal-overlay hidden items-center justify-center z-50 p-4">
+    <div class="modal-content w-full max-w-sm">
+      <h3 class="text-lg font-semibold mb-4">🗑️ Confirmar Eliminación</h3>
+      <p class="text-sm text-gray-600 mb-4">¿Estás seguro de que deseas eliminar este artículo?</p>
+      <input type="password" id="deletePassword" placeholder="Ingrese contraseña" class="input-modern w-full mb-4" aria-label="Contraseña">
       <div class="flex justify-end gap-2">
-        <button onclick="cerrarModal()" class="px-3 sm:px-4 py-2 bg-gray-300 rounded text-sm sm:text-base">Cancelar</button>
-        <button id="confirmDelete" onclick="confirmarEliminar()" class="px-3 sm:px-4 py-2 bg-red-500 text-white rounded text-sm sm:text-base">Eliminar</button>
+        <button onclick="cerrarModal()" class="modal-btn modal-btn-cancel">Cancelar</button>
+        <button onclick="confirmarEliminar()" class="modal-btn modal-btn-delete">Eliminar</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal de contraseña para editar -->
-  <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="editTitle">
-    <div class="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-sm">
-      <h3 id="editTitle" class="text-base sm:text-lg font-semibold mb-4">Confirmar Edición</h3>
-      <p class="text-sm sm:text-base mb-3">Ingrese contraseña para editar este artículo.</p>
-      <input type="password" id="editPassword" placeholder="Ingrese contraseña" class="border border-gray-300 p-2 rounded w-full mb-4 focus:outline-none focus:ring-2 focus:ring-yellow-400 text-sm sm:text-base" aria-label="Contraseña para editar">
+  <!-- Modal editar -->
+  <div id="editModal" class="fixed inset-0 modal-overlay hidden items-center justify-center z-50 p-4">
+    <div class="modal-content w-full max-w-sm">
+      <h3 class="text-lg font-semibold mb-4">✏️ Confirmar Edición</h3>
+      <p class="text-sm text-gray-600 mb-4">Ingrese contraseña para editar este artículo.</p>
+      <input type="password" id="editPassword" placeholder="Ingrese contraseña" class="input-modern w-full mb-4" aria-label="Contraseña">
       <div class="flex justify-end gap-2">
-        <button onclick="cerrarModalEditar()" class="px-3 sm:px-4 py-2 bg-gray-300 rounded text-sm sm:text-base">Cancelar</button>
-        <button onclick="confirmarEditar()" class="px-3 sm:px-4 py-2 bg-yellow-500 text-white rounded text-sm sm:text-base">Confirmar</button>
+        <button onclick="cerrarModalEditar()" class="modal-btn modal-btn-cancel">Cancelar</button>
+        <button onclick="confirmarEditar()" class="modal-btn modal-btn-save">Confirmar</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal para agregar stock -->
-  <div id="stockModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="stockTitle">
-    <div class="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-sm">
-      <h3 id="stockTitle" class="text-base sm:text-lg font-semibold mb-4">Agregar Inventario</h3>
+  <!-- Modal stock -->
+  <div id="stockModal" class="fixed inset-0 modal-overlay hidden items-center justify-center z-50 p-4">
+    <div class="modal-content w-full max-w-sm">
+      <h3 class="text-lg font-semibold mb-4">📦 Agregar Inventario</h3>
       <p class="text-sm text-gray-600 mb-2">Artículo: <span id="stockArticuloNombre" class="font-medium"></span></p>
       <p class="text-sm text-gray-600 mb-3">Stock actual: <span id="stockActual" class="font-medium"></span></p>
-      <input type="number" id="cantidadAgregar" placeholder="Cantidad a agregar" min="1"
-             class="border border-gray-300 p-2 rounded w-full mb-4 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-400">
-      <input type="password" id="stockPassword" placeholder="Ingrese contraseña" class="border border-gray-300 p-2 rounded w-full mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base" aria-label="Contraseña para agregar stock">
+      <input type="number" id="cantidadAgregar" placeholder="Cantidad a agregar" min="1" class="input-modern w-full mb-3">
+      <input type="password" id="stockPassword" placeholder="Ingrese contraseña" class="input-modern w-full mb-4" aria-label="Contraseña">
       <div class="flex justify-end gap-2">
-        <button onclick="cerrarModalStock()" class="px-3 sm:px-4 py-2 bg-gray-300 rounded text-sm sm:text-base">Cancelar</button>
-        <button onclick="confirmarAgregarStock()" class="px-3 sm:px-4 py-2 bg-blue-500 text-white rounded text-sm sm:text-base">Agregar</button>
+        <button onclick="cerrarModalStock()" class="modal-btn modal-btn-cancel">Cancelar</button>
+        <button onclick="confirmarAgregarStock()" class="modal-btn modal-btn-blue">Agregar</button>
       </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // === VERIFICACIÓN DE AUTENTICACIÓN ===
     const supabaseUrl = "https://vurddrbkwuafszrddgxe.supabase.co";
     const supabaseKey = "sb_publishable_5bselDNif0wV61df7eZhgQ_E7gRM_zb";
     const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-    // Verificar si está logueado
+    // Verificar autenticación
     (function() {
       const usuario = localStorage.getItem('usuario');
       if (!usuario) {
@@ -142,13 +378,11 @@
       }
     })();
 
-    // === VARIABLES ===
     let editandoId = null;
     let articuloAEliminar = null;
     let articuloParaStock = null;
     let articuloParaEditar = null;
 
-    // === FUNCIONES ===
     function mostrarNotificacion(mensaje, tipo = 'success') {
       Toastify({
         text: mensaje,
@@ -167,10 +401,12 @@
     function editarArticulo(id, nombre, precio, stock) {
       articuloParaEditar = { id, nombre, precio, stock };
       document.getElementById('editModal').classList.remove('hidden');
+      document.getElementById('editModal').classList.add('flex');
     }
 
-    function cerrarModalEditar() {
+        function cerrarModalEditar() {
       document.getElementById('editModal').classList.add('hidden');
+      document.getElementById('editModal').classList.remove('flex');
       document.getElementById('editPassword').value = "";
       articuloParaEditar = null;
     }
@@ -190,7 +426,7 @@
         document.getElementById('precio').value = articuloParaEditar.precio;
         document.getElementById('stock').value = articuloParaEditar.stock;
         editandoId = articuloParaEditar.id;
-        document.getElementById('guardarBtn').textContent = "Actualizar";
+        document.getElementById('guardarBtn').textContent = "✏️ Actualizar";
         document.getElementById('crear-articulo').scrollIntoView({ behavior: 'smooth' });
         cerrarModalEditar();
       }
@@ -224,7 +460,7 @@
           if (error) throw error;
           mostrarNotificacion("Artículo actualizado exitosamente.");
           editandoId = null;
-          document.getElementById('guardarBtn').textContent = "Guardar";
+          document.getElementById('guardarBtn').textContent = "💾 Guardar";
         }
         document.getElementById('nombre').value = "";
         document.getElementById('precio').value = "";
@@ -239,9 +475,9 @@
     }
 
     function getStockClass(stock) {
-      if (stock <= 0) return 'text-red-600 bg-red-100';
-      if (stock <= 10) return 'text-yellow-600 bg-yellow-100';
-      return 'text-green-600 bg-green-100';
+      if (stock <= 0) return 'badge-red';
+      if (stock <= 10) return 'badge-yellow';
+      return 'badge-green';
     }
 
     async function cargarArticulos() {
@@ -264,41 +500,37 @@
             const stock = articulo.stock || 0;
             const stockClass = getStockClass(stock);
 
+            // Fila tabla desktop
             const tr = document.createElement('tr');
             tr.innerHTML = `
-              <td class="px-4 py-2 text-sm">${articulo.nombre}</td>
-              <td class="px-4 py-2 text-sm">${parseFloat(articulo.precio).toFixed(2)}</td>
-              <td class="px-4 py-2 text-center">
-                <span class="px-2 py-1 rounded-full text-sm font-medium ${stockClass}">${stock}</span>
-              </td>
-              <td class="px-4 py-2 text-center space-x-1">
-                <button onclick="mostrarModalStock(${articulo.id}, '${articulo.nombre.replace(/'/g, "\\'")}', ${articulo.precio}, ${stock})"
-                 class="bg-blue-400 hover:bg-blue-500 px-2 py-1 rounded text-white text-xs transition focus:outline-none focus:ring-2 focus:ring-blue-600" aria-label="Agregar stock a ${articulo.nombre}">+Stock</button>
-                <button onclick="editarArticulo(${articulo.id}, '${articulo.nombre.replace(/'/g, "\\'")}', ${articulo.precio}, ${stock})"
-                  class="bg-yellow-300 hover:bg-yellow-400 px-2 py-1 rounded text-xs transition focus:outline-none focus:ring-2 focus:ring-yellow-600" aria-label="Editar ${articulo.nombre}">Editar</button>
-                <button onclick="mostrarModalEliminar(${articulo.id})"
-                  class="bg-red-400 hover:bg-red-500 px-2 py-1 rounded text-white text-xs transition focus:outline-none focus:ring-2 focus:ring-red-600" aria-label="Eliminar ${articulo.nombre}">Eliminar</button>
+              <td class="font-medium text-gray-800">${articulo.nombre}</td>
+              <td class="text-green-600 font-semibold">${parseFloat(articulo.precio).toFixed(2)}</td>
+              <td class="text-center"><span class="badge-stock ${stockClass}">${stock}</span></td>
+              <td class="text-center">
+                <div class="flex justify-center gap-2">
+                  <button onclick="mostrarModalStock(${articulo.id}, '${articulo.nombre.replace(/'/g, "\\'")}', ${stock})" class="btn-action btn-blue">+Stock</button>
+                  <button onclick="editarArticulo(${articulo.id}, '${articulo.nombre.replace(/'/g, "\\'")}', ${articulo.precio}, ${stock})" class="btn-action btn-yellow">Editar</button>
+                  <button onclick="mostrarModalEliminar(${articulo.id})" class="btn-action btn-red">Eliminar</button>
+                </div>
               </td>
             `;
             listaDesktop.appendChild(tr);
 
+            // Tarjeta móvil
             const card = document.createElement('div');
-            card.className = "bg-yellow-50 p-3 rounded-lg shadow";
+            card.className = "article-card";
             card.innerHTML = `
               <div class="flex justify-between items-start mb-2">
                 <div>
                   <h4 class="font-semibold text-gray-800">${articulo.nombre}</h4>
                   <p class="text-sm text-gray-600">RD$ ${parseFloat(articulo.precio).toFixed(2)}</p>
                 </div>
-                <span class="px-2 py-1 rounded-full text-sm font-medium ${stockClass}">${stock} disp.</span>
+                <span class="badge-stock ${stockClass}">${stock} disp.</span>
               </div>
-              <div class="flex gap-2 mt-2">
-                <button onclick="mostrarModalStock(${articulo.id}, '${articulo.nombre.replace(/'/g, "\\'")}', ${stock})"
-                  class="flex-1 bg-blue-400 hover:bg-blue-500 px-2 py-1.5 rounded text-white text-xs transition">+Stock</button>
-                <button onclick="editarArticulo(${articulo.id}, '${articulo.nombre.replace(/'/g, "\\'")}', ${articulo.precio}, ${stock})"
-                  class="flex-1 bg-yellow-300 hover:bg-yellow-400 px-2 py-1.5 rounded text-xs transition">Editar</button>
-                <button onclick="mostrarModalEliminar(${articulo.id})"
-                  class="flex-1 bg-red-400 hover:bg-red-500 px-2 py-1.5 rounded text-white text-xs transition">Eliminar</button>
+              <div class="flex gap-2 mt-3">
+                <button onclick="mostrarModalStock(${articulo.id}, '${articulo.nombre.replace(/'/g, "\\'")}', ${stock})" class="btn-action btn-blue flex-1">+Stock</button>
+                <button onclick="editarArticulo(${articulo.id}, '${articulo.nombre.replace(/'/g, "\\'")}', ${articulo.precio}, ${stock})" class="btn-action btn-yellow flex-1">Editar</button>
+                <button onclick="mostrarModalEliminar(${articulo.id})" class="btn-action btn-red flex-1">Eliminar</button>
               </div>
             `;
             listaMobile.appendChild(card);
@@ -312,10 +544,12 @@
     function mostrarModalEliminar(id) {
       articuloAEliminar = id;
       document.getElementById('confirmModal').classList.remove('hidden');
+      document.getElementById('confirmModal').classList.add('flex');
     }
 
     function cerrarModal() {
       document.getElementById('confirmModal').classList.add('hidden');
+      document.getElementById('confirmModal').classList.remove('flex');
       articuloAEliminar = null;
       document.getElementById('deletePassword').value = "";
     }
@@ -350,10 +584,12 @@
       document.getElementById('cantidadAgregar').value = "";
       document.getElementById('stockPassword').value = "";
       document.getElementById('stockModal').classList.remove('hidden');
+      document.getElementById('stockModal').classList.add('flex');
     }
 
     function cerrarModalStock() {
       document.getElementById('stockModal').classList.add('hidden');
+      document.getElementById('stockModal').classList.remove('flex');
       articuloParaStock = null;
     }
 
@@ -377,11 +613,7 @@
 
       try {
         const nuevoStock = articuloParaStock.stock + cantidad;
-        const { error } = await supabaseClient
-          .from('articulos')
-          .update({ stock: nuevoStock })
-          .eq('id', articuloParaStock.id);
-
+        const { error } = await supabaseClient.from('articulos').update({ stock: nuevoStock }).eq('id', articuloParaStock.id);
         if (error) throw error;
         mostrarNotificacion(`Se agregaron ${cantidad} unidades a ${articuloParaStock.nombre}.`);
         cargarArticulos();
@@ -390,31 +622,28 @@
         mostrarNotificacion("Error: " + error.message, 'error');
       }
     }
-   
-    
-// Verificar si es leidylop para mostrar botón de usuarios
-const usuario = JSON.parse(localStorage.getItem('usuario'));
-if (usuario && usuario.username === 'leidylop') {
-  document.getElementById('btnUsuarios').classList.remove('hidden');
 
-}
-setInterval(async () => {
-  const usuario = localStorage.getItem('usuario');
-  if (usuario) {
-    const usuarioObj = JSON.parse(usuario);
-    try {
-      await supabaseClient
-        .from('usuarios')
-        .update({ ultima_conexion: new Date().toISOString() })
-        .eq('username', usuarioObj.username);
-    } catch (e) {
-      console.error('Error actualizando conexión:', e);
+    // Mostrar botón de usuarios si es admin
+    const usuario = JSON.parse(localStorage.getItem('usuario'));
+    if (usuario && usuario.username === 'leidylop') {
+      document.getElementById('btnUsuarios').classList.remove('hidden');
     }
-  }
-}, 30000);
+
+    // Actualizar conexión cada 30 segundos
+    setInterval(async () => {
+      const usuario = localStorage.getItem('usuario');
+      if (usuario) {
+        const usuarioObj = JSON.parse(usuario);
+        try {
+          await supabaseClient.from('usuarios').update({ ultima_conexion: new Date().toISOString() }).eq('username', usuarioObj.username);
+        } catch (e) {
+          console.error('Error actualizando conexión:', e);
+        }
+      }
+    }, 30000);
+
     // Cargar artículos al inicio
     cargarArticulos();
   </script>
-
 </body>
 </html>
