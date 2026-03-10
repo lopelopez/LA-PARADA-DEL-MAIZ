@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Historial de Stock - La Parada del Maíz</title>
+  <title>Historial - La Parada del Maíz</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
     /* === DISEÑO MODERNO === */
@@ -41,19 +42,26 @@
       color: white;
     }
 
+    .nav-yellow:hover {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+
+    .nav-green {
+      background: linear-gradient(135deg, #34d399, #10b981);
+      color: white;
+    }
+
+    .nav-green:hover {
+      background: linear-gradient(135deg, #10b981, #059669);
+    }
+
     .nav-red {
       background: linear-gradient(135deg, #f87171, #ef4444);
       color: white;
     }
 
-    .nav-gray {
-      background: linear-gradient(135deg, #9ca3af, #6b7280);
-      color: white;
-    }
-
-    .nav-purple {
-      background: linear-gradient(135deg, #a78bfa, #8b5cf6);
-      color: white;
+    .nav-red:hover {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
     }
 
     .glass-card {
@@ -80,7 +88,7 @@
       outline: none;
     }
 
-    .btn-save {
+    .btn-search {
       border-radius: 16px;
       padding: 14px 28px;
       background: linear-gradient(135deg, #fbbf24, #f59e0b);
@@ -92,58 +100,111 @@
       box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
     }
 
-    .btn-save:hover {
+    .btn-search:hover {
       transform: translateY(-3px);
       box-shadow: 0 10px 30px rgba(245, 158, 11, 0.45);
     }
 
-    .table-modern {
+    .factura-card {
+      background: linear-gradient(135deg, #ffffff, #fefbf4);
       border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      padding: 20px;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.06);
+      border: 1px solid rgba(245, 158, 11, 0.1);
+      transition: all 0.3s ease;
     }
 
-    .table-modern thead {
+    .factura-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(245, 158, 11, 0.15);
+    }
+
+    .badge-fecha {
       background: linear-gradient(135deg, #fef3c7, #fde68a);
-    }
-
-    .table-modern th {
-      padding: 16px;
-      font-weight: 600;
-      color: #92400e;
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .table-modern td {
-      padding: 14px 16px;
-      font-size: 14px;
-    }
-
-    .table-modern tbody tr {
-      transition: all 0.2s ease;
-    }
-
-    .table-modern tbody tr:hover {
-      background: #fffbeb;
-    }
-
-    .badge-stock {
       padding: 6px 14px;
-      border-radius: 20px;
+      border-radius: 12px;
       font-size: 12px;
       font-weight: 600;
+      color: #92400e;
     }
 
-    .badge-green {
+    .badge-total {
       background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+      padding: 8px 16px;
+      border-radius: 14px;
+      font-weight: 700;
       color: #065f46;
     }
 
-    .badge-red {
-      background: linear-gradient(135deg, #fee2e2, #fecaca);
-      color: #991b1b;
+    .btn-action {
+      border-radius: 12px;
+      padding: 8px 16px;
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-action:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-detail {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: white;
+    }
+
+    .btn-delete {
+      background: linear-gradient(135deg, #f87171, #ef4444);
+      color: white;
+    }
+
+    .modal-overlay {
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-content {
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(30px);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-btn {
+      border-radius: 14px;
+      padding: 12px 24px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .modal-btn-cancel {
+      background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+      color: #374151;
+    }
+
+    .modal-btn-delete {
+      background: linear-gradient(135deg, #f87171, #ef4444);
+      color: white;
+    }
+
+    .modal-btn-save {
+      background: linear-gradient(135deg, #34d399, #10b981);
+      color: white;
+    }
+
+    .info-box {
+      background: linear-gradient(135deg, #eff6ff, #dbeafe);
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .eliminated-card {
+      background: linear-gradient(135deg, #fef2f2, #fee2e2);
+      border-radius: 20px;
+      padding: 20px;
+      border: 1px solid rgba(239, 68, 68, 0.2);
     }
 
     @media (max-width: 640px) {
@@ -161,95 +222,140 @@
 <body>
 
   <!-- Banner -->
-  <div class="relative w-full h-28 sm:h-36 md:h-48 lg:h-56">
+  <div class="relative w-full h-28 sm:h-36">
     <img src="LOGO LA PARADA DEL MAIZ.png" alt="Logo" class="w-full h-full object-cover">
     <div class="absolute inset-0 bg-gradient-to-b from-yellow-500/50 to-yellow-600/60 flex items-center justify-center banner">
-      <h1 class="text-white text-lg sm:text-xl md:text-3xl lg:text-4xl font-bold text-center px-4 drop-shadow-lg">
-        Historial de Stock
+      <h1 class="text-white text-xl md:text-3xl font-bold text-center px-4 drop-shadow-lg">
+        📋 Historial de Facturas
       </h1>
     </div>
   </div>
 
   <!-- Navegación -->
   <nav class="flex flex-wrap justify-center gap-3 mt-6 px-4">
-    <a href="cajachica.html" class="nav-btn nav-red text-sm">💰 Caja Chica</a>
+    <a href="index.html" class="nav-btn nav-yellow text-sm">📦 Artículos</a>
     <a href="facturacion.html" class="nav-btn nav-yellow text-sm">🧾 Facturación</a>
-    <a href="historial.html" class="nav-btn nav-yellow text-sm">📊 Historial</a>
-    <a href="articulos_defectuosos.html" class="nav-btn nav-red text-sm">⚠️ Defectuosos</a>
-    <button id="btnUsuarios" onclick="window.location.href='usuarios.html'" class="hidden nav-btn nav-purple text-sm">👥 Usuarios</button>
-    <button onclick="cerrarSesion()" class="nav-btn nav-gray text-sm">🚪 Cerrar Sesión</button>
+    <button onclick="mostrarModalImprimir()" class="nav-btn nav-green text-sm">🖨️ Imprimir</button>
+    <button onclick="mostrarModalIngresos()" class="nav-btn nav-green text-sm">💰 Ingresos</button>
+    <button onclick="mostrarFacturasEliminadas()" class="nav-btn nav-red text-sm">🗑️ Eliminadas</button>
   </nav>
 
-  <!-- Filtros de Fecha -->
-  <section class="max-w-4xl mx-auto mt-6 mx-4">
-    <div class="glass-card">
-      <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4">📅 Filtrar por Fecha</h2>
-      <div class="flex flex-col sm:flex-row gap-3">
-        <input type="date" id="fechaInicio" class="input-modern w-full" aria-label="Fecha de inicio">
-        <input type="date" id="fechaFin" class="input-modern w-full" aria-label="Fecha de fin">
-        <button onclick="filtrarHistorial()" class="btn-save w-full sm:w-auto">🔍 Filtrar</button>
-        <button onclick="cargarTodoHistorial()" class="btn-save w-full sm:w-auto bg-gray-500">🔄 Todo</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- Resumen del Día -->
-  <section class="max-w-4xl mx-auto mt-6 mx-4">
-    <div class="glass-card">
-      <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4">📈 Resumen del Día</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="bg-green-50 p-4 rounded-xl border border-green-200">
-          <p class="text-sm text-gray-600">Entradas de Stock</p>
-          <p id="totalEntradas" class="text-2xl font-bold text-green-600">0</p>
-        </div>
-        <div class="bg-red-50 p-4 rounded-xl border border-red-200">
-          <p class="text-sm text-gray-600">Salidas de Stock</p>
-          <p id="totalSalidas" class="text-2xl font-bold text-red-600">0</p>
-        </div>
-        <div class="bg-blue-50 p-4 rounded-xl border border-blue-200">
-          <p class="text-sm text-gray-600">Artículos Movidos</p>
-          <p id="totalArticulos" class="text-2xl font-bold text-blue-600">0</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Tabla de Historial -->
+  <!-- Historial -->
   <section class="max-w-4xl mx-auto mt-6 mx-4 mb-10">
     <div class="glass-card">
-      <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">📋 Historial de Movimientos</h3>
-      <div class="hidden sm:block overflow-x-auto">
-        <table class="table-modern w-full">
-          <thead>
-            <tr>
-              <th class="text-left">Fecha</th>
-              <th class="text-left">Artículo</th>
-              <th class="text-center">Tipo</th>
-              <th class="text-center">Cantidad</th>
-              <th class="text-left">Usuario</th>
-              <th class="text-left">Observaciones</th>
-            </tr>
-          </thead>
-          <tbody id="listaHistorial" class="divide-y divide-gray-100"></tbody>
-        </table>
+      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">📋 Historial de Facturas</h2>
+      
+      <!-- Selector de fechas -->
+      <div class="flex flex-col sm:flex-row gap-4 mb-6">
+        <div class="w-full sm:w-1/3">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Desde:</label>
+          <input type="date" id="fechaDesde" class="input-modern w-full">
+        </div>
+        <div class="w-full sm:w-1/3">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Hasta:</label>
+          <input type="date" id="fechaHasta" class="input-modern w-full">
+        </div>
+        <div class="w-full sm:w-1/3">
+          <label class="block text-sm font-medium text-gray-700 mb-2"> </label>
+          <button onclick="cargarFacturasPorRango()" class="btn-search w-full">
+            🔍 Buscar
+          </button>
+        </div>
       </div>
-      <div id="noData" class="text-center text-gray-500 mt-4 hidden text-sm">No hay movimientos registrados en este periodo.</div>
+
+      <!-- Lista de facturas -->
+      <div id="historialFacturas" class="space-y-4"></div>
+      <div id="noData" class="info-box text-center hidden">
+        <p class="text-blue-700">📭 No hay facturas en este período</p>
+      </div>
     </div>
   </section>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Modal Eliminar -->
+  <div id="modalPassword" class="fixed inset-0 modal-overlay hidden items-center justify-center z-50 p-4">
+    <div class="modal-content w-full max-w-sm">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">🗑️ Eliminar Factura</h3>
+      
+      <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña:</label>
+      <input type="password" id="inputPassword" class="input-modern w-full mb-4" placeholder="Ingrese contraseña">
+      
+      <label class="block text-sm font-medium text-gray-700 mb-2">Motivo de eliminación:</label>
+      <input type="text" id="motivoEliminacion" class="input-modern w-full mb-4" placeholder="¿Por qué se elimina?">
+      
+      <div class="flex justify-end gap-3">
+        <button onclick="cerrarModal()" class="modal-btn modal-btn-cancel">Cancelar</button>
+        <button onclick="confirmarEliminar()" class="modal-btn modal-btn-delete">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Contraseña Ingresos -->
+  <div id="modalPasswordIngresos" class="fixed inset-0 modal-overlay hidden items-center justify-center z-50 p-4">
+    <div class="modal-content w-full max-w-sm">
+      <h3 class="text-xl font-bold text-gray-800 mb-4">💰 Ingresos - Contraseña</h3>
+      
+      <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña:</label>
+      <input type="password" id="inputPasswordIngresos" class="input-modern w-full mb-4" placeholder="Ingrese contraseña">
+      
+      <div class="flex justify-end gap-3">
+        <button onclick="cerrarModalIngresos()" class="modal-btn modal-btn-cancel">Cancelar</button>
+        <button onclick="confirmarPasswordIngresos()" class="modal-btn modal-btn-save">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Imprimir -->
+  <div id="modalPasswordImprimir" class="fixed inset-0 modal-overlay hidden items-center justify-center z-50 p-4">
+    <div class="modal-content w-full max-w-sm">
+      <h3 class="text-xl font-bold text-gray-800 mb-4">🖨️ Imprimir - Contraseña</h3>
+      
+      <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña:</label>
+      <input type="password" id="inputPasswordImprimir" class="input-modern w-full mb-4" placeholder="Ingrese contraseña">
+      
+      <div class="flex justify-end gap-3">
+        <button onclick="cerrarModalImprimir()" class="modal-btn modal-btn-cancel">Cancelar</button>
+        <button onclick="confirmarPasswordImprimir()" class="modal-btn modal-btn-save">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Rango Impresión -->
+  <div id="modalImprimir" class="fixed inset-0 modal-overlay hidden items-center justify-center z-50 p-4">
+    <div class="modal-content w-full max-w-sm">
+      <h3 class="text-xl font-bold text-gray-800 mb-4">🖨️ Imprimir Ventas</h3>
+      
+      <label class="block text-sm font-medium text-gray-700 mb-2">Desde:</label>
+      <input type="date" id="printDesde" class="input-modern w-full mb-3">
+      
+      <label class="block text-sm font-medium text-gray-700 mb-2">Hasta:</label>
+      <input type="date" id="printHasta" class="input-modern w-full mb-4">
+      
+      <div class="flex justify-end gap-3">
+        <button onclick="cerrarModalImprimir()" class="modal-btn modal-btn-cancel">Cancelar</button>
+        <button onclick="imprimirVentas()" class="modal-btn modal-btn-save">Imprimir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Facturas Eliminadas -->
+  <div id="modalEliminadas" class="fixed inset-0 modal-overlay hidden items-center justify-center z-50 p-4">
+    <div class="modal-content w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+      <h3 class="text-xl font-bold text-gray-800 mb-4">🗑️ Facturas Eliminadas</h3>
+      
+      <ul id="listaEliminadas" class="space-y-4"></ul>
+      
+      <div class="flex justify-end mt-6">
+        <button onclick="cerrarModalEliminadas()" class="modal-btn modal-btn-cancel">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const supabaseUrl = "https://vurddrbkwuafszrddgxe.supabase.co";
     const supabaseKey = "sb_publishable_5bselDNif0wV61df7eZhgQ_E7gRM_zb";
     const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-    // Verificar autenticación
-    (function() {
-      const usuario = localStorage.getItem('usuario');
-      if (!usuario) {
-        window.location.href = 'login.html';
-      }
-    })();
+    let facturaAEliminar = null;
 
     function mostrarNotificacion(mensaje, tipo = 'success') {
       Toastify({
@@ -257,128 +363,702 @@
         duration: 3000,
         gravity: "top",
         position: "right",
-        backgroundColor: tipo === 'error' ? "#dc3545" : tipo === 'warning' ? "#ffc107" : "#28a745",
+        backgroundColor: tipo === 'error' ? "#dc3545" : tipo === 'warning' ? "#ffc107" : "#28a745"
       }).showToast();
     }
 
-    function cerrarSesion() {
-      localStorage.removeItem('usuario');
-      window.location.href = 'login.html';
+    function formatearFecha(fechaStr) {
+      if (!fechaStr) return '';
+      return fechaStr.split('T')[0].split('-').reverse().join('/');
     }
 
-    // Cargar historial con filtros
-    async function filtrarHistorial() {
-      const fechaInicio = document.getElementById('fechaInicio').value;
-      const fechaFin = document.getElementById('fechaFin').value;
+    function obtenerUsuario() {
+      const usuario = localStorage.getItem('usuario');
+      return usuario ? JSON.parse(usuario) : null;
+    }
 
-      if (!fechaInicio || !fechaFin) {
-        mostrarNotificacion("Selecciona ambas fechas para filtrar.", 'warning');
+    async function cargarFacturas() {
+      try {
+        const hoy = new Date();
+        const fechaHoy = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+        const { data } = await supabaseClient
+          .from('facturas')
+          .select('*')
+          .gte('fecha', fechaHoy + 'T00:00:00')
+          .lte('fecha', fechaHoy + 'T23:59:59')
+          .order('id', { ascending: false });
+        mostrarFacturas(data || []);
+      } catch (error) {
+        mostrarNotificacion("Error: " + error.message, 'error');
+      }
+    }
+
+    function mostrarFacturas(data) {
+      const lista = document.getElementById('historialFacturas');
+      const noData = document.getElementById('noData');
+      lista.innerHTML = "";
+      
+      if (data.length === 0) {
+        noData.classList.remove('hidden');
+        return;
+      }
+      
+      noData.classList.add('hidden');
+      
+      data.forEach(f => {
+        const card = document.createElement('div');
+        card.className = 'factura-card';
+        
+        card.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex-1">
+              <div class="flex items-center gap-3 mb-2">
+                <span class="font-bold text-lg text-gray-800">#${f.id}</span>
+                <span class="badge-fecha">${formatearFecha(f.fecha)}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="badge-total">RD$${parseFloat(f.total).toFixed(2)}</span>
+                ${f.usuario ? '<span class="text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded-full">👤 ' + f.usuario + '</span>' : ''}
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="window.location.href='detalle_factura.html?id=${f.id}'" class="btn-action btn-detail">📋 Detalle</button>
+              <button onclick="eliminarFactura(${f.id})" class="btn-action btn-delete">🗑️</button>
+            </div>
+          </div>
+        `;
+        
+        lista.appendChild(card);
+      });
+    }
+
+    async function cargarFacturasPorRango() {
+      const d = document.getElementById('fechaDesde').value;
+      const h = document.getElementById('fechaHasta').value;
+      
+      if (!d || !h) {
+        return mostrarNotificacion('Seleccione fechas', 'warning');
+      }
+      
+      const { data } = await supabaseClient
+        .from('facturas')
+        .select('*')
+        .gte('fecha', d + 'T00:00:00')
+        .lte('fecha', h + 'T23:59:59')
+        .order('id', { ascending: false });
+      
+      mostrarFacturas(data || []);
+    }
+
+    function eliminarFactura(id) {
+      facturaAEliminar = id;
+      document.getElementById('modalPassword').classList.remove('hidden');
+      document.getElementById('modalPassword').classList.add('flex');
+      document.getElementById('motivoEliminacion').value = '';
+      document.getElementById('inputPassword').value = '';
+    }
+
+    function cerrarModal() {
+      facturaAEliminar = null;
+      document.getElementById('inputPassword').value = '';
+      document.getElementById('motivoEliminacion').value = '';
+      document.getElementById('modalPassword').classList.add('hidden');
+      document.getElementById('modalPassword').classList.remove('flex');
+    }
+
+    async function confirmarEliminar() {
+      if (document.getElementById('inputPassword').value !== '6511') {
+        return mostrarNotificacion('Contraseña incorrecta', 'error');
+      }
+
+      const motivo = document.getElementById('motivoEliminacion').value.trim();
+      if (!motivo) {
+        return mostrarNotificacion('Ingrese el motivo de eliminación', 'warning');
+      }
+
+      try {
+        const { data: factura } = await supabaseClient
+          .from('facturas')
+          .select('*')
+          .eq('id', facturaAEliminar)
+          .single();
+
+        if (factura) {
+          await supabaseClient.from('facturas_eliminadas').insert([{
+            factura_id: factura.id,
+            fecha_original: factura.fecha,
+            total: factura.total,
+            comentario: motivo,
+            eliminado_por: obtenerUsuario()?.username || 'Desconocido',
+            fecha_eliminacion: new Date().toISOString()
+          }]);
+        }
+
+        const { data: dets } = await supabaseClient
+          .from('detalle_factura')
+          .select('articulo_id, cantidad')
+          .eq('factura_id', facturaAEliminar);
+
+        for (const d of dets) {
+          const { data: a } = await supabaseClient
+            .from('articulos')
+            .select('stock')
+            .eq('id', d.articulo_id)
+            .single();
+          
+          if (a) {
+            await supabaseClient
+              .from('articulos')
+              .update({ stock: (a.stock || 0) + d.cantidad })
+              .eq('id', d.articulo_id);
+          }
+        }
+
+        await supabaseClient.from('detalle_factura').delete().eq('factura_id', facturaAEliminar);
+        await supabaseClient.from('facturas').delete().eq('id', facturaAEliminar);
+        
+        mostrarNotificacion('Factura eliminada correctamente');
+        cerrarModal();
+        cargarFacturas();
+      } catch (e) {
+        mostrarNotificacion('Error: ' + e.message, 'error');
+      }
+    }
+
+    function mostrarModalImprimir() {
+      document.getElementById('modalPasswordImprimir').classList.remove('hidden');
+      document.getElementById('modalPasswordImprimir').classList.add('flex');
+    }
+
+    function cerrarModalImprimir() {
+      document.getElementById('modalPasswordImprimir').classList.add('hidden');
+      document.getElementById('modalPasswordImprimir').classList.remove('flex');
+      document.getElementById('modalImprimir').classList.add('hidden');
+      document.getElementById('modalImprimir').classList.remove('flex');
+      document.getElementById('inputPasswordImprimir').value = '';
+    }
+
+    function confirmarPasswordImprimir() {
+      if (document.getElementById('inputPasswordImprimir').value !== '6511') {
+        return mostrarNotificacion('Contraseña incorrecta', 'error');
+      }
+      document.getElementById('modalPasswordImprimir').classList.add('hidden');
+      document.getElementById('modalPasswordImprimir').classList.remove('flex');
+      document.getElementById('modalImprimir').classList.remove('hidden');
+      document.getElementById('modalImprimir').classList.add('flex');
+    }
+
+    function mostrarModalIngresos() {
+      document.getElementById('modalPasswordIngresos').classList.remove('hidden');
+      document.getElementById('modalPasswordIngresos').classList.add('flex');
+    }
+
+    function cerrarModalIngresos() {
+      document.getElementById('modalPasswordIngresos').classList.add('hidden');
+      document.getElementById('modalPasswordIngresos').classList.remove('flex');
+      document.getElementById('inputPasswordIngresos').value = '';
+    }
+
+    function confirmarPasswordIngresos() {
+      if (document.getElementById('inputPasswordIngresos').value !== '6511') {
+        return mostrarNotificacion('Contraseña incorrecta', 'error');
+      }
+      window.location.href = 'ingresos.html';
+    }
+
+    async function mostrarFacturasEliminadas() {
+      document.getElementById('modalEliminadas').classList.remove('hidden');
+      document.getElementById('modalEliminadas').classList.add('flex');
+
+      const { data } = await supabaseClient
+        .from('facturas_eliminadas')
+        .select('*')
+        .order('fecha_eliminacion', { ascending: false });
+
+      const lista = document.getElementById('listaEliminadas');
+      lista.innerHTML = '';
+
+      if (!data || data.length === 0) {
+        lista.innerHTML = '<li class="text-center text-gray-500">No hay facturas eliminadas</li>';
         return;
       }
 
-      try {
-        const { data, error } = await supabaseClient
-          .from('movimientos_stock')
-          .select(`
-            *,
-            articulos(nombre)
-          `)
-          .gte('fecha', fechaInicio)
-          .lte('fecha', fechaFin)
-          .order('fecha', { ascending: false });
-
-        if (error) throw error;
-        mostrarHistorial(data);
-        calcularResumen(data);
-      } catch (error) {
-        mostrarNotificacion("Error al cargar historial: " + error.message, 'error');
-      }
+      data.forEach(f => {
+        const li = document.createElement('li');
+        li.className = 'eliminated-card';
+        li.innerHTML = `
+          <div class="flex justify-between items-start mb-2">
+            <span class="font-bold text-lg text-gray-800">Factura #${f.factura_id}</span>
+            <span class="badge-fecha">${formatearFecha(f.fecha_original)}</span>
+          </div>
+          <div class="flex flex-wrap gap-2 mb-2">
+            <span class="badge-total">RD$${parseFloat(f.total).toFixed(2)}</span>
+            <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium">👤 ${f.eliminado_por}</span>
+          </div>
+          <div class="bg-yellow-50 p-3 rounded-lg mb-2">
+            <span class="font-semibold text-sm text-yellow-800">Motivo:</span>
+            <span class="text-sm text-gray-700"> ${f.comentario}</span>
+          </div>
+          <div class="text-xs text-gray-400">Eliminado: ${new Date(f.fecha_eliminacion).toLocaleString()}</div>
+        `;
+        lista.appendChild(li);
+      });
     }
 
-        // Cargar todo el historial
-    async function cargarTodoHistorial() {
-      try {
-        const { data, error } = await supabaseClient
-          .from('movimientos_stock')
-          .select(`
-            *,
-            articulos(nombre)
-          `)
-          .order('fecha', { ascending: false })
-          .limit(100);
+    function cerrarModalEliminadas() {
+      document.getElementById('modalEliminadas').classList.add('hidden');
+      document.getElementById('modalEliminadas').classList.remove('flex');
+    }
+// Funcion imprimir
+  async function imprimirVentas() {
+  const fd = document.getElementById('printDesde').value;
+  const fh = document.getElementById('printHasta').value;
+  
+  if (!fd || !fh) {
+    return mostrarNotificacion('Seleccione fechas', 'warning');
+  }
+  
+  try {
+    // Obtener facturas del período
+    const { data: fs } = await supabaseClient
+      .from('facturas')
+      .select('*')
+      .gte('fecha', fd + 'T00:00:00')
+      .lte('fecha', fh + 'T23:59:59')
+      .order('id', { ascending: true });
 
-        if (error) throw error;
-        mostrarHistorial(data);
-        calcularResumen(data);
-      } catch (error) {
-        mostrarNotificacion("Error al cargar historial: " + error.message, 'error');
-      }
+    // Obtener caja_chica del período
+    const { data: cajas } = await supabaseClient
+      .from('caja_chica')
+      .select('*')
+      .gte('fecha', fd)
+      .lte('fecha', fh);
+
+    // Obtener artículos
+    const { data: articulos } = await supabaseClient.from('articulos').select('*');
+
+    if ((!fs || fs.length === 0) && (!cajas || cajas.length === 0)) {
+      return mostrarNotificacion('No hay datos en este periodo', 'warning');
     }
 
-    // Mostrar historial en la tabla
-    function mostrarHistorial(data) {
-      const listaHistorial = document.getElementById('listaHistorial');
-      const noData = document.getElementById('noData');
+    const ids = fs ? fs.map(f => f.id) : [];
+    const { data: dets } = ids.length > 0
+      ? await supabaseClient
+          .from('detalle_factura')
+          .select('factura_id, cantidad, precio, subtotal, articulos(nombre), facturas(comentario, descuento)')
+          .in('factura_id', ids)
+      : { data: [] };
 
-      listaHistorial.innerHTML = "";
+    const xf = {};
+    const comentarios = {};
+    
+    dets.forEach(d => {
+      if (!xf[d.factura_id]) xf[d.factura_id] = [];
+      xf[d.factura_id].push(d);
+      if (d.facturas && d.facturas.comentario) comentarios[d.factura_id] = d.facturas.comentario;
+    });
 
-      if (data.length === 0) {
-        noData.classList.remove('hidden');
-      } else {
-        noData.classList.add('hidden');
-        data.forEach(movimiento => {
-          const tr = document.createElement('tr');
-          const fecha = new Date(movimiento.fecha).toLocaleDateString('es-DO', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          });
-          const tipoClass = movimiento.tipo === 'entrada' ? 'badge-green' : 'badge-red';
-          const tipoIcon = movimiento.tipo === 'entrada' ? '📥' : '📤';
-
-          tr.innerHTML = `
-            <td class="font-medium text-gray-800">${fecha}</td>
-            <td class="text-gray-800">${movimiento.articulos?.nombre || 'N/A'}</td>
-            <td class="text-center"><span class="badge-stock ${tipoClass}">${tipoIcon} ${movimiento.tipo}</span></td>
-            <td class="text-center font-semibold">${movimiento.cantidad}</td>
-            <td class="text-gray-600">${movimiento.usuario}</td>
-            <td class="text-gray-500 text-sm">${movimiento.observaciones || '-'}</td>
-          `;
-          listaHistorial.appendChild(tr);
-        });
+    const infoArticulos = {};
+    let totalArticulos = 0;
+    let totalDescuentos = 0;
+    
+    dets.forEach(d => {
+      const nom = d.articulos.nombre;
+      const factura = fs?.find(f => f.id === d.factura_id);
+      const descuento = parseFloat(factura?.descuento || 0);
+      const itemsFactura = dets.filter(x => x.factura_id === d.factura_id);
+      const subtotalFactura = itemsFactura.reduce((sum, x) => sum + x.subtotal, 0);
+      let precioReal = d.subtotal;
+      
+      if (descuento > 0 && subtotalFactura > 0) {
+        const proporcion = d.subtotal / subtotalFactura;
+        precioReal = d.subtotal - (descuento * proporcion);
       }
+      
+      if (!infoArticulos[nom]) infoArticulos[nom] = { cantidad: 0, totalVenta: 0 };
+      infoArticulos[nom].cantidad += d.cantidad;
+      infoArticulos[nom].totalVenta += precioReal;
+      totalArticulos += d.cantidad;
+    });
+    
+    fs?.forEach(f => {
+      totalDescuentos += parseFloat(f.descuento || 0);
+    });
+
+    // Calcular totales de caja_chica
+    let totalInicialCaja = 0;
+    let totalGastosCaja = 0;
+    let totalFinalCaja = 0;
+    
+    if (cajas && cajas.length > 0) {
+      cajas.forEach(c => {
+        totalInicialCaja += parseFloat(c.monto_inicial || 0);
+        totalGastosCaja += parseFloat(c.monto_gastos || 0);
+        totalFinalCaja += parseFloat(c.monto_final || 0);
+      });
     }
 
-    // Calcular resumen del periodo
-    function calcularResumen(data) {
-      let entradas = 0;
-      let salidas = 0;
-      const articulosUnicos = new Set();
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF("p", "mm", "a4");
 
-      data.forEach(movimiento => {
-        if (movimiento.tipo === 'entrada') {
-          entradas += movimiento.cantidad;
-        } else {
-          salidas += movimiento.cantidad;
-        }
-        articulosUnicos.add(movimiento.articulo_id);
+    const marginLeft = 15;
+    const marginRight = 195;
+    const pageWidth = 180;
+    const pageHeight = 297;
+    const footerY = 285; // ✅ CORREGIDO: Footer más abajo
+
+    // Fondo sutil
+    doc.setFillColor(255, 248, 240);
+    doc.rect(0, 0, 210, 297, 'F');
+
+    // === LOGO ===
+    try {
+      const img = new Image();
+      img.src = 'LOGO LA PARADA DEL MAIZ.png';
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+      });
+      doc.addImage(img, 'PNG', marginLeft, 12, 18, 18);
+    } catch (e) {
+      console.warn('Logo no cargado');
+    }
+
+    // === HEADER MODERNO ===
+    doc.setFillColor(217, 119, 6);
+    doc.roundedRect(marginLeft + 22, 10, pageWidth - 22, 25, 4, 4, 'F');
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.setTextColor(255, 255, 255);
+    doc.text("LA PARADA DEL MAIZ", 105, 22, { align: "center" });
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text("El Majarete de Leidy", 105, 28, { align: "center" });
+
+    // Línea decorativa
+    doc.setDrawColor(255, 200, 120);
+    doc.setLineWidth(0.8);
+    doc.line(marginLeft, 38, marginRight, 38);
+
+    // === INFORMACIÓN ===
+    doc.setFontSize(9);
+    doc.setTextColor(60, 60, 60);
+    doc.text("Periodo: " + fd + " al " + fh, marginLeft, 45);
+    doc.text("Generado: " + new Date().toLocaleDateString('es-DO'), marginRight, 45, { align: "right" });
+
+    let y = 52;
+
+    // === TITULO VENTAS ===
+    doc.setFillColor(255, 140, 0);
+    doc.roundedRect(marginLeft, y, pageWidth, 8, 3, 3, 'F');
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(255, 255, 255);
+    doc.text("DETALLE DE VENTAS", 105, y + 5.5, { align: "center" });
+
+    y += 12;
+
+    // Encabezado tabla
+    doc.setFillColor(255, 235, 210);
+    doc.roundedRect(marginLeft, y, pageWidth, 7, 2, 2, 'F');
+
+    doc.setFontSize(8);
+    doc.setTextColor(0, 0, 0);
+    doc.text("FAC", marginLeft + 3, y + 4.5);
+    doc.text("FECHA", marginLeft + 20, y + 4.5);
+    doc.text("ARTICULO", marginLeft + 50, y + 4.5);
+    doc.text("CANT", marginLeft + 125, y + 4.5);
+    doc.text("PRECIO", marginLeft + 140, y + 4.5);
+    doc.text("SUBTOTAL", marginRight - 2, y + 4.5, { align: "right" });
+
+    y += 9;
+
+    let totalPeriodo = 0;
+
+    // === FACTURAS ===
+    for (const f of fs || []) {
+      const items = xf[f.id] || [];
+      totalPeriodo += parseFloat(f.total);
+
+      doc.setFillColor(255, 250, 240);
+      doc.roundedRect(marginLeft, y, pageWidth, 7, 2, 2, 'F');
+
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(0, 0, 0);
+      doc.text(String(f.id), marginLeft + 3, y + 4.5);
+      doc.text(formatearFecha(f.fecha), marginLeft + 20, y + 4.5);
+
+      doc.setTextColor(34, 197, 94);
+      doc.text("RD$" + parseFloat(f.total).toFixed(2), marginRight - 2, y + 4.5, { align: "right" });
+
+      y += 8;
+
+      items.forEach(i => {
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(90, 90, 90);
+
+        let nombre = i.articulos.nombre;
+        if (nombre.length > 30) nombre = nombre.substring(0, 27) + "...";
+        doc.text(nombre, marginLeft + 25, y + 4);
+        doc.text(String(i.cantidad), marginLeft + 127, y + 4);
+        doc.text("RD$" + i.precio.toFixed(2), marginLeft + 142, y + 4);
+        doc.text("RD$" + i.subtotal.toFixed(2), marginRight - 2, y + 4, { align: "right" });
+
+        y += 6;
       });
 
-      document.getElementById('totalEntradas').textContent = entradas;
-      document.getElementById('totalSalidas').textContent = salidas;
-      document.getElementById('totalArticulos').textContent = articulosUnicos.size;
+      // Comentario
+      if (comentarios[f.id] && comentarios[f.id].trim() !== "") {
+        doc.setFont("helvetica", "italic");
+        doc.setTextColor(59, 130, 246);
+        doc.text("Nota: " + comentarios[f.id], marginLeft + 25, y + 4);
+        y += 6;
+      }
+
+      y += 3;
+
+      // ✅ CORREGIDO: Saltar página más temprano
+      if (y > 245) {
+        doc.addPage();
+        doc.setFillColor(255, 248, 240);
+        doc.rect(0, 0, 210, 297, 'F');
+        y = 20;
+      }
     }
 
-    // Mostrar botón de usuarios si es admin
-    const usuario = JSON.parse(localStorage.getItem('usuario'));
-    if (usuario && usuario.username === 'leidylop') {
-      document.getElementById('btnUsuarios').classList.remove('hidden');
+    // === RESUMEN POR ARTÍCULO ===
+    y += 10;
+
+    doc.setFillColor(59, 130, 246);
+    doc.roundedRect(marginLeft, y, pageWidth, 8, 3, 3, 'F');
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(255, 255, 255);
+    doc.text("RESUMEN POR ARTICULO", 105, y + 5.5, { align: "center" });
+
+    y += 12;
+
+    doc.setFillColor(239, 246, 255);
+    doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
+    doc.setFontSize(8);
+    doc.setTextColor(0, 0, 0);
+    doc.text("ARTICULO", marginLeft + 3, y + 4);
+    doc.text("CANT", marginLeft + 115, y + 4);
+    doc.text("TOTAL VENTA", marginLeft + 140, y + 4);
+    doc.text("PROMEDIO", marginRight - 2, y + 4, { align: "right" });
+
+    y += 8;
+
+    Object.keys(infoArticulos).forEach(nom => {
+      const info = infoArticulos[nom];
+      const promedio = info.totalVenta / info.cantidad;
+
+      doc.setFillColor(249, 250, 251);
+      doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(0, 0, 0);
+
+      let nombre = nom;
+      if (nombre.length > 40) nombre = nombre.substring(0, 37) + "...";
+      doc.text(nombre, marginLeft + 3, y + 4);
+      doc.text(String(info.cantidad), marginLeft + 118, y + 4);
+      doc.text("RD$" + info.totalVenta.toFixed(2), marginLeft + 142, y + 4);
+      doc.text("RD$" + promedio.toFixed(2), marginRight - 2, y + 4, { align: "right" });
+
+      y += 7;
+
+      // ✅ CORREGIDO: Saltar página más temprano
+      if (y > 245) {
+        doc.addPage();
+        doc.setFillColor(255, 248, 240);
+        doc.rect(0, 0, 210, 297, 'F');
+        y = 20;
+      }
+    });
+
+    // === CAJA CHICA ===
+    if (cajas && cajas.length > 0) {
+      y += 10;
+
+      doc.setFillColor(220, 38, 38);
+      doc.roundedRect(marginLeft, y, pageWidth, 8, 3, 3, 'F');
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(255, 255, 255);
+      doc.text("RESUMEN DE CAJA CHICA", 105, y + 5.5, { align: "center" });
+
+      y += 12;
+
+      doc.setFillColor(254, 242, 242);
+      doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
+      doc.setFontSize(8);
+      doc.setTextColor(0, 0, 0);
+      doc.text("CONCEPTO", marginLeft + 3, y + 4);
+      doc.text("MONTO", marginRight - 2, y + 4, { align: "right" });
+
+      y += 8;
+
+      doc.setFillColor(239, 248, 255);
+      doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
+      doc.setTextColor(59, 130, 246);
+      doc.text("Total Inicial", marginLeft + 3, y + 4);
+      doc.text("RD$" + totalInicialCaja.toFixed(2), marginRight - 2, y + 4, { align: "right" });
+      y += 7;
+
+      doc.setFillColor(255, 237, 237);
+      doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
+      doc.setTextColor(220, 38, 38);
+      doc.text("Total Gastos", marginLeft + 3, y + 4);
+      doc.text("- RD$" + totalGastosCaja.toFixed(2), marginRight - 2, y + 4, { align: "right" });
+      y += 7;
+
+      doc.setFillColor(220, 252, 231);
+      doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(22, 163, 74);
+      doc.text("Balance Final en Caja", marginLeft + 3, y + 4);
+      doc.text("RD$" + totalFinalCaja.toFixed(2), marginRight - 2, y + 4, { align: "right" });
+      y += 7;
     }
 
-    // Cargar historial al inicio
-    cargarTodoHistorial();
+        // === STOCK ===
+    if (articulos && articulos.length > 0) {
+      y += 10;
+
+      doc.setFillColor(16, 185, 129);
+      doc.roundedRect(marginLeft, y, pageWidth, 8, 3, 3, 'F');
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(255, 255, 255);
+      doc.text("STOCK DISPONIBLE", 105, y + 5.5, { align: "center" });
+
+      y += 12;
+
+      doc.setFillColor(220, 252, 231);
+      doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
+      doc.setFontSize(8);
+      doc.setTextColor(0, 0, 0);
+      doc.text("ARTICULO", marginLeft + 3, y + 4);
+      doc.text("STOCK", marginRight - 2, y + 4, { align: "right" });
+
+      y += 8;
+
+      articulos.forEach(a => {
+        let colorStock = [34, 197, 94];
+        if (a.stock <= 0) colorStock = [220, 38, 38];
+        else if (a.stock <= 10) colorStock = [217, 119, 6];
+
+        doc.setFillColor(240, 253, 244);
+        doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.setTextColor(0, 0, 0);
+
+        let nombre = a.nombre;
+        if (nombre.length > 40) nombre = nombre.substring(0, 37) + "...";
+        doc.text(nombre, marginLeft + 3, y + 4);
+
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(colorStock[0], colorStock[1], colorStock[2]);
+        doc.text(String(a.stock), marginRight - 2, y + 4, { align: "right" });
+
+        y += 7;
+
+        // ✅ CORREGIDO: Saltar página más temprano
+        if (y > 245) {
+          doc.addPage();
+          doc.setFillColor(255, 248, 240);
+          doc.rect(0, 0, 210, 297, 'F');
+          y = 20;
+        }
+      });
+    }
+
+    // === RESUMEN FINAL ===
+    y += 10;
+
+    doc.setFillColor(217, 119, 6);
+    doc.roundedRect(marginLeft, y, pageWidth, 50, 6, 6, 'F');
+
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(255, 255, 255);
+    doc.text("RESUMEN GENERAL", 105, y + 10, { align: "center" });
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text("Total Ventas: RD$" + totalPeriodo.toFixed(2), 105, y + 20, { align: "center" });
+    doc.text("Artículos Vendidos: " + totalArticulos, 105, y + 27, { align: "center" });
+    doc.text("Descuentos: RD$" + totalDescuentos.toFixed(2), 105, y + 34, { align: "center" });
+
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("Balance en Caja: RD$" + totalFinalCaja.toFixed(2), 105, y + 42, { align: "center" });
+
+    const totalGeneral = totalPeriodo + totalFinalCaja;
+    y += 52;
+    
+    doc.setFillColor(255, 255, 255);
+    doc.roundedRect(marginLeft, y - 3, pageWidth, 12, 3, 3, 'F');
+    
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(217, 119, 6);
+    doc.text("TOTAL GENERAL: RD$" + totalGeneral.toFixed(2), 105, y + 4, { align: "center" });
+
+    // === FOOTER ===
+    y = footerY;
+    doc.setFillColor(31, 41, 55);
+    doc.roundedRect(0, y, 210, 17, 0, 0, 'F');
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(255, 255, 255);
+    doc.text("La Parada del Maíz y El Majarete de Leidy", 105, y + 7, { align: "center" });
+    
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.text("Generado el " + new Date().toLocaleString('es-DO'), 105, y + 13, { align: "center" });
+
+    doc.save('Resumen_' + fd + '_al_' + fh + '.pdf');
+    cerrarModalImprimir();
+    mostrarNotificacion('PDF generado correctamente');
+  } catch (e) {
+    mostrarNotificacion('Error: ' + e.message, 'error');
+  }
+}
+
+    // Actualizar conexión cada 30 segundos
+    setInterval(async () => {
+      const usuario = localStorage.getItem('usuario');
+      if (usuario) {
+        const usuarioObj = JSON.parse(usuario);
+        try {
+          await supabaseClient
+            .from('usuarios')
+            .update({ ultima_conexion: new Date().toISOString() })
+            .eq('username', usuarioObj.username);
+        } catch (e) {
+          console.error('Error actualizando conexión:', e);
+        }
+      }
+    }, 30000);
+
+    window.onload = () => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('desde') && params.get('hasta')) {
+        document.getElementById('fechaDesde').value = params.get('desde');
+        document.getElementById('fechaHasta').value = params.get('hasta');
+        cargarFacturasPorRango();
+      } else {
+        cargarFacturas();
+      }
+    };
   </script>
 </body>
 </html>
