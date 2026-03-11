@@ -12,11 +12,35 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
-    /* === DISEÑO MODERNO === */
+    /* === VARIABLES DE TEMA === */
+    :root {
+      --bg-primary: #fffbeb;
+      --bg-secondary: #fef3c7;
+      --bg-card: rgba(255, 255, 255, 0.95);
+      --text-primary: #1f2937;
+      --text-secondary: #6b7280;
+      --border-color: #e5e7eb;
+      --accent-color: #f59e0b;
+      --shadow-color: rgba(0, 0, 0, 0.1);
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #111827;
+      --bg-secondary: #1f2937;
+      --bg-card: rgba(31, 41, 55, 0.95);
+      --text-primary: #f9fafb;
+      --text-secondary: #9ca3af;
+      --border-color: #374151;
+      --accent-color: #fbbf24;
+      --shadow-color: rgba(0, 0, 0, 0.3);
+    }
+
     body {
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fff7ed 100%);
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, #fff7ed 100%);
       min-height: 100vh;
+      transition: all 0.3s ease;
+      color: var(--text-primary);
     }
 
     .banner {
@@ -64,25 +88,35 @@
       background: linear-gradient(135deg, #ef4444, #dc2626);
     }
 
+    .nav-gray {
+      background: linear-gradient(135deg, #9ca3af, #6b7280);
+      color: white;
+    }
+
+    .nav-gray:hover {
+      background: linear-gradient(135deg, #6b7280, #4b5563);
+    }
+
     .glass-card {
-      background: rgba(255, 255, 255, 0.95);
+      background: var(--bg-card);
       backdrop-filter: blur(20px);
       border-radius: 28px;
       padding: 28px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 10px 40px var(--shadow-color);
+      border: 1px solid var(--border-color);
     }
 
     .input-modern {
       border-radius: 16px;
       padding: 14px 18px;
-      border: 2px solid #e5e7eb;
-      background: #f9fafb;
+      border: 2px solid var(--border-color);
+      background: var(--bg-primary);
       transition: all 0.3s ease;
+      color: var(--text-primary);
     }
 
     .input-modern:focus {
-      border-color: #f59e0b;
+      border-color: var(--accent-color);
       background: white;
       box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.15);
       outline: none;
@@ -161,14 +195,19 @@
     .modal-overlay {
       background: rgba(0, 0, 0, 0.5);
       backdrop-filter: blur(4px);
+      display: none;
+    }
+
+    .modal-overlay.flex {
+      display: flex;
     }
 
     .modal-content {
-      background: rgba(255, 255, 255, 0.98);
+      background: var(--bg-card);
       backdrop-filter: blur(30px);
       border-radius: 28px;
       padding: 28px;
-      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 25px 80px var(--shadow-color);
     }
 
     .modal-btn {
@@ -207,6 +246,30 @@
       border: 1px solid rgba(239, 68, 68, 0.2);
     }
 
+    .theme-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px var(--shadow-color);
+      z-index: 100;
+    }
+
+    .theme-toggle:hover {
+      transform: scale(1.1);
+    }
+
+    .theme-toggle svg {
+      width: 24px;
+      height: 24px;
+      fill: var(--text-primary);
+    }
+
     @media (max-width: 640px) {
       .glass-card {
         padding: 20px;
@@ -220,6 +283,13 @@
   </style>
 </head>
 <body>
+
+  <!-- Botón de Tema -->
+  <button id="themeToggle" class="theme-toggle" title="Cambiar Tema">
+    <svg id="themeIcon" viewBox="0 0 24 24">
+      <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/>
+    </svg>
+  </button>
 
   <!-- Banner -->
   <div class="relative w-full h-28 sm:h-36">
@@ -235,9 +305,11 @@
   <nav class="flex flex-wrap justify-center gap-3 mt-6 px-4">
     <a href="index.html" class="nav-btn nav-yellow text-sm">📦 Artículos</a>
     <a href="facturacion.html" class="nav-btn nav-yellow text-sm">🧾 Facturación</a>
+    <a href="caja_chica.html" class="nav-btn nav-red text-sm">💵 Caja Chica</a>
     <button onclick="mostrarModalImprimir()" class="nav-btn nav-green text-sm">🖨️ Imprimir</button>
     <button onclick="mostrarModalIngresos()" class="nav-btn nav-green text-sm">💰 Ingresos</button>
     <button onclick="mostrarFacturasEliminadas()" class="nav-btn nav-red text-sm">🗑️ Eliminadas</button>
+    <button onclick="cerrarSesion()" class="nav-btn nav-gray text-sm">🚪 Cerrar Sesión</button>
   </nav>
 
   <!-- Historial -->
@@ -248,7 +320,7 @@
       <!-- Selector de fechas -->
       <div class="flex flex-col sm:flex-row gap-4 mb-6">
         <div class="w-full sm:w-1/3">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Desde:</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Desde:</label>
           <input type="date" id="fechaDesde" class="input-modern w-full">
         </div>
         <div class="w-full sm:w-1/3">
@@ -256,7 +328,7 @@
           <input type="date" id="fechaHasta" class="input-modern w-full">
         </div>
         <div class="w-full sm:w-1/3">
-          <label class="block text-sm font-medium text-gray-700 mb-2"> </label>
+          <label class="block text-sm font-medium text-gray-700 mb-2"> </label>
           <button onclick="cargarFacturasPorRango()" class="btn-search w-full">
             🔍 Buscar
           </button>
@@ -274,7 +346,7 @@
   <!-- Modal Eliminar -->
   <div id="modalPassword" class="fixed inset-0 modal-overlay hidden items-center justify-center z-50 p-4">
     <div class="modal-content w-full max-w-sm">
-            <h3 class="text-xl font-bold text-gray-800 mb-4">🗑️ Eliminar Factura</h3>
+      <h3 class="text-xl font-bold text-gray-800 mb-4">🗑️ Eliminar Factura</h3>
       
       <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña:</label>
       <input type="password" id="inputPassword" class="input-modern w-full mb-4" placeholder="Ingrese contraseña">
@@ -350,13 +422,65 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+    // === TEMA OSCURO/CLARO ===
+    function initTheme() {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      updateThemeIcon(savedTheme);
+    }
+
+    function updateThemeIcon(theme) {
+      const icon = document.getElementById('themeIcon');
+      if (icon) {
+        if (theme === 'dark') {
+          icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+        } else {
+          icon.innerHTML = '<path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/>';
+        }
+      }
+    }
+
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeIcon(newTheme);
+    });
+
+    // === SESIÓN Y SEGURIDAD ===
     const supabaseUrl = "https://vurddrbkwuafszrddgxe.supabase.co";
     const supabaseKey = "sb_publishable_5bselDNif0wV61df7eZhgQ_E7gRM_zb";
     const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
+    (function() {
+      const usuario = localStorage.getItem('usuario');
+      if (!usuario) {
+        window.location.href = 'login.html';
+      }
+    })();
+
+    let sessionTimeout;
+    const SESSION_DURATION = 30 * 60 * 1000;
+
+    function resetSessionTimeout() {
+      clearTimeout(sessionTimeout);
+      sessionTimeout = setTimeout(() => {
+        mostrarNotificacion("Sesión expirada por inactividad", 'warning');
+        cerrarSesion();
+      }, SESSION_DURATION);
+    }
+
+    document.addEventListener('click', resetSessionTimeout);
+    document.addEventListener('keypress', resetSessionTimeout);
+    document.addEventListener('mousemove', resetSessionTimeout);
+    resetSessionTimeout();
+
     let facturaAEliminar = null;
 
+    // === NOTIFICACIONES ===
     function mostrarNotificacion(mensaje, tipo = 'success') {
       Toastify({
         text: mensaje,
@@ -365,6 +489,11 @@
         position: "right",
         backgroundColor: tipo === 'error' ? "#dc3545" : tipo === 'warning' ? "#ffc107" : "#28a745"
       }).showToast();
+    }
+
+    function cerrarSesion() {
+      localStorage.removeItem('usuario');
+      window.location.href = 'login.html';
     }
 
     function formatearFecha(fechaStr) {
@@ -559,7 +688,7 @@
       document.getElementById('inputPasswordIngresos').value = '';
     }
 
-    function confirmarPasswordIngresos() {
+        function confirmarPasswordIngresos() {
       if (document.getElementById('inputPasswordIngresos').value !== '6511') {
         return mostrarNotificacion('Contraseña incorrecta', 'error');
       }
@@ -609,431 +738,444 @@
       document.getElementById('modalEliminadas').classList.add('hidden');
       document.getElementById('modalEliminadas').classList.remove('flex');
     }
-// Funcion imprimir
-  async function imprimirVentas() {
-  const fd = document.getElementById('printDesde').value;
-  const fh = document.getElementById('printHasta').value;
-  
-  if (!fd || !fh) {
-    return mostrarNotificacion('Seleccione fechas', 'warning');
-  }
-  
-  try {
-    // Obtener facturas del período
-    const { data: fs } = await supabaseClient
-      .from('facturas')
-      .select('*')
-      .gte('fecha', fd + 'T00:00:00')
-      .lte('fecha', fh + 'T23:59:59')
-      .order('id', { ascending: true });
 
-    // Obtener caja_chica del período
-    const { data: cajas } = await supabaseClient
-      .from('caja_chica')
-      .select('*')
-      .gte('fecha', fd)
-      .lte('fecha', fh);
-
-    // Obtener artículos
-    const { data: articulos } = await supabaseClient.from('articulos').select('*');
-
-    if ((!fs || fs.length === 0) && (!cajas || cajas.length === 0)) {
-      return mostrarNotificacion('No hay datos en este periodo', 'warning');
-    }
-
-    const ids = fs ? fs.map(f => f.id) : [];
-    const { data: dets } = ids.length > 0
-      ? await supabaseClient
-          .from('detalle_factura')
-          .select('factura_id, cantidad, precio, subtotal, articulos(nombre), facturas(comentario, descuento)')
-          .in('factura_id', ids)
-      : { data: [] };
-
-    const xf = {};
-    const comentarios = {};
-    
-    dets.forEach(d => {
-      if (!xf[d.factura_id]) xf[d.factura_id] = [];
-      xf[d.factura_id].push(d);
-      if (d.facturas && d.facturas.comentario) comentarios[d.factura_id] = d.facturas.comentario;
-    });
-
-    const infoArticulos = {};
-    let totalArticulos = 0;
-    let totalDescuentos = 0;
-    
-    dets.forEach(d => {
-      const nom = d.articulos.nombre;
-      const factura = fs?.find(f => f.id === d.factura_id);
-      const descuento = parseFloat(factura?.descuento || 0);
-      const itemsFactura = dets.filter(x => x.factura_id === d.factura_id);
-      const subtotalFactura = itemsFactura.reduce((sum, x) => sum + x.subtotal, 0);
-      let precioReal = d.subtotal;
+    // === IMPRIMIR VENTAS ===
+           // === IMPRIMIR VENTAS ===
+    async function imprimirVentas() {
+      const fd = document.getElementById('printDesde').value;
+      const fh = document.getElementById('printHasta').value;
       
-      if (descuento > 0 && subtotalFactura > 0) {
-        const proporcion = d.subtotal / subtotalFactura;
-        precioReal = d.subtotal - (descuento * proporcion);
+      if (!fd || !fh) {
+        return mostrarNotificacion('Seleccione fechas', 'warning');
       }
       
-      if (!infoArticulos[nom]) infoArticulos[nom] = { cantidad: 0, totalVenta: 0 };
-      infoArticulos[nom].cantidad += d.cantidad;
-      infoArticulos[nom].totalVenta += precioReal;
-      totalArticulos += d.cantidad;
-    });
-    
-    fs?.forEach(f => {
-      totalDescuentos += parseFloat(f.descuento || 0);
-    });
+      try {
+        // Obtener facturas del período
+        const { data: fs } = await supabaseClient
+          .from('facturas')
+          .select('*')
+          .gte('fecha', fd + 'T00:00:00')
+          .lte('fecha', fh + 'T23:59:59')
+          .order('id', { ascending: true });
 
-    // Calcular totales de caja_chica
-    let totalInicialCaja = 0;
-    let totalGastosCaja = 0;
-    let totalFinalCaja = 0;
-    
-    if (cajas && cajas.length > 0) {
-      cajas.forEach(c => {
-        totalInicialCaja += parseFloat(c.monto_inicial || 0);
-        totalGastosCaja += parseFloat(c.monto_gastos || 0);
-        totalFinalCaja += parseFloat(c.monto_final || 0);
-      });
-    }
+        // Obtener caja_chica del período
+        const { data: cajas } = await supabaseClient
+          .from('caja_chica')
+          .select('*')
+          .gte('fecha', fd)
+          .lte('fecha', fh);
 
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF("p", "mm", "a4");
+        // Obtener artículos
+        const { data: articulos } = await supabaseClient.from('articulos').select('*');
 
-    const marginLeft = 15;
-    const marginRight = 195;
-    const pageWidth = 180;
-    const pageHeight = 297;
-    const footerY = 285; // ✅ CORREGIDO: Footer más abajo
+        if ((!fs || fs.length === 0) && (!cajas || cajas.length === 0)) {
+          return mostrarNotificacion('No hay datos en este periodo', 'warning');
+        }
 
-    // Fondo sutil
-    doc.setFillColor(255, 248, 240);
-    doc.rect(0, 0, 210, 297, 'F');
+        const ids = fs ? fs.map(f => f.id) : [];
+        const { data: dets } = ids.length > 0
+          ? await supabaseClient
+              .from('detalle_factura')
+              .select('factura_id, cantidad, precio, subtotal, articulos(nombre), facturas(comentario, descuento)')
+              .in('factura_id', ids)
+          : { data: [] };
 
-    // === LOGO ===
-    try {
-      const img = new Image();
-      img.src = 'LOGO LA PARADA DEL MAIZ.png';
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
-      });
-      doc.addImage(img, 'PNG', marginLeft, 12, 18, 18);
-    } catch (e) {
-      console.warn('Logo no cargado');
-    }
+        const xf = {};
+        const comentarios = {};
+        
+        dets.forEach(d => {
+          if (!xf[d.factura_id]) xf[d.factura_id] = [];
+          xf[d.factura_id].push(d);
+          if (d.facturas && d.facturas.comentario) comentarios[d.factura_id] = d.facturas.comentario;
+        });
 
-    // === HEADER MODERNO ===
-    doc.setFillColor(217, 119, 6);
-    doc.roundedRect(marginLeft + 22, 10, pageWidth - 22, 25, 4, 4, 'F');
+        const infoArticulos = {};
+        let totalArticulos = 0;
+        let totalDescuentos = 0;
+        
+        dets.forEach(d => {
+          const nom = d.articulos.nombre;
+          const factura = fs?.find(f => f.id === d.factura_id);
+          const descuento = parseFloat(factura?.descuento || 0);
+          const itemsFactura = dets.filter(x => x.factura_id === d.factura_id);
+          const subtotalFactura = itemsFactura.reduce((sum, x) => sum + x.subtotal, 0);
+          let precioReal = d.subtotal;
+          
+          if (descuento > 0 && subtotalFactura > 0) {
+            const proporcion = d.subtotal / subtotalFactura;
+            precioReal = d.subtotal - (descuento * proporcion);
+          }
+          
+          if (!infoArticulos[nom]) infoArticulos[nom] = { cantidad: 0, totalVenta: 0 };
+          infoArticulos[nom].cantidad += d.cantidad;
+          infoArticulos[nom].totalVenta += precioReal;
+          totalArticulos += d.cantidad;
+        });
+        
+        fs?.forEach(f => {
+          totalDescuentos += parseFloat(f.descuento || 0);
+        });
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.setTextColor(255, 255, 255);
-    doc.text("LA PARADA DEL MAIZ", 105, 22, { align: "center" });
+        // Calcular totales de caja_chica
+        let totalInicialCaja = 0;
+        let totalGastosCaja = 0;
+        let totalFinalCaja = 0;
+        
+        if (cajas && cajas.length > 0) {
+          cajas.forEach(c => {
+            totalInicialCaja += parseFloat(c.monto_inicial || 0);
+            totalGastosCaja += parseFloat(c.monto_gastos || 0);
+            totalFinalCaja += parseFloat(c.monto_final || 0);
+          });
+        }
 
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.text("El Majarete de Leidy", 105, 28, { align: "center" });
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF("p", "mm", "a4");
 
-    // Línea decorativa
-    doc.setDrawColor(255, 200, 120);
-    doc.setLineWidth(0.8);
-    doc.line(marginLeft, 38, marginRight, 38);
+        // === CONFIGURACIÓN CORREGIDA ===
+        const marginLeft = 15;
+        const marginRight = 15;
+        const pageWidth = 210 - marginLeft - marginRight;
+        const pageHeight = 297;
+        const footerHeight = 20;
+        const footerY = pageHeight - footerHeight;
+        const safeArea = footerY - 15; // Área segura (15mm antes del footer)
 
-    // === INFORMACIÓN ===
-    doc.setFontSize(9);
-    doc.setTextColor(60, 60, 60);
-    doc.text("Periodo: " + fd + " al " + fh, marginLeft, 45);
-    doc.text("Generado: " + new Date().toLocaleDateString('es-DO'), marginRight, 45, { align: "right" });
-
-    let y = 52;
-
-    // === TITULO VENTAS ===
-    doc.setFillColor(255, 140, 0);
-    doc.roundedRect(marginLeft, y, pageWidth, 8, 3, 3, 'F');
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(255, 255, 255);
-    doc.text("DETALLE DE VENTAS", 105, y + 5.5, { align: "center" });
-
-    y += 12;
-
-    // Encabezado tabla
-    doc.setFillColor(255, 235, 210);
-    doc.roundedRect(marginLeft, y, pageWidth, 7, 2, 2, 'F');
-
-    doc.setFontSize(8);
-    doc.setTextColor(0, 0, 0);
-    doc.text("FAC", marginLeft + 3, y + 4.5);
-    doc.text("FECHA", marginLeft + 20, y + 4.5);
-    doc.text("ARTICULO", marginLeft + 50, y + 4.5);
-    doc.text("CANT", marginLeft + 125, y + 4.5);
-    doc.text("PRECIO", marginLeft + 140, y + 4.5);
-    doc.text("SUBTOTAL", marginRight - 2, y + 4.5, { align: "right" });
-
-    y += 9;
-
-    let totalPeriodo = 0;
-
-    // === FACTURAS ===
-    for (const f of fs || []) {
-      const items = xf[f.id] || [];
-      totalPeriodo += parseFloat(f.total);
-
-      doc.setFillColor(255, 250, 240);
-      doc.roundedRect(marginLeft, y, pageWidth, 7, 2, 2, 'F');
-
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(0, 0, 0);
-      doc.text(String(f.id), marginLeft + 3, y + 4.5);
-      doc.text(formatearFecha(f.fecha), marginLeft + 20, y + 4.5);
-
-      doc.setTextColor(34, 197, 94);
-      doc.text("RD$" + parseFloat(f.total).toFixed(2), marginRight - 2, y + 4.5, { align: "right" });
-
-      y += 8;
-
-      items.forEach(i => {
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor(90, 90, 90);
-
-        let nombre = i.articulos.nombre;
-        if (nombre.length > 30) nombre = nombre.substring(0, 27) + "...";
-        doc.text(nombre, marginLeft + 25, y + 4);
-        doc.text(String(i.cantidad), marginLeft + 127, y + 4);
-        doc.text("RD$" + i.precio.toFixed(2), marginLeft + 142, y + 4);
-        doc.text("RD$" + i.subtotal.toFixed(2), marginRight - 2, y + 4, { align: "right" });
-
-        y += 6;
-      });
-
-      // Comentario
-      if (comentarios[f.id] && comentarios[f.id].trim() !== "") {
-        doc.setFont("helvetica", "italic");
-        doc.setTextColor(59, 130, 246);
-        doc.text("Nota: " + comentarios[f.id], marginLeft + 25, y + 4);
-        y += 6;
-      }
-
-      y += 3;
-
-      // ✅ CORREGIDO: Saltar página más temprano
-      if (y > 245) {
-        doc.addPage();
+        // Fondo sutil
         doc.setFillColor(255, 248, 240);
         doc.rect(0, 0, 210, 297, 'F');
-        y = 20;
-      }
-    }
 
-    // === RESUMEN POR ARTÍCULO ===
-    y += 10;
+        // === LOGO ===
+        try {
+          const img = new Image();
+          img.src = 'LOGO LA PARADA DEL MAIZ.png';
+          await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+          });
+          doc.addImage(img, 'PNG', marginLeft, 12, 18, 18);
+        } catch (e) {
+          console.warn('Logo no cargado');
+        }
 
-    doc.setFillColor(59, 130, 246);
-    doc.roundedRect(marginLeft, y, pageWidth, 8, 3, 3, 'F');
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(255, 255, 255);
-    doc.text("RESUMEN POR ARTICULO", 105, y + 5.5, { align: "center" });
-
-    y += 12;
-
-    doc.setFillColor(239, 246, 255);
-    doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
-    doc.setFontSize(8);
-    doc.setTextColor(0, 0, 0);
-    doc.text("ARTICULO", marginLeft + 3, y + 4);
-    doc.text("CANT", marginLeft + 115, y + 4);
-    doc.text("TOTAL VENTA", marginLeft + 140, y + 4);
-    doc.text("PROMEDIO", marginRight - 2, y + 4, { align: "right" });
-
-    y += 8;
-
-    Object.keys(infoArticulos).forEach(nom => {
-      const info = infoArticulos[nom];
-      const promedio = info.totalVenta / info.cantidad;
-
-      doc.setFillColor(249, 250, 251);
-      doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
-
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(8);
-      doc.setTextColor(0, 0, 0);
-
-      let nombre = nom;
-      if (nombre.length > 40) nombre = nombre.substring(0, 37) + "...";
-      doc.text(nombre, marginLeft + 3, y + 4);
-      doc.text(String(info.cantidad), marginLeft + 118, y + 4);
-      doc.text("RD$" + info.totalVenta.toFixed(2), marginLeft + 142, y + 4);
-      doc.text("RD$" + promedio.toFixed(2), marginRight - 2, y + 4, { align: "right" });
-
-      y += 7;
-
-      // ✅ CORREGIDO: Saltar página más temprano
-      if (y > 245) {
-        doc.addPage();
-        doc.setFillColor(255, 248, 240);
-        doc.rect(0, 0, 210, 297, 'F');
-        y = 20;
-      }
-    });
-
-    // === CAJA CHICA ===
-    if (cajas && cajas.length > 0) {
-      y += 10;
-
-      doc.setFillColor(220, 38, 38);
-      doc.roundedRect(marginLeft, y, pageWidth, 8, 3, 3, 'F');
-      doc.setFontSize(11);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(255, 255, 255);
-      doc.text("RESUMEN DE CAJA CHICA", 105, y + 5.5, { align: "center" });
-
-      y += 12;
-
-      doc.setFillColor(254, 242, 242);
-      doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
-      doc.setFontSize(8);
-      doc.setTextColor(0, 0, 0);
-      doc.text("CONCEPTO", marginLeft + 3, y + 4);
-      doc.text("MONTO", marginRight - 2, y + 4, { align: "right" });
-
-      y += 8;
-
-      doc.setFillColor(239, 248, 255);
-      doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
-      doc.setTextColor(59, 130, 246);
-      doc.text("Total Inicial", marginLeft + 3, y + 4);
-      doc.text("RD$" + totalInicialCaja.toFixed(2), marginRight - 2, y + 4, { align: "right" });
-      y += 7;
-
-      doc.setFillColor(255, 237, 237);
-      doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
-      doc.setTextColor(220, 38, 38);
-      doc.text("Total Gastos", marginLeft + 3, y + 4);
-      doc.text("- RD$" + totalGastosCaja.toFixed(2), marginRight - 2, y + 4, { align: "right" });
-      y += 7;
-
-      doc.setFillColor(220, 252, 231);
-      doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(22, 163, 74);
-      doc.text("Balance Final en Caja", marginLeft + 3, y + 4);
-      doc.text("RD$" + totalFinalCaja.toFixed(2), marginRight - 2, y + 4, { align: "right" });
-      y += 7;
-    }
-
-        // === STOCK ===
-    if (articulos && articulos.length > 0) {
-      y += 10;
-
-      doc.setFillColor(16, 185, 129);
-      doc.roundedRect(marginLeft, y, pageWidth, 8, 3, 3, 'F');
-      doc.setFontSize(11);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(255, 255, 255);
-      doc.text("STOCK DISPONIBLE", 105, y + 5.5, { align: "center" });
-
-      y += 12;
-
-      doc.setFillColor(220, 252, 231);
-      doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
-      doc.setFontSize(8);
-      doc.setTextColor(0, 0, 0);
-      doc.text("ARTICULO", marginLeft + 3, y + 4);
-      doc.text("STOCK", marginRight - 2, y + 4, { align: "right" });
-
-      y += 8;
-
-      articulos.forEach(a => {
-        let colorStock = [34, 197, 94];
-        if (a.stock <= 0) colorStock = [220, 38, 38];
-        else if (a.stock <= 10) colorStock = [217, 119, 6];
-
-        doc.setFillColor(240, 253, 244);
-        doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
-
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(8);
-        doc.setTextColor(0, 0, 0);
-
-        let nombre = a.nombre;
-        if (nombre.length > 40) nombre = nombre.substring(0, 37) + "...";
-        doc.text(nombre, marginLeft + 3, y + 4);
+        // === HEADER MODERNO ===
+        doc.setFillColor(217, 119, 6);
+        doc.roundedRect(marginLeft + 22, 10, pageWidth - 22, 25, 4, 4, 'F');
 
         doc.setFont("helvetica", "bold");
-        doc.setTextColor(colorStock[0], colorStock[1], colorStock[2]);
-        doc.text(String(a.stock), marginRight - 2, y + 4, { align: "right" });
+        doc.setFontSize(16);
+        doc.setTextColor(255, 255, 255);
+        doc.text("LA PARADA DEL MAIZ", 105, 22, { align: "center" });
 
-        y += 7;
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        doc.text("El Majarete de Leidy", 105, 28, { align: "center" });
 
-        // ✅ CORREGIDO: Saltar página más temprano
-        if (y > 245) {
+        // Línea decorativa
+        doc.setDrawColor(255, 200, 120);
+        doc.setLineWidth(0.8);
+        doc.line(marginLeft, 38, 210 - marginLeft, 38);
+
+        // === INFORMACIÓN ===
+        doc.setFontSize(9);
+        doc.setTextColor(60, 60, 60);
+        doc.text("Periodo: " + fd + " al " + fh, marginLeft, 45);
+        doc.text("Generado: " + new Date().toLocaleDateString('es-DO'), 210 - marginLeft, 45, { align: "right" });
+
+        let y = 52;
+
+        // === TITULO VENTAS ===
+        doc.setFillColor(255, 140, 0);
+        doc.roundedRect(marginLeft, y, pageWidth, 8, 3, 3, 'F');
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(255, 255, 255);
+        doc.text("DETALLE DE VENTAS", 105, y + 5.5, { align: "center" });
+
+        y += 12;
+
+        // Encabezado tabla
+        doc.setFillColor(255, 235, 210);
+        doc.roundedRect(marginLeft, y, pageWidth, 7, 2, 2, 'F');
+
+        doc.setFontSize(8);
+        doc.setTextColor(0, 0, 0);
+        doc.text("FAC", marginLeft + 3, y + 4.5);
+        doc.text("FECHA", marginLeft + 20, y + 4.5);
+        doc.text("ARTICULO", marginLeft + 50, y + 4.5);
+        doc.text("CANT", marginLeft + 125, y + 4.5);
+        doc.text("PRECIO", marginLeft + 140, y + 4.5);
+        doc.text("SUBTOTAL", 210 - marginLeft - 2, y + 4.5, { align: "right" });
+
+        y += 9;
+
+        let totalPeriodo = 0;
+
+        // === FACTURAS ===
+        for (const f of fs || []) {
+          const items = xf[f.id] || [];
+          totalPeriodo += parseFloat(f.total);
+
+          doc.setFillColor(255, 250, 240);
+          doc.roundedRect(marginLeft, y, pageWidth, 7, 2, 2, 'F');
+
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor(0, 0, 0);
+          doc.text(String(f.id), marginLeft + 3, y + 4.5);
+          doc.text(formatearFecha(f.fecha), marginLeft + 20, y + 4.5);
+
+          doc.setTextColor(34, 197, 94);
+          doc.text("RD$" + parseFloat(f.total).toFixed(2), 210 - marginLeft - 2, y + 4.5, { align: "right" });
+
+          y += 8;
+
+          items.forEach(i => {
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(90, 90, 90);
+
+            let nombre = i.articulos.nombre;
+            if (nombre.length > 30) nombre = nombre.substring(0, 27) + "...";
+            doc.text(nombre, marginLeft + 25, y + 4);
+            doc.text(String(i.cantidad), marginLeft + 127, y + 4);
+            doc.text("RD$" + i.precio.toFixed(2), marginLeft + 142, y + 4);
+            doc.text("RD$" + i.subtotal.toFixed(2), 210 - marginLeft - 2, y + 4, { align: "right" });
+
+            y += 6;
+          });
+
+          // Comentario
+          if (comentarios[f.id] && comentarios[f.id].trim() !== "") {
+            doc.setFont("helvetica", "italic");
+            doc.setTextColor(59, 130, 246);
+            doc.text("Nota: " + comentarios[f.id], marginLeft + 25, y + 4);
+            y += 6;
+          }
+
+          y += 3;
+
+          // ✅ CORREGIDO: Saltar página con margen de seguridad
+          if (y > safeArea - 15) {
+            doc.addPage();
+            doc.setFillColor(255, 248, 240);
+            doc.rect(0, 0, 210, 297, 'F');
+            y = 20;
+          }
+        }
+
+        // === RESUMEN POR ARTÍCULO ===
+        y += 10;
+
+        doc.setFillColor(59, 130, 246);
+        doc.roundedRect(marginLeft, y, pageWidth, 8, 3, 3, 'F');
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(255, 255, 255);
+        doc.text("RESUMEN POR ARTICULO", 105, y + 5.5, { align: "center" });
+
+        y += 12;
+
+        doc.setFillColor(239, 246, 255);
+        doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
+        doc.setFontSize(8);
+        doc.setTextColor(0, 0, 0);
+        doc.text("ARTICULO", marginLeft + 3, y + 4);
+        doc.text("CANT", marginLeft + 115, y + 4);
+        doc.text("TOTAL VENTA", marginLeft + 140, y + 4);
+        doc.text("PROMEDIO", 210 - marginLeft - 2, y + 4, { align: "right" });
+
+        y += 8;
+
+        Object.keys(infoArticulos).forEach(nom => {
+          const info = infoArticulos[nom];
+          const promedio = info.totalVenta / info.cantidad;
+
+          doc.setFillColor(249, 250, 251);
+          doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
+
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(8);
+          doc.setTextColor(0, 0, 0);
+
+          let nombre = nom;
+          if (nombre.length > 40) nombre = nombre.substring(0, 37) + "...";
+          doc.text(nombre, marginLeft + 3, y + 4);
+          doc.text(String(info.cantidad), marginLeft + 118, y + 4);
+          doc.text("RD$" + info.totalVenta.toFixed(2), marginLeft + 142, y + 4);
+          doc.text("RD$" + promedio.toFixed(2), 210 - marginLeft - 2, y + 4, { align: "right" });
+
+          y += 7;
+
+          // ✅ CORREGIDO: Saltar página con margen de seguridad
+          if (y > safeArea - 15) {
+            doc.addPage();
+            doc.setFillColor(255, 248, 240);
+            doc.rect(0, 0, 210, 297, 'F');
+            y = 20;
+          }
+        });
+
+        // === CAJA CHICA ===
+        if (cajas && cajas.length > 0) {
+          y += 10;
+
+          doc.setFillColor(220, 38, 38);
+          doc.roundedRect(marginLeft, y, pageWidth, 8, 3, 3, 'F');
+          doc.setFontSize(11);
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor(255, 255, 255);
+          doc.text("RESUMEN DE CAJA CHICA", 105, y + 5.5, { align: "center" });
+
+          y += 12;
+
+          doc.setFillColor(254, 242, 242);
+          doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
+          doc.setFontSize(8);
+          doc.setTextColor(0, 0, 0);
+          doc.text("CONCEPTO", marginLeft + 3, y + 4);
+          doc.text("MONTO", 210 - marginLeft - 2, y + 4, { align: "right" });
+
+          y += 8;
+
+          doc.setFillColor(239, 248, 255);
+          doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
+          doc.setTextColor(59, 130, 246);
+          doc.text("Total Inicial", marginLeft + 3, y + 4);
+          doc.text("RD$" + totalInicialCaja.toFixed(2), 210 - marginLeft - 2, y + 4, { align: "right" });
+          y += 7;
+
+          doc.setFillColor(255, 237, 237);
+          doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
+          doc.setTextColor(220, 38, 38);
+          doc.text("Total Gastos", marginLeft + 3, y + 4);
+          doc.text("- RD$" + totalGastosCaja.toFixed(2), 210 - marginLeft - 2, y + 4, { align: "right" });
+          y += 7;
+
+          doc.setFillColor(220, 252, 231);
+          doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor(22, 163, 74);
+          doc.text("Balance Final en Caja", marginLeft + 3, y + 4);
+          doc.text("RD$" + totalFinalCaja.toFixed(2), 210 - marginLeft - 2, y + 4, { align: "right" });
+          y += 7;
+        }
+
+               // === STOCK ===
+        if (articulos && articulos.length > 0) {
+          y += 10;
+
+          doc.setFillColor(16, 185, 129);
+          doc.roundedRect(marginLeft, y, pageWidth, 8, 3, 3, 'F');
+          doc.setFontSize(11);
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor(255, 255, 255);
+          doc.text("STOCK DISPONIBLE", 105, y + 5.5, { align: "center" });
+
+          y += 12;
+
+          doc.setFillColor(220, 252, 231);
+          doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
+          doc.setFontSize(8);
+          doc.setTextColor(0, 0, 0);
+          doc.text("ARTICULO", marginLeft + 3, y + 4);
+          doc.text("STOCK", 210 - marginLeft - 2, y + 4, { align: "right" });
+
+          y += 8;
+
+          articulos.forEach(a => {
+            let colorStock = [34, 197, 94];
+            if (a.stock <= 0) colorStock = [220, 38, 38];
+            else if (a.stock <= 10) colorStock = [217, 119, 6];
+
+            doc.setFillColor(240, 253, 244);
+            doc.roundedRect(marginLeft, y, pageWidth, 6, 2, 2, 'F');
+
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(8);
+            doc.setTextColor(0, 0, 0);
+
+            let nombre = a.nombre;
+            if (nombre.length > 40) nombre = nombre.substring(0, 37) + "...";
+            doc.text(nombre, marginLeft + 3, y + 4);
+
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(colorStock[0], colorStock[1], colorStock[2]);
+            doc.text(String(a.stock), 210 - marginLeft - 2, y + 4, { align: "right" });
+
+            y += 7;
+
+            // ✅ CORREGIDO: Saltar página con margen de seguridad
+            if (y > safeArea - 15) {
+              doc.addPage();
+              doc.setFillColor(255, 248, 240);
+              doc.rect(0, 0, 210, 297, 'F');
+              y = 20;
+            }
+          });
+        }
+
+        // === RESUMEN FINAL ===
+        y += 10;
+
+        // ✅ CORREGIDO: Verificar espacio ANTES de escribir resumen
+        if (y > safeArea - 60) {
           doc.addPage();
           doc.setFillColor(255, 248, 240);
           doc.rect(0, 0, 210, 297, 'F');
           y = 20;
         }
-      });
+
+        doc.setFillColor(217, 119, 6);
+        doc.roundedRect(marginLeft, y, pageWidth, 50, 6, 6, 'F');
+
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(255, 255, 255);
+        doc.text("RESUMEN GENERAL", 105, y + 10, { align: "center" });
+
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        doc.text("Total Ventas: RD$" + totalPeriodo.toFixed(2), 105, y + 20, { align: "center" });
+        doc.text("Artículos Vendidos: " + totalArticulos, 105, y + 27, { align: "center" });
+        doc.text("Descuentos: RD$" + totalDescuentos.toFixed(2), 105, y + 34, { align: "center" });
+
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "bold");
+        doc.text("Balance en Caja: RD$" + totalFinalCaja.toFixed(2), 105, y + 42, { align: "center" });
+
+        const totalGeneral = totalPeriodo + totalFinalCaja;
+        y += 52;
+        
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(marginLeft, y - 3, pageWidth, 12, 3, 3, 'F');
+        
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(217, 119, 6);
+        doc.text("TOTAL GENERAL: RD$" + totalGeneral.toFixed(2), 105, y + 4, { align: "center" });
+
+        // === FOOTER ===
+        y = footerY;
+        doc.setFillColor(31, 41, 55);
+        doc.roundedRect(0, y, 210, footerHeight, 0, 0, 'F');
+        
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(255, 255, 255);
+        doc.text("La Parada del Maíz y El Majarete de Leidy", 105, y + 7, { align: "center" });
+        
+        doc.setFontSize(8);
+        doc.setFont("helvetica", "normal");
+        doc.text("Generado el " + new Date().toLocaleString('es-DO'), 105, y + 13, { align: "center" });
+
+        doc.save('Resumen_' + fd + '_al_' + fh + '.pdf');
+        cerrarModalImprimir();
+        mostrarNotificacion('PDF generado correctamente');
+      } catch (e) {
+        mostrarNotificacion('Error: ' + e.message, 'error');
+      }
     }
 
-    // === RESUMEN FINAL ===
-    y += 10;
-
-    doc.setFillColor(217, 119, 6);
-    doc.roundedRect(marginLeft, y, pageWidth, 50, 6, 6, 'F');
-
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(255, 255, 255);
-    doc.text("RESUMEN GENERAL", 105, y + 10, { align: "center" });
-
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.text("Total Ventas: RD$" + totalPeriodo.toFixed(2), 105, y + 20, { align: "center" });
-    doc.text("Artículos Vendidos: " + totalArticulos, 105, y + 27, { align: "center" });
-    doc.text("Descuentos: RD$" + totalDescuentos.toFixed(2), 105, y + 34, { align: "center" });
-
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "bold");
-    doc.text("Balance en Caja: RD$" + totalFinalCaja.toFixed(2), 105, y + 42, { align: "center" });
-
-    const totalGeneral = totalPeriodo + totalFinalCaja;
-    y += 52;
-    
-    doc.setFillColor(255, 255, 255);
-    doc.roundedRect(marginLeft, y - 3, pageWidth, 12, 3, 3, 'F');
-    
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(217, 119, 6);
-    doc.text("TOTAL GENERAL: RD$" + totalGeneral.toFixed(2), 105, y + 4, { align: "center" });
-
-    // === FOOTER ===
-    y = footerY;
-    doc.setFillColor(31, 41, 55);
-    doc.roundedRect(0, y, 210, 17, 0, 0, 'F');
-    
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(255, 255, 255);
-    doc.text("La Parada del Maíz y El Majarete de Leidy", 105, y + 7, { align: "center" });
-    
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "normal");
-    doc.text("Generado el " + new Date().toLocaleString('es-DO'), 105, y + 13, { align: "center" });
-
-    doc.save('Resumen_' + fd + '_al_' + fh + '.pdf');
-    cerrarModalImprimir();
-    mostrarNotificacion('PDF generado correctamente');
-  } catch (e) {
-    mostrarNotificacion('Error: ' + e.message, 'error');
-  }
-}
-
-    // Actualizar conexión cada 30 segundos
+    // === ACTUALIZAR CONEXIÓN CADA 30 SEGUNDOS ===
     setInterval(async () => {
       const usuario = localStorage.getItem('usuario');
       if (usuario) {
@@ -1049,6 +1191,7 @@
       }
     }, 30000);
 
+    // === INICIALIZAR ===
     window.onload = () => {
       const params = new URLSearchParams(window.location.search);
       if (params.get('desde') && params.get('hasta')) {
@@ -1058,8 +1201,8 @@
       } else {
         cargarFacturas();
       }
+      initTheme();
     };
   </script>
 </body>
 </html>
-
